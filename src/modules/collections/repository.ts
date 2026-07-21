@@ -1,5 +1,6 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
 import { catalogCollections } from "@/lib/catalog/mock-data";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import type { CollectionSummary } from "./types";
 
 export interface CollectionRepository {
@@ -37,7 +38,12 @@ export class SupabaseCollectionRepository implements CollectionRepository {
     }
 
     const { data, error } = await this.client.from("collections").select("*").order("sort_order", { ascending: true });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "collections")) {
+        return new InMemoryCollectionRepository().list();
+      }
+      throw error;
+    }
     return (data ?? []).map((row) => ({
       id: row.id,
       name: row.name,
@@ -66,7 +72,12 @@ export class SupabaseCollectionRepository implements CollectionRepository {
       status: collection.status,
       sort_order: collection.sortOrder
     });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "collections")) {
+        return new InMemoryCollectionRepository().upsert(collection);
+      }
+      throw error;
+    }
     return collection;
   }
 }

@@ -1,4 +1,5 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import type { PaymentEvent } from "./schema";
 
 const paymentEvents: PaymentEvent[] = [
@@ -49,7 +50,12 @@ export class SupabaseWebhookRepository implements WebhookRepository {
     }
 
     const { data, error } = await this.client.from("payment_events").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "payment_events")) {
+        return new InMemoryWebhookRepository().list();
+      }
+      throw error;
+    }
     return (data ?? []).map((row) => ({
       id: row.id,
       provider: row.provider,
@@ -80,7 +86,12 @@ export class SupabaseWebhookRepository implements WebhookRepository {
       .select("*")
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "payment_events")) {
+        return new InMemoryWebhookRepository().retry(provider, providerEventId);
+      }
+      throw error;
+    }
     if (!data) return null;
 
     return {

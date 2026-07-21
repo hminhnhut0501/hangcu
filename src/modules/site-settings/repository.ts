@@ -126,7 +126,12 @@ export class SupabaseSiteSettingsRepository {
       .eq("id", "global")
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings")) {
+        return this.memory.get();
+      }
+      throw error;
+    }
     return data ? mapRowToSettings(data as Record<string, unknown>) : defaultSettings;
   }
 
@@ -171,7 +176,12 @@ export class SupabaseSiteSettingsRepository {
       updated_at: normalized.updatedAt
     });
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings")) {
+        return this.memory.save(normalized);
+      }
+      throw error;
+    }
     return normalized;
   }
 }

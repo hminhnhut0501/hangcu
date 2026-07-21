@@ -1,4 +1,5 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import type { AuditLog } from "./schema";
 
 const auditLogs: AuditLog[] = [];
@@ -28,7 +29,12 @@ export class SupabaseAuditRepository implements AuditRepository {
     }
 
     const { data, error } = await this.client.from("audit_logs").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "audit_logs")) {
+        return new InMemoryAuditRepository().list();
+      }
+      throw error;
+    }
     return (data ?? []).map((row) => ({
       id: row.id,
       adminId: row.admin_id ?? null,
@@ -64,7 +70,12 @@ export class SupabaseAuditRepository implements AuditRepository {
       })
       .select("*")
       .single();
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "audit_logs")) {
+        return new InMemoryAuditRepository().create(log);
+      }
+      throw error;
+    }
     return {
       id: data.id,
       adminId: data.admin_id ?? null,

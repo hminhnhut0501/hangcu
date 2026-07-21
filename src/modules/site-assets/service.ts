@@ -7,7 +7,12 @@ export async function listSiteAssets() {
   const client = getSupabaseServiceClient();
   if (!client) return [...memory];
   const { data, error } = await client.from("site_assets").select("*").order("sort_order", { ascending: true });
-  if (error) throw error;
+  if (error) {
+    if (error.code === "PGRST205" || String(error.message ?? "").includes("site_assets")) {
+      return [...memory];
+    }
+    throw error;
+  }
   return (data ?? []).map((row) => ({
     id: row.id,
     assetKey: row.asset_key,

@@ -1,4 +1,5 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import { catalogProducts } from "@/lib/catalog/mock-data";
 import type { ProductSummary } from "./types";
 
@@ -53,7 +54,12 @@ export class SupabaseProductRepository implements ProductRepository {
     }
 
     const { data, error } = await this.client.from("products").select("*, product_media(*)").order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "products") || isMissingSupabaseTableError(error, "product_media")) {
+        return new InMemoryProductRepository().list();
+      }
+      throw error;
+    }
     return (data ?? []).map((row) => ({
       id: row.id,
       sku: row.sku,
@@ -122,7 +128,12 @@ export class SupabaseProductRepository implements ProductRepository {
       metadata: {},
       published_at: null
     });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "products")) {
+        return new InMemoryProductRepository().upsert(product);
+      }
+      throw error;
+    }
 
     const productMediaRows = product.media.map((media) => ({
       id: media.id,
@@ -138,11 +149,21 @@ export class SupabaseProductRepository implements ProductRepository {
     }));
 
     const deleteError = await this.client.from("product_media").delete().eq("product_id", product.id);
-    if (deleteError.error) throw deleteError.error;
+    if (deleteError.error) {
+      if (isMissingSupabaseTableError(deleteError.error, "product_media")) {
+        return product;
+      }
+      throw deleteError.error;
+    }
 
     if (productMediaRows.length > 0) {
       const insertResult = await this.client.from("product_media").insert(productMediaRows);
-      if (insertResult.error) throw insertResult.error;
+      if (insertResult.error) {
+        if (isMissingSupabaseTableError(insertResult.error, "product_media")) {
+          return product;
+        }
+        throw insertResult.error;
+      }
     }
 
     return product;

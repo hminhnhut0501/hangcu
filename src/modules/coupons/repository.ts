@@ -1,4 +1,5 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import type { Coupon } from "./schema";
 
 const coupons: Coupon[] = [
@@ -57,7 +58,12 @@ export class SupabaseCouponRepository implements CouponRepository {
     }
 
     const { data, error } = await this.client.from("coupons").select("*").order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "coupons")) {
+        return new InMemoryCouponRepository().list();
+      }
+      throw error;
+    }
     return (data ?? []).map((row) => ({
       id: row.id,
       code: row.code,
@@ -79,7 +85,12 @@ export class SupabaseCouponRepository implements CouponRepository {
     }
 
     const { data, error } = await this.client.from("coupons").select("*").ilike("code", code).maybeSingle();
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "coupons")) {
+        return new InMemoryCouponRepository().findByCode(code);
+      }
+      throw error;
+    }
     if (!data) return null;
     return {
       id: data.id,
@@ -102,7 +113,12 @@ export class SupabaseCouponRepository implements CouponRepository {
     }
 
     const { data, error } = await this.client.from("coupons").select("*").eq("id", id).maybeSingle();
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "coupons")) {
+        return new InMemoryCouponRepository().findById(id);
+      }
+      throw error;
+    }
     if (!data) return null;
     return {
       id: data.id,
@@ -142,7 +158,12 @@ export class SupabaseCouponRepository implements CouponRepository {
       .select("*")
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "coupons")) {
+        return new InMemoryCouponRepository().save(coupon);
+      }
+      throw error;
+    }
     return {
       id: data.id,
       code: data.code,
