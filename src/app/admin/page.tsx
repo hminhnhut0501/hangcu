@@ -47,6 +47,12 @@ export default async function AdminHomePage() {
             <Link href={"/admin/license-plans" as any} className="rounded-full border border-slate-200 px-4 py-2">
               License plans
             </Link>
+            <Link href={"/admin/site-settings" as any} className="rounded-full border border-slate-200 px-4 py-2">
+              Site settings
+            </Link>
+            <Link href={"/admin/media" as any} className="rounded-full border border-slate-200 px-4 py-2">
+              Media
+            </Link>
             <Link href={"/admin/donate-packages" as any} className="rounded-full border border-slate-200 px-4 py-2">
               Donate packages
             </Link>

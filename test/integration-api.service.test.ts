@@ -20,7 +20,9 @@ describe("integration api service", () => {
 
   it("creates checkout payloads with entitlement metadata", async () => {
     const previousSecret = process.env.APP_HMAC_SECRET;
+    const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
     process.env.APP_HMAC_SECRET = "test-secret";
+    process.env.NEXT_PUBLIC_APP_URL = "https://hangcu.vercel.app";
     try {
       const result = await createCheckoutViaIntegration({
         timestamp: 1784600000,
@@ -42,6 +44,7 @@ describe("integration api service", () => {
       expect(result.entitlements).toContain("vip_group_access");
     } finally {
       process.env.APP_HMAC_SECRET = previousSecret;
+      process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
     }
   });
 });

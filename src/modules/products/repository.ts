@@ -69,7 +69,19 @@ export class SupabaseProductRepository implements ProductRepository {
       currency: "USD",
       amountMinor: 0,
       compareAtAmountMinor: null,
-      media: []
+      media: Array.isArray(row.product_media)
+        ? row.product_media.map((media: Record<string, unknown>) => ({
+            id: String(media.id),
+            type: media.type as "preview" | "detail" | "lifestyle",
+            bucketName: String(media.bucket_name ?? "product-media"),
+            storagePath: String(media.storage_path),
+            publicUrl: media.public_url ? String(media.public_url) : null,
+            altText: String(media.alt_text ?? ""),
+            sortOrder: Number(media.sort_order ?? 0),
+            width: Number(media.width ?? 1),
+            height: Number(media.height ?? 1)
+          }))
+        : []
     }));
   }
 
@@ -111,6 +123,28 @@ export class SupabaseProductRepository implements ProductRepository {
       published_at: null
     });
     if (error) throw error;
+
+    const productMediaRows = product.media.map((media) => ({
+      id: media.id,
+      product_id: product.id,
+      type: media.type,
+      bucket_name: media.bucketName,
+      storage_path: media.storagePath,
+      public_url: media.publicUrl,
+      alt_text: media.altText,
+      sort_order: media.sortOrder,
+      width: media.width,
+      height: media.height
+    }));
+
+    const deleteError = await this.client.from("product_media").delete().eq("product_id", product.id);
+    if (deleteError.error) throw deleteError.error;
+
+    if (productMediaRows.length > 0) {
+      const insertResult = await this.client.from("product_media").insert(productMediaRows);
+      if (insertResult.error) throw insertResult.error;
+    }
+
     return product;
   }
 }

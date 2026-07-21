@@ -38,7 +38,14 @@ export async function POST(request: Request) {
     return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
   }
 
-  const product = await upsertProduct(parsed.data);
+  const product = await upsertProduct({
+    ...parsed.data,
+    media: parsed.data.media.map((media) => ({
+      ...media,
+      bucketName: "product-media",
+      publicUrl: null
+    }))
+  });
   await writeAuditLog({
     ...getAdminMutationContext(),
     action: "product_upserted",

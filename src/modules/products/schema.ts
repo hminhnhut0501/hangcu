@@ -6,7 +6,9 @@ export const mediaTypeSchema = z.enum(["preview", "detail", "lifestyle"]);
 export const productMediaSchema = z.object({
   id: z.string(),
   type: mediaTypeSchema,
+  bucketName: z.string(),
   storagePath: z.string(),
+  publicUrl: z.string().nullable(),
   altText: z.string(),
   sortOrder: z.number().int().nonnegative(),
   width: z.number().int().positive(),

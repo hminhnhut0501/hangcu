@@ -34,7 +34,9 @@ create table if not exists product_media (
   id uuid primary key default gen_random_uuid(),
   product_id uuid not null references products(id) on delete cascade,
   type text not null check (type in ('preview', 'detail', 'lifestyle')),
+  bucket_name text not null default 'product-media',
   storage_path text not null,
+  public_url text,
   alt_text text,
   sort_order integer not null default 0,
   width integer,
@@ -60,4 +62,3 @@ create index if not exists idx_products_status_featured on products (status, fea
 create index if not exists idx_products_collection on products (collection_id);
 create index if not exists idx_product_media_product_sort on product_media (product_id, sort_order);
 create index if not exists idx_prices_product_active on prices (product_id, is_active, valid_from desc);
-

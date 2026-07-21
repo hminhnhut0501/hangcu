@@ -8,6 +8,7 @@ type Field = {
   type?: string;
   placeholder?: string;
   defaultValue?: string;
+  rows?: number;
 };
 
 type Props = {
@@ -70,16 +71,26 @@ export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessag
         {fields.map((field) => (
           <label key={field.name} className="block">
             <span className="text-sm font-medium text-slate-700">{field.label}</span>
-            <input
-              name={field.name}
-              type={field.type ?? "text"}
-              placeholder={field.placeholder}
-              defaultValue={field.type === "checkbox" ? undefined : field.defaultValue}
-              defaultChecked={field.type === "checkbox" ? field.defaultValue === "true" || field.defaultValue === "on" : undefined}
-              className={field.type === "checkbox"
-                ? "mt-2 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                : "mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"}
-            />
+            {field.type === "textarea" ? (
+              <textarea
+                name={field.name}
+                placeholder={field.placeholder}
+                defaultValue={field.defaultValue}
+                rows={field.rows ?? 5}
+                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm outline-none ring-0 focus:border-blue-500"
+              />
+            ) : (
+              <input
+                name={field.name}
+                type={field.type ?? "text"}
+                placeholder={field.placeholder}
+                defaultValue={field.type === "checkbox" ? undefined : field.defaultValue}
+                defaultChecked={field.type === "checkbox" ? field.defaultValue === "true" || field.defaultValue === "on" : undefined}
+                className={field.type === "checkbox"
+                  ? "mt-2 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  : "mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"}
+              />
+            )}
           </label>
         ))}
       </div>

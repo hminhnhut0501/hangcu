@@ -25,7 +25,9 @@ export type CatalogProduct = {
   media: Array<{
     id: string;
     type: "preview" | "detail" | "lifestyle";
+    bucketName: string;
     storagePath: string;
+    publicUrl: string | null;
     altText: string;
     sortOrder: number;
     width: number;
@@ -73,7 +75,9 @@ export const catalogProducts: CatalogProduct[] = [
       {
         id: "med_skyline_preview",
         type: "preview",
+        bucketName: "product-media",
         storagePath: "products/skyline-after-rain/preview.jpg",
+        publicUrl: null,
         altText: "Preview of Skyline After Rain",
         sortOrder: 1,
         width: 1600,
@@ -101,7 +105,9 @@ export const catalogProducts: CatalogProduct[] = [
       {
         id: "med_calm_preview",
         type: "preview",
+        bucketName: "product-media",
         storagePath: "products/quiet-horizon/preview.jpg",
+        publicUrl: null,
         altText: "Preview of Quiet Horizon",
         sortOrder: 1,
         width: 1600,
