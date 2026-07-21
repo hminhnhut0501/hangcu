@@ -31,6 +31,7 @@ export interface LicenseKeyRepository {
   findByHash(codeHash: string): Promise<LicenseKey | null>;
   findByLastFour(lastFour: string): Promise<LicenseKey[]>;
   findAvailableByPlanId(licensePlanId: string): Promise<LicenseKey | null>;
+  findById(id: string): Promise<LicenseKey | null>;
   save(licenseKey: LicenseKey): Promise<LicenseKey>;
 }
 
@@ -54,6 +55,10 @@ export class InMemoryLicenseKeyRepository implements LicenseKeyRepository {
     if (!key) return null;
     key.status = "reserved";
     return key;
+  }
+
+  async findById(id: string): Promise<LicenseKey | null> {
+    return licenseKeys.find((licenseKey) => licenseKey.id === id) ?? null;
   }
 
   async save(licenseKey: LicenseKey): Promise<LicenseKey> {

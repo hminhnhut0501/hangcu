@@ -52,6 +52,7 @@ export function buildOrderDraftFromProducts(input: {
 }
 
 export async function createOrder(draft: OrderDraft) {
+  const now = new Date().toISOString();
   const totals = calculateTotals(draft.items);
   const orderNumber = createOrderNumber();
   const order: OrderSummary = {
@@ -67,7 +68,11 @@ export async function createOrder(draft: OrderDraft) {
     fulfillmentStatus: "unfulfilled",
     source: draft.source,
     notes: draft.notes ?? null,
-    metadata: draft.metadata ?? {},
+    metadata: {
+      ...(draft.metadata ?? {}),
+      createdAt: now,
+      updatedAt: now
+    },
     items: draft.items
   };
 
@@ -84,4 +89,20 @@ export async function listOrdersByEmail(email: string) {
 
 export async function listAllOrders() {
   return orderRepository.listAll();
+}
+
+export async function updateOrder(orderNumber: string, patch: Partial<OrderSummary>) {
+  const current = await orderRepository.findByOrderNumber(orderNumber);
+  if (!current) {
+    return null;
+  }
+
+  return orderRepository.update(orderNumber, {
+    ...patch,
+    metadata: {
+      ...current.metadata,
+      ...(patch.metadata ?? {}),
+      updatedAt: new Date().toISOString()
+    }
+  });
 }

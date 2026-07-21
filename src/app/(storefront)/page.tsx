@@ -2,38 +2,40 @@ import Link from "next/link";
 import Image from "next/image";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { getStoragePublicUrl } from "@/lib/storage/service";
+import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront";
 
 export default async function HomePage() {
   const settings = await getSiteContentSettings();
+  const locale = await getStorefrontLocale();
   const heroImageUrl = settings.heroImagePath ? await getStoragePublicUrl(settings.heroImagePath) : null;
   return (
     <main className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-24">
       <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
-            {settings.heroEyebrowEn}
+            {getLocalizedText(locale, { vi: settings.heroEyebrowVi, en: settings.heroEyebrowEn })}
           </p>
           <h1 className="max-w-3xl text-5xl font-semibold tracking-tight text-slate-950 sm:text-7xl">
-            {settings.heroTitleEn}
+            {getLocalizedText(locale, { vi: settings.heroTitleVi, en: settings.heroTitleEn })}
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-slate-600">
-            {settings.heroDescriptionVi}
+            {getLocalizedText(locale, { vi: settings.heroDescriptionVi, en: settings.heroDescriptionEn })}
           </p>
           <p className="max-w-2xl text-base leading-7 text-slate-600">
-            {settings.heroSecondaryTextEn}
+            {getLocalizedText(locale, { vi: settings.heroSecondaryTextVi, en: settings.heroSecondaryTextEn })}
           </p>
           <div className="flex flex-wrap gap-3 text-sm font-medium">
             <Link
               href={settings.heroPrimaryCtaHref as any}
               className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-white"
             >
-              {settings.heroPrimaryCtaLabelEn}
+              {getLocalizedText(locale, { vi: settings.heroPrimaryCtaLabelVi, en: settings.heroPrimaryCtaLabelEn })}
             </Link>
             <Link
               href={settings.heroSecondaryCtaHref as any}
               className="inline-flex rounded-full border border-slate-200 px-5 py-3 text-slate-900"
             >
-              {settings.heroSecondaryCtaLabelEn}
+              {getLocalizedText(locale, { vi: settings.heroSecondaryCtaLabelVi, en: settings.heroSecondaryCtaLabelEn })}
             </Link>
           </div>
         </div>
@@ -51,7 +53,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="flex min-h-[320px] w-full items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
-              Upload a hero image from Admin &gt; Media
+              {locale === "vi" ? "Tải ảnh hero trong Admin > Media" : "Upload a hero image from Admin > Media"}
             </div>
           )}
         </div>

@@ -65,6 +65,24 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
   const [previewUrl, setPreviewUrl] = useState<string | null>(selectedAsset?.publicUrl ?? null);
   const [previewProductUrl, setPreviewProductUrl] = useState<string | null>(selectedProduct?.media[0]?.publicUrl ?? null);
 
+  function applyAssetToHero(asset: SiteAsset) {
+    setHeroDraft((current) => ({
+      ...current,
+      heroImagePath: asset.publicUrl ?? asset.storagePath,
+      heroImageAltVi: asset.altTextVi ?? asset.assetKey,
+      heroImageAltEn: asset.altTextEn ?? asset.assetKey
+    }));
+    setStatus(`Applied ${asset.assetKey} to hero preview.`);
+  }
+
+  function applyAssetToProduct(asset: SiteAsset) {
+    setProductForm((current) => ({
+      ...current,
+      altText: asset.altTextEn ?? asset.assetKey
+    }));
+    setStatus(`Applied ${asset.assetKey} to product media preview.`);
+  }
+
   async function refreshData() {
     const [assetsJson, productsJson] = await Promise.all([
       fetchJson("/api/admin/site-assets"),
@@ -229,7 +247,10 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Site assets picker</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold">Site assets picker</h3>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Hero / logo / banner</p>
+          </div>
           <div className="mt-4 grid gap-3">
             <select
               value={selectedAssetKey}
@@ -255,6 +276,23 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                 </option>
               ))}
             </select>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {assets.map((asset) => (
+                <button
+                  key={asset.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedAssetKey(asset.assetKey);
+                    setPreviewUrl(asset.publicUrl);
+                    applyAssetToHero(asset);
+                  }}
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-left text-xs hover:border-blue-300 hover:bg-blue-50"
+                >
+                  <p className="font-medium">{asset.assetKey}</p>
+                  <p className="text-slate-500">{asset.category}</p>
+                </button>
+              ))}
+            </div>
             {selectedAsset ? (
               <div className="rounded-xl border border-slate-200 p-3">
                 <div className="relative h-52 overflow-hidden rounded-lg bg-slate-50">
@@ -269,6 +307,14 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                     <span className="text-sm">Alt text VI</span>
                     <input value={siteForm.altTextVi} onChange={(e) => setSiteForm((c) => ({ ...c, altTextVi: e.target.value }))} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
                   </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => applyAssetToHero(selectedAsset)} className="rounded-full bg-slate-950 px-4 py-2 text-xs font-medium text-white">
+                      Use as hero
+                    </button>
+                    <button type="button" onClick={() => applyAssetToProduct(selectedAsset)} className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700">
+                      Use as product preview
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : null}
@@ -298,11 +344,11 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
             </select>
             {selectedProduct ? (
               <div className="space-y-4">
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <div className="relative h-56 overflow-hidden rounded-lg bg-slate-50">
-                    {previewProductUrl ? <Image src={previewProductUrl} alt={selectedProduct.media[0]?.altText ?? selectedProduct.name} fill className="object-cover" /> : null}
-                  </div>
-                  <form onSubmit={handleProductUpload} className="mt-4 space-y-3">
+                  <div className="rounded-xl border border-slate-200 p-4">
+                    <div className="relative h-56 overflow-hidden rounded-lg bg-slate-50">
+                      {previewProductUrl ? <Image src={previewProductUrl} alt={selectedProduct.media[0]?.altText ?? selectedProduct.name} fill className="object-cover" /> : null}
+                    </div>
+                    <form onSubmit={handleProductUpload} className="mt-4 space-y-3">
                     <input type="hidden" name="productSlug" value={selectedProduct.slug} />
                     <label className="block text-sm">
                       <span>Media type</span>
@@ -317,8 +363,28 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                       <input name="file" type="file" accept="image/*" className="mt-1 block w-full text-sm" />
                     </label>
                     <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white">Upload to product</button>
-                  </form>
-                </div>
+                    </form>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 p-4">
+                    <p className="text-sm font-medium">Quick assign from site assets</p>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {assets.slice(0, 6).map((asset) => (
+                        <button
+                          key={asset.id}
+                          type="button"
+                          onClick={() => {
+                            setPreviewProductUrl(asset.publicUrl);
+                            setProductForm((current) => ({ ...current, altText: asset.altTextEn ?? asset.assetKey }));
+                            setStatus(`Selected ${asset.assetKey} for product media.`);
+                          }}
+                          className="rounded-xl border border-slate-200 px-3 py-2 text-left text-xs hover:border-blue-300 hover:bg-blue-50"
+                        >
+                          <p className="font-medium">{asset.assetKey}</p>
+                          <p className="text-slate-500">{asset.category}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 <div className="grid gap-3">
                   {selectedProduct.media
                     .slice()

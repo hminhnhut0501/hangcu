@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getStorefrontLocale } from "@/modules/i18n/storefront";
 
 const sampleCheckoutItems = [
   {
@@ -8,20 +9,23 @@ const sampleCheckoutItems = [
   }
 ];
 
-export default function CheckoutPage() {
+export default async function CheckoutPage() {
+  const locale = await getStorefrontLocale();
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-6">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
-              Checkout
+              {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-              Review your license order
+              {locale === "vi" ? "Kiểm tra đơn license" : "Review your license order"}
             </h1>
             <p className="mt-4 text-lg leading-8 text-slate-600">
-              Kiểm tra lại thông tin gói license trước khi thanh toán.
+              {locale === "vi"
+                ? "Kiểm tra lại thông tin gói license trước khi thanh toán."
+                : "Review your license package details before paying."}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -55,7 +59,9 @@ export default function CheckoutPage() {
         </section>
         <aside className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold">Order summary / Tóm tắt đơn hàng</h2>
+            <h2 className="text-lg font-semibold">
+              {locale === "vi" ? "Tóm tắt đơn hàng" : "Order summary"}
+            </h2>
             <ul className="mt-4 space-y-4">
               {sampleCheckoutItems.map((item) => (
                 <li key={item.slug} className="flex items-center justify-between">
@@ -70,14 +76,15 @@ export default function CheckoutPage() {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-600">
-              Thanh toán sẽ được kết nối ở phase tiếp theo. Hiện tại đây là khung
-              checkout cho license store.
+              {locale === "vi"
+                ? "Thanh toán sẽ được kết nối ở phase tiếp theo. Hiện tại đây là khung checkout cho license store."
+                : "Payments will be connected in the next phase. This is the checkout shell for the license store."}
             </p>
             <Link
               href="/products"
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white"
             >
-              Back to license plans
+              {locale === "vi" ? "Về gói license" : "Back to license plans"}
             </Link>
           </div>
         </aside>

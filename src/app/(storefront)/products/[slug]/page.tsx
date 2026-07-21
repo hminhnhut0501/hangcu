@@ -1,5 +1,6 @@
 import { getProductBySlug } from "@/modules/products/service";
 import { getCurrentPriceForProduct } from "@/modules/prices/service";
+import { getStorefrontLocale } from "@/modules/i18n/storefront";
 
 type ProductDetailPageProps = {
   params: Promise<{
@@ -13,6 +14,7 @@ export default async function ProductDetailPage({
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   const price = await getCurrentPriceForProduct(product.id);
+  const locale = await getStorefrontLocale();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -37,12 +39,13 @@ export default async function ProductDetailPage({
               {product.description}
             </p>
             <p className="mt-3 text-base leading-7 text-slate-600">
-              This page will present English and Vietnamese license copy side by
-              side as the bilingual content phase lands.
+              {locale === "vi"
+                ? "Trang này sẽ hiển thị nội dung license tiếng Anh và tiếng Việt song song."
+                : "This page will present English and Vietnamese license copy side by side."}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-500">License price</p>
+            <p className="text-sm text-slate-500">{locale === "vi" ? "Giá license" : "License price"}</p>
             <p className="mt-2 text-3xl font-semibold">
               {price.currency} {(price.amountMinor / 100).toFixed(2)}
             </p>
@@ -53,10 +56,11 @@ export default async function ProductDetailPage({
             ) : null}
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold">License terms</h2>
+            <h2 className="text-lg font-semibold">{locale === "vi" ? "Điều khoản license" : "License terms"}</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              License delivery will be handled through license keys. Transitional
-              download information remains in the system until the cutover.
+              {locale === "vi"
+                ? "License sẽ được giao qua mã license. Thông tin tải xuống tạm thời vẫn được giữ trong hệ thống cho đến khi chuyển đổi hoàn tất."
+                : "License delivery will be handled through license keys. Transitional download information remains in the system until cutover."}
             </p>
           </div>
         </section>

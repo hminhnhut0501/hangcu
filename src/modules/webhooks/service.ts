@@ -17,6 +17,10 @@ export async function listWebhookSummaries(): Promise<WebhookSummary[]> {
   }));
 }
 
+export async function getWebhookEvent(provider: string, providerEventId: string) {
+  return webhookRepository.findByProviderEventId(provider, providerEventId);
+}
+
 export async function retryWebhook(provider: string, providerEventId: string) {
   const event = await webhookRepository.retry(provider, providerEventId);
   if (event) {

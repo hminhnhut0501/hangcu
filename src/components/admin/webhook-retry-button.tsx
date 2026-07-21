@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -8,10 +9,21 @@ type Props = {
 };
 
 export function WebhookRetryButton({ provider, providerEventId }: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  async function readErrorMessage(response: Response) {
+    const json = await response.json().catch(() => null);
+    return json?.error?.message ?? json?.message ?? `Request failed (${response.status})`;
+  }
 
   async function onRetry() {
+    if (!window.confirm(`Retry webhook ${providerEventId}?`)) {
+      return;
+    }
     setStatus("loading");
+    setMessage("");
     try {
       const csrfResponse = await fetch("/api/admin/csrf", { method: "GET", credentials: "include" });
       const csrfJson = (await csrfResponse.json()) as { data?: { token?: string } };
@@ -32,23 +44,30 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
       });
 
       if (!response.ok) {
-        throw new Error("Retry failed");
+        throw new Error(await readErrorMessage(response));
       }
 
       setStatus("done");
-    } catch {
+      setMessage("Webhook retried.");
+      router.refresh();
+    } catch (error) {
       setStatus("error");
+      setMessage(error instanceof Error ? error.message : "Retry failed.");
     }
   }
 
   return (
-    <button
-      type="button"
-      onClick={onRetry}
-      className="text-xs font-medium text-blue-600 disabled:opacity-50"
-      disabled={status === "loading"}
-    >
-      {status === "loading" ? "Retrying..." : status === "done" ? "Retried" : "Retry"}
-    </button>
+    <div className="flex flex-col items-start gap-1">
+      <button
+        type="button"
+        onClick={onRetry}
+        className="text-xs font-medium text-blue-600 disabled:opacity-50"
+        disabled={status === "loading"}
+      >
+        {status === "loading" ? "Retrying..." : status === "done" ? "Retried" : "Retry"}
+      </button>
+      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry failed."}</p> : null}
+      {status === "done" ? <p className="text-xs text-emerald-600">{message}</p> : null}
+    </div>
   );
 }

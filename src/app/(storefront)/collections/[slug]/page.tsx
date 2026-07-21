@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCollectionBySlug } from "@/modules/collections/service";
 import { listProductsByCollectionSlug } from "@/modules/products/service";
+import { getStorefrontLocale } from "@/modules/i18n/storefront";
 
 type CollectionDetailPageProps = {
   params: Promise<{
@@ -14,19 +15,22 @@ export default async function CollectionDetailPage({
   const { slug } = await params;
   const collection = await getCollectionBySlug(slug);
   const products = await listProductsByCollectionSlug(slug);
+  const locale = await getStorefrontLocale();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
         <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
-          Collection
+          {locale === "vi" ? "Nhóm" : "Collection"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight">{collection.name}</h1>
         <p className="max-w-2xl text-lg leading-8 text-slate-600">
           {collection.description}
         </p>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
-          Đây là khu vực hiển thị các gói license và donate package liên quan.
+          {locale === "vi"
+            ? "Đây là khu vực hiển thị các gói license và donate package liên quan."
+            : "This area shows related license plans and donate packages."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -46,7 +50,7 @@ export default async function CollectionDetailPage({
                 className="inline-flex text-sm font-medium text-blue-600"
                 href={`/products/${product.slug}`}
               >
-                View license details
+                {locale === "vi" ? "Xem chi tiết license" : "View license details"}
               </Link>
             </div>
           </article>

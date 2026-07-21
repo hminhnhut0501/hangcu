@@ -138,6 +138,39 @@ export async function listLicenseKeys() {
   return repository.list();
 }
 
+export async function getLicenseKeyById(id: string) {
+  return repository.findById(id);
+}
+
+export async function updateLicenseKeyById(input: {
+  id: string;
+  status?: "available" | "reserved" | "issued" | "redeemed" | "expired" | "revoked";
+  expiresAt?: Date | null;
+  revokedReason?: string | null;
+  customerRef?: string | null;
+  externalUserId?: string | null;
+  notes?: string | null;
+}) {
+  const key = await repository.findById(input.id);
+  if (!key) {
+    throw new LicenseKeyNotFoundError();
+  }
+
+  return repository.save({
+    ...key,
+    ...(input.status ? { status: input.status } : {}),
+    ...(input.expiresAt !== undefined ? { expiresAt: input.expiresAt } : {}),
+    ...(input.revokedReason !== undefined ? { revokedReason: input.revokedReason } : {}),
+    ...(input.customerRef !== undefined ? { customerRef: input.customerRef } : {}),
+    ...(input.externalUserId !== undefined ? { externalUserId: input.externalUserId } : {}),
+    metadata: {
+      ...key.metadata,
+      ...(input.notes !== undefined ? { notes: input.notes } : {})
+    },
+    ...(input.status === "expired" ? { revokedAt: null, revokedReason: null } : {})
+  });
+}
+
 export async function createLicenseKey(input: LicenseKeyIssueInput) {
   return issueLicenseKey(input);
 }

@@ -5,6 +5,7 @@ export interface OrderRepository {
   findByOrderNumber(orderNumber: string): Promise<OrderSummary | null>;
   listByEmail(email: string): Promise<OrderSummary[]>;
   listAll(): Promise<OrderSummary[]>;
+  update(orderNumber: string, patch: Partial<OrderSummary>): Promise<OrderSummary | null>;
 }
 
 export class InMemoryOrderRepository implements OrderRepository {
@@ -27,5 +28,22 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   async listAll(): Promise<OrderSummary[]> {
     return [...this.orders.values()];
+  }
+
+  async update(orderNumber: string, patch: Partial<OrderSummary>): Promise<OrderSummary | null> {
+    const current = this.orders.get(orderNumber);
+    if (!current) {
+      return null;
+    }
+
+    const updated = {
+      ...current,
+      ...patch,
+      items: patch.items ?? current.items,
+      metadata: patch.metadata ?? current.metadata
+    };
+
+    this.orders.set(orderNumber, updated);
+    return updated;
   }
 }

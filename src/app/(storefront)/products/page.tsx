@@ -1,19 +1,24 @@
 import Link from "next/link";
 import { listProducts } from "@/modules/products/service";
+import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront";
 
 export default async function ProductsPage() {
   const products = await listProducts();
+  const locale = await getStorefrontLocale();
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
         <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
-          License plans
+          {locale === "vi" ? "Gói license" : "License plans"}
         </p>
-        <h1 className="text-4xl font-semibold tracking-tight">Browse available license plans</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">
+          {locale === "vi" ? "Duyệt các gói license đang mở bán" : "Browse available license plans"}
+        </h1>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
-          Duyệt các gói license 30 ngày, trọn đời, và các gói donate có tặng kèm
-          license key.
+          {locale === "vi"
+            ? "Duyệt các gói license 30 ngày, trọn đời, và các gói donate có tặng kèm license key."
+            : "Browse the 30-day license, lifetime license, and donate packages that include bonus license keys."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -40,7 +45,7 @@ export default async function ProductsPage() {
                 className="inline-flex text-sm font-medium text-blue-600"
                 href={`/products/${product.slug}`}
               >
-                View license details
+                {locale === "vi" ? "Xem chi tiết license" : "View license details"}
               </Link>
             </div>
           </article>

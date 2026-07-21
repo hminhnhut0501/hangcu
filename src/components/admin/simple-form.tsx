@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 type Field = {
@@ -16,14 +17,26 @@ type Props = {
   fields: Field[];
   submitLabel: string;
   onSuccessMessage: string;
+  confirmMessage?: string;
 };
 
-export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessage }: Props) {
+async function readErrorMessage(response: Response) {
+  const json = await response.json().catch(() => null);
+  return json?.error?.message ?? json?.message ?? json?.error ?? `Request failed (${response.status})`;
+}
+
+export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessage, confirmMessage }: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [message, setMessage] = useState<string>("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (confirmMessage && !window.confirm(confirmMessage)) {
+      return;
+    }
     setStatus("loading");
+    setMessage("");
     try {
       const formData = new FormData(event.currentTarget);
       const csrfResponse = await fetch("/api/admin/csrf", { method: "GET", credentials: "include" });
@@ -56,12 +69,15 @@ export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessag
       });
 
       if (!response.ok) {
-        throw new Error("Request failed");
+        throw new Error(await readErrorMessage(response));
       }
 
       setStatus("done");
-    } catch {
+      setMessage(onSuccessMessage);
+      router.refresh();
+    } catch (error) {
       setStatus("error");
+      setMessage(error instanceof Error ? error.message : "Submission failed.");
     }
   }
 
@@ -103,7 +119,7 @@ export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessag
           {status === "loading" ? "Saving..." : submitLabel}
         </button>
         <p className="text-sm text-slate-600">
-          {status === "done" ? onSuccessMessage : status === "error" ? "Submission failed." : null}
+          {status === "done" ? message || onSuccessMessage : status === "error" ? message || "Submission failed." : null}
         </p>
       </div>
     </form>

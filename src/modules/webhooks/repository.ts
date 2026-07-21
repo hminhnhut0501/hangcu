@@ -18,12 +18,21 @@ const paymentEvents: PaymentEvent[] = [
 
 export interface WebhookRepository {
   list(): Promise<PaymentEvent[]>;
+  findByProviderEventId(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
   retry(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
 }
 
 export class InMemoryWebhookRepository implements WebhookRepository {
   async list(): Promise<PaymentEvent[]> {
     return [...paymentEvents];
+  }
+
+  async findByProviderEventId(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
+    return (
+      paymentEvents.find(
+        (entry) => entry.provider === provider && entry.providerEventId === providerEventId
+      ) ?? null
+    );
   }
 
   async retry(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
@@ -67,6 +76,39 @@ export class SupabaseWebhookRepository implements WebhookRepository {
       errorMessage: row.error_message ?? null,
       processedAt: row.processed_at ? new Date(row.processed_at) : null
     }));
+  }
+
+  async findByProviderEventId(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
+    if (!this.client) {
+      return new InMemoryWebhookRepository().findByProviderEventId(provider, providerEventId);
+    }
+
+    const { data, error } = await this.client
+      .from("payment_events")
+      .select("*")
+      .eq("provider", provider)
+      .eq("provider_event_id", providerEventId)
+      .maybeSingle();
+
+    if (error) {
+      if (isMissingSupabaseTableError(error, "payment_events")) {
+        return new InMemoryWebhookRepository().findByProviderEventId(provider, providerEventId);
+      }
+      throw error;
+    }
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      provider: data.provider,
+      providerEventId: data.provider_event_id,
+      eventType: data.event_type,
+      payload: data.payload ?? {},
+      signatureValid: data.signature_valid,
+      processingStatus: data.processing_status,
+      errorMessage: data.error_message ?? null,
+      processedAt: data.processed_at ? new Date(data.processed_at) : null
+    };
   }
 
   async retry(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
