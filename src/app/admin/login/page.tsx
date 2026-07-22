@@ -83,12 +83,6 @@ export default function AdminLoginPage() {
             >
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
-            <a
-              href="/admin/login-test"
-              className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Mở login test
-            </a>
           </div>
 
           <p className="mt-4 text-sm text-slate-600">{message}</p>
