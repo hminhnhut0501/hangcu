@@ -22,7 +22,7 @@ export function ModeSwitchHeader({ modeLabel = "Chế độ UI:", currentMode, o
         return (
           <Link
             key={option.key}
-            href={option.href}
+            href={option.href as any}
             className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
               active ? "bg-slate-950 text-white shadow-sm" : "border border-slate-200 bg-slate-50 text-slate-700 hover:bg-white"
             }`}
