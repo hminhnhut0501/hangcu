@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { requireAdminMutationAccess } from "@/modules/admin-auth/guard";
-import { uploadStorageFile } from "@/lib/storage/service";
+import { isStorageBucketMissingError, uploadStorageFile } from "@/lib/storage/service";
 
 const schema = z.object({
   folder: z.string().min(1),
@@ -26,7 +26,23 @@ export async function POST(request: Request) {
 
   const extension = file.name.split(".").pop() || "bin";
   const path = `${parsed.data.folder}/${parsed.data.assetKey}.${extension}`;
-  const uploaded = await uploadStorageFile({ path, file });
+  try {
+    const uploaded = await uploadStorageFile({ path, file });
+    return Response.json({ success: true, data: uploaded });
+  } catch (error) {
+    if (isStorageBucketMissingError(error)) {
+      return Response.json(
+        {
+          success: false,
+          error: {
+            code: "STORAGE_BUCKET_MISSING",
+            message: "Thiếu bucket Supabase Storage cho upload. Hãy chạy migration tạo bucket hoặc cấu hình SUPABASE_STORAGE_BUCKET đúng tên bucket."
+          }
+        },
+        { status: 503 }
+      );
+    }
 
-  return Response.json({ success: true, data: uploaded });
+    throw error;
+  }
 }

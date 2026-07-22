@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { requireAdminMutationAccess } from "@/modules/admin-auth/guard";
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
-import { uploadStorageFile } from "@/lib/storage/service";
+import { isStorageBucketMissingError, uploadStorageFile } from "@/lib/storage/service";
 import { listSiteAssets } from "@/modules/site-assets/service";
 
 const schema = z.object({
@@ -35,7 +35,24 @@ export async function POST(request: Request) {
 
   const extension = file.name.split(".").pop() || "bin";
   const path = `site/${parsed.data.category}/${parsed.data.assetKey}.${extension}`;
-  const uploaded = await uploadStorageFile({ path, file });
+  let uploaded;
+  try {
+    uploaded = await uploadStorageFile({ path, file });
+  } catch (error) {
+    if (isStorageBucketMissingError(error)) {
+      return Response.json(
+        {
+          success: false,
+          error: {
+            code: "STORAGE_BUCKET_MISSING",
+            message: 'Thiếu bucket Supabase Storage cho "site-assets". Hãy tạo bucket này hoặc chạy migration storage buckets.'
+          }
+        },
+        { status: 503 }
+      );
+    }
+    throw error;
+  }
   const client = getSupabaseServiceClient();
   if (client) {
     const { error } = await client.from("site_assets").upsert({
