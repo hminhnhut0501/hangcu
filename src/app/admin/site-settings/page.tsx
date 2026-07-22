@@ -5,10 +5,10 @@ import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
 export default async function AdminSiteSettingsPage({
   searchParams
 }: {
-  searchParams?: Promise<{ mode?: string }> | { mode?: string };
+  searchParams?: Promise<{ mode?: string }>;
 }) {
   const settings = await getSiteContentSettings();
-  const resolvedSearchParams = searchParams ? await Promise.resolve(searchParams) : {};
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const mode = typeof resolvedSearchParams.mode === "string" ? resolvedSearchParams.mode : "basic";
   const isAdvanced = mode === "advanced";
 

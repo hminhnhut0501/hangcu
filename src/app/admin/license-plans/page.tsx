@@ -3,12 +3,12 @@ import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { LicensePlanActions } from "@/components/admin/license-plan-actions";
 import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
 
-export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ edit?: string }> | { edit?: string } }) {
+export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ edit?: string; mode?: string }> }) {
   const plans = await listLicensePlans();
-  const resolvedSearchParams = searchParams ? await Promise.resolve(searchParams) : {};
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   const editPlan = resolvedSearchParams.edit ? plans.find((plan) => plan.id === resolvedSearchParams.edit) ?? null : null;
   const defaults = editPlan ?? plans[0] ?? null;
-  const mode = typeof (resolvedSearchParams as { mode?: string }).mode === "string" ? (resolvedSearchParams as { mode?: string }).mode : "payment-only";
+  const mode = typeof resolvedSearchParams.mode === "string" ? resolvedSearchParams.mode : "payment-only";
   const isAdvanced = mode === "advanced";
 
   return (
