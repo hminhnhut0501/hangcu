@@ -88,6 +88,7 @@ export async function createLicenseCheckout(input: unknown) {
   if (price == null) {
     throw integrationErrors.internalError;
   }
+  const licenseCode = String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
 
   const order = await createOrder({
     customerEmail: `${parsed.telegramUserId ?? parsed.customerRef ?? parsed.orderId}@telegram.local`,
@@ -100,7 +101,8 @@ export async function createLicenseCheckout(input: unknown) {
       planCode: parsed.planCode,
       locale: parsed.locale,
       currency: parsed.currency,
-      activationCode: parsed.activationCode ?? null,
+      activationCode: licenseCode,
+      licenseCode,
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment",
       orderId: parsed.orderId
@@ -161,7 +163,8 @@ export async function createLicenseCheckout(input: unknown) {
       planCode: parsed.planCode,
       locale: parsed.locale,
       currency: parsed.currency,
-      activationCode: parsed.activationCode ?? null,
+      activationCode: licenseCode,
+      licenseCode,
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment"
     }
@@ -178,8 +181,10 @@ export async function createLicenseCheckout(input: unknown) {
     plan_code: plan.code,
     locale: parsed.locale,
     currency: parsed.currency,
-    activationCode: parsed.activationCode ?? null,
-    activation_code: parsed.activationCode ?? null,
+    activationCode: licenseCode,
+    activation_code: licenseCode,
+    licenseCode,
+    license_code: licenseCode,
     paymentProvider: provider,
     payment_provider: provider,
     telegramUserId: parsed.telegramUserId ?? null,
