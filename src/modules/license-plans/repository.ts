@@ -8,6 +8,7 @@ export interface LicensePlanRepository {
   findBySlug(slug: string): Promise<LicensePlanSummary | null>;
   findByCode(code: string): Promise<LicensePlanSummary | null>;
   save(plan: LicensePlanSummary): Promise<LicensePlanSummary>;
+  delete(id: string): Promise<boolean>;
 }
 
 export class InMemoryLicensePlanRepository implements LicensePlanRepository {
@@ -31,6 +32,16 @@ export class InMemoryLicensePlanRepository implements LicensePlanRepository {
       plans.push(plan);
     }
     return plan;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const index = plans.findIndex((entry) => entry.id === id);
+    if (index < 0) {
+      return false;
+    }
+
+    plans.splice(index, 1);
+    return true;
   }
 }
 

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { listWebhookSummaries } from "@/modules/webhooks/service";
+import { FilterPills } from "@/components/admin/filter-pills";
+import { SummaryCard } from "@/components/admin/summary-card";
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
@@ -61,41 +63,19 @@ export default async function AdminPaymentsPage({
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Event</p>
-            <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
-          </article>
-          <article className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Chờ</p>
-            <p className="mt-2 text-2xl font-semibold">{pendingCount}</p>
-          </article>
-          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Lỗi</p>
-            <p className="mt-2 text-2xl font-semibold">{failedCount}</p>
-          </article>
-          <article className="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">Đã xử lý</p>
-            <p className="mt-2 text-2xl font-semibold">{processedCount}</p>
-          </article>
+          <SummaryCard label="Event" value={filtered.length} />
+          <SummaryCard label="Chờ" value={pendingCount} tone="amber" />
+          <SummaryCard label="Lỗi" value={failedCount} tone="rose" />
+          <SummaryCard label="Đã xử lý" value={processedCount} tone="emerald" />
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {quickFilters.map((filter) => {
-          const active = filter.href === "/admin/payments" ? !status : filter.href.includes(`status=${status}`);
-          return (
-            <Link
-              key={filter.href}
-              href={filter.href as any}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                active ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {filter.label}
-            </Link>
-          );
-        })}
-      </div>
+      <FilterPills
+        pills={quickFilters.map((filter) => ({
+          ...filter,
+          active: filter.href === "/admin/payments" ? !status : filter.href.includes(`status=${status}`)
+        }))}
+      />
 
       <form className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] lg:grid-cols-4">
         <input

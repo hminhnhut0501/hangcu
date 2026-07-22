@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { LicenseKeyBulkActions } from "@/components/admin/license-key-bulk-actions";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
+import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
+import { FilterPills } from "@/components/admin/filter-pills";
+import { SummaryCard } from "@/components/admin/summary-card";
 import { listLicenseKeys } from "@/modules/license-keys/service";
 
 const statusStyles: Record<string, string> = {
@@ -36,6 +39,8 @@ export default async function AdminLicenseKeysPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
+  const mode = typeof params.mode === "string" ? params.mode : "basic";
+  const isAdvanced = mode === "advanced";
   const keys = await listLicenseKeys();
   const q = typeof params.q === "string" ? params.q.trim().toLowerCase() : "";
   const status = typeof params.status === "string" ? params.status : "";
@@ -69,44 +74,28 @@ export default async function AdminLicenseKeysPage({
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Keys</p>
-            <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
-          </article>
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Sẵn sàng</p>
-            <p className="mt-2 text-2xl font-semibold">{availableCount}</p>
-          </article>
-          <article className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-blue-700">Đã cấp</p>
-            <p className="mt-2 text-2xl font-semibold">{issuedCount}</p>
-          </article>
-          <article className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">Đã redeem</p>
-            <p className="mt-2 text-2xl font-semibold">{redeemedCount}</p>
-          </article>
+          <SummaryCard label="Keys" value={filtered.length} />
+          <SummaryCard label="Sẵn sàng" value={availableCount} tone="default" />
+          <SummaryCard label="Đã cấp" value={issuedCount} tone="blue" />
+          <SummaryCard label="Đã redeem" value={redeemedCount} tone="emerald" />
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {quickFilters.map((filter) => {
-          const active =
-            filter.href === "/admin/license-keys"
-              ? !status
-              : filter.href.includes(`status=${status}`);
-          return (
-            <Link
-              key={filter.href}
-              href={filter.href as any}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                active ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              {filter.label}
-            </Link>
-          );
-        })}
-      </div>
+      <ModeSwitchHeader
+        currentMode={isAdvanced ? "advanced" : "basic"}
+        options={[
+          { key: "basic", label: "Basic", href: "/admin/license-keys?mode=basic" },
+          { key: "advanced", label: "Advanced", href: "/admin/license-keys?mode=advanced" }
+        ]}
+        hint={isAdvanced ? "Hiện bulk action và bảng đầy đủ." : "Gọn hơn, ưu tiên thao tác tạo key và lọc nhanh."}
+      />
+
+      <FilterPills
+        pills={quickFilters.map((filter) => ({
+          ...filter,
+          active: filter.href === "/admin/license-keys" ? !status : filter.href.includes(`status=${status}`)
+        }))}
+      />
 
       <SimpleAdminForm
         endpoint="/api/admin/license-keys"
@@ -157,17 +146,19 @@ export default async function AdminLicenseKeysPage({
         </div>
       </form>
 
-      <LicenseKeyBulkActions
-        keys={filtered.map((key) => ({
-          id: key.id,
-          codeLastFour: key.codeLastFour,
-          licensePlanId: key.licensePlanId,
-          status: key.status,
-          customerRef: key.customerRef,
-          externalUserId: key.externalUserId,
-          href: `/admin/license-keys/${key.id}`
-        }))}
-      />
+      {isAdvanced ? (
+        <LicenseKeyBulkActions
+          keys={filtered.map((key) => ({
+            id: key.id,
+            codeLastFour: key.codeLastFour,
+            licensePlanId: key.licensePlanId,
+            status: key.status,
+            customerRef: key.customerRef,
+            externalUserId: key.externalUserId,
+            href: `/admin/license-keys/${key.id}`
+          }))}
+        />
+      ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -176,15 +167,15 @@ export default async function AdminLicenseKeysPage({
               <th className="px-6 py-4 font-medium">Key</th>
               <th className="px-6 py-4 font-medium">Gói</th>
               <th className="px-6 py-4 font-medium">Trạng thái</th>
-              <th className="px-6 py-4 font-medium">Binding</th>
-              <th className="px-6 py-4 font-medium">Vòng đời</th>
+              {isAdvanced ? <th className="px-6 py-4 font-medium">Binding</th> : null}
+              {isAdvanced ? <th className="px-6 py-4 font-medium">Vòng đời</th> : null}
               <th className="px-6 py-4 font-medium">Hành động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
             {filtered.length === 0 ? (
               <tr>
-                <td className="px-6 py-10 text-center text-slate-500" colSpan={6}>
+                <td className="px-6 py-10 text-center text-slate-500" colSpan={isAdvanced ? 6 : 4}>
                   Chưa có license key nào phù hợp.
                 </td>
               </tr>
@@ -200,15 +191,19 @@ export default async function AdminLicenseKeysPage({
                     <p className="text-xs text-slate-500">Order: {key.orderId ?? "không có"}</p>
                   </td>
                   <td className="px-6 py-4">{formatStatus(key.status)}</td>
-                  <td className="px-6 py-4">
-                    <p className="font-medium">{key.bindingType ?? "unbound"}</p>
-                    <p className="text-xs text-slate-500">{key.externalUserId ?? key.customerRef ?? "Chưa gắn customer"}</p>
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">
-                    <p>Đã cấp: {formatDate(key.issuedAt)}</p>
-                    <p>Hết hạn: {formatDate(key.expiresAt)}</p>
-                    <p>Đã redeem: {formatDate(key.redeemedAt)}</p>
-                  </td>
+                  {isAdvanced ? (
+                    <td className="px-6 py-4">
+                      <p className="font-medium">{key.bindingType ?? "unbound"}</p>
+                      <p className="text-xs text-slate-500">{key.externalUserId ?? key.customerRef ?? "Chưa gắn customer"}</p>
+                    </td>
+                  ) : null}
+                  {isAdvanced ? (
+                    <td className="px-6 py-4 text-slate-600">
+                      <p>Đã cấp: {formatDate(key.issuedAt)}</p>
+                      <p>Hết hạn: {formatDate(key.expiresAt)}</p>
+                      <p>Đã redeem: {formatDate(key.redeemedAt)}</p>
+                    </td>
+                  ) : null}
                   <td className="px-6 py-4">
                     <Link
                       href={`/admin/license-keys/${key.id}`}

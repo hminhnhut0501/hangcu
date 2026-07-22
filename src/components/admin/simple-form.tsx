@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
+import { AdminPanel } from "@/components/admin/admin-shell";
 
 type Field = {
   name: string;
@@ -90,10 +91,10 @@ export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
       <div className="space-y-6">
         {formSections.map((section) => (
-          <div key={section.title || "default"} className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <AdminPanel key={section.title || "default"} className="space-y-4 bg-slate-50/70 p-4 shadow-none">
             {section.title ? (
               <div>
                 <h3 className="text-base font-semibold text-slate-950">{section.title}</h3>
@@ -125,9 +126,9 @@ export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, 
                     />
                   )}
                 </label>
-              ))}
+                ))}
             </div>
-          </div>
+          </AdminPanel>
         ))}
       </div>
       <div className="mt-6 flex items-center gap-3">

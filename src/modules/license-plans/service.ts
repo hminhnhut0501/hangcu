@@ -30,25 +30,39 @@ export async function upsertLicensePlan(input: {
   name: string;
   nameVi?: string;
   nameEn?: string;
-  slug: string;
-  description: string;
+  slug?: string;
+  description?: string;
   currencyPrices?: {
     VND: number | null;
     USD: number | null;
   };
-  planType: "regular" | "donate_bonus" | "special";
-  durationDays: number;
-  isLifetime: boolean;
-  status: "active" | "hidden" | "archived";
-  sortOrder: number;
+  planType?: "regular" | "donate_bonus" | "special";
+  durationDays?: number;
+  isLifetime?: boolean;
+  status?: "active" | "hidden" | "archived";
+  sortOrder?: number;
   entitlementTags?: string[];
 }) {
+  const existing = await getLicensePlanById(input.id);
   return repository.save({
-    ...input,
+    id: input.id,
+    code: input.code,
+    name: input.name,
     nameVi: input.nameVi ?? input.name,
     nameEn: input.nameEn ?? input.name,
+    slug: input.slug ?? existing?.slug ?? input.code.toLowerCase(),
+    description: input.description ?? existing?.description ?? "",
     currencyPrices: input.currencyPrices ?? { VND: null, USD: null },
-    entitlementTags: input.entitlementTags ?? ["app_access"],
-    metadata: {}
+    planType: input.planType ?? existing?.planType ?? "regular",
+    durationDays: input.durationDays ?? existing?.durationDays ?? 30,
+    isLifetime: input.isLifetime ?? existing?.isLifetime ?? false,
+    status: input.status ?? existing?.status ?? "active",
+    sortOrder: input.sortOrder ?? existing?.sortOrder ?? 1,
+    entitlementTags: input.entitlementTags ?? existing?.entitlementTags ?? ["app_access"],
+    metadata: existing?.metadata ?? {}
   });
+}
+
+export async function deleteLicensePlan(id: string) {
+  return repository.delete(id);
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { listAuditLogs } from "@/modules/audit/service";
 import { filterAuditLogs, normalizeAuditQuery } from "@/modules/audit/query";
+import { FilterPills } from "@/components/admin/filter-pills";
+import { SummaryCard } from "@/components/admin/summary-card";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("vi-VN", {
@@ -116,31 +118,23 @@ export default async function AdminAuditPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {stats.map((card) => (
-          <article key={card.label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">{card.label}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight">{card.value}</p>
-          </article>
+        {stats.map((card, index) => (
+          <SummaryCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            tone={index === 1 ? "blue" : index === 2 ? "emerald" : index === 3 ? "amber" : "default"}
+          />
         ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="flex flex-wrap gap-2">
-          {quickFilters.map((filter) => {
-            const active = filter.href === "/admin/audit" ? Object.keys(params).length === 0 : (params.actorType ?? params.entityType ?? "").toString() !== "";
-            return (
-              <Link
-                key={filter.href}
-                href={filter.href as any}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                  active ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                {filter.label}
-              </Link>
-            );
-          })}
-        </div>
+        <FilterPills
+          pills={quickFilters.map((filter) => ({
+            ...filter,
+            active: filter.href === "/admin/audit" ? Object.keys(params).length === 0 : (params.actorType ?? params.entityType ?? "").toString() !== ""
+          }))}
+        />
         <div className="grid gap-2 sm:grid-cols-2">
           {topActions.map((action) => (
             <article key={action.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">

@@ -21,8 +21,6 @@ export default async function AdminDonatePackagesPage() {
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "DONATE_NEW" },
           { name: "name", label: "Tên", defaultValue: "New Donate Package" },
-          { name: "slug", label: "Slug", defaultValue: "new-donate-package" },
-          { name: "description", label: "Mô tả", defaultValue: "Description" },
           { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "2000" },
           { name: "currency", label: "Tiền tệ", defaultValue: "USD" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
