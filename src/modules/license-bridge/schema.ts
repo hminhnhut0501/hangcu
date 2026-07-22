@@ -6,6 +6,13 @@ export const integrationBaseSchema = z.object({
   signature: z.string().min(1)
 });
 
+const optionalUrlSchema = z.preprocess((value) => {
+  if (value === "" || value === null) {
+    return undefined;
+  }
+  return value;
+}, z.string().url().optional());
+
 export const licenseCheckoutSchema = integrationBaseSchema.extend({
   orderId: z.string().min(1),
   telegramUserId: z.string().min(1).optional(),
@@ -14,8 +21,8 @@ export const licenseCheckoutSchema = integrationBaseSchema.extend({
   locale: z.enum(["vi", "en"]),
   currency: z.enum(["VND", "USD"]),
   activationCode: z.string().min(1).optional(),
-  returnUrl: z.string().url().optional(),
-  cancelUrl: z.string().url().optional(),
+  returnUrl: optionalUrlSchema,
+  cancelUrl: optionalUrlSchema,
   source: z.string().min(1).optional()
 });
 
