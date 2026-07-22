@@ -33,7 +33,7 @@ export function LicenseKeyActionsForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!window.confirm("Save license lifecycle changes?")) {
+    if (!window.confirm("Lưu thay đổi vòng đời license key?")) {
       return;
     }
     setStatus("loading");
@@ -67,11 +67,11 @@ export function LicenseKeyActionsForm({
 
       if (!response.ok) throw new Error(await readErrorMessage(response));
       setStatus("done");
-      setMessage("License key updated.");
+      setMessage("Đã cập nhật license key.");
       router.refresh();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Update failed.");
+      setMessage(error instanceof Error ? error.message : "Cập nhật thất bại.");
     }
   }
 
@@ -79,7 +79,7 @@ export function LicenseKeyActionsForm({
     <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Status</span>
+          <span className="text-sm font-medium text-slate-700">Trạng thái</span>
           <select
             name="status"
             defaultValue={currentStatus}
@@ -94,7 +94,7 @@ export function LicenseKeyActionsForm({
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Expires at</span>
+          <span className="text-sm font-medium text-slate-700">Hết hạn lúc</span>
           <input
             name="expiresAt"
             defaultValue={currentExpiresAt ?? ""}
@@ -103,7 +103,7 @@ export function LicenseKeyActionsForm({
           />
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Customer ref</span>
+          <span className="text-sm font-medium text-slate-700">Tham chiếu khách</span>
           <input
             name="customerRef"
             defaultValue={currentCustomerRef ?? ""}
@@ -111,7 +111,7 @@ export function LicenseKeyActionsForm({
           />
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">External user ID</span>
+          <span className="text-sm font-medium text-slate-700">ID user ngoài</span>
           <input
             name="externalUserId"
             defaultValue={currentExternalUserId ?? ""}
@@ -119,7 +119,7 @@ export function LicenseKeyActionsForm({
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Revoked reason</span>
+          <span className="text-sm font-medium text-slate-700">Lý do thu hồi</span>
           <input
             name="revokedReason"
             defaultValue={currentRevokedReason ?? ""}
@@ -127,7 +127,7 @@ export function LicenseKeyActionsForm({
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Internal notes</span>
+          <span className="text-sm font-medium text-slate-700">Ghi chú nội bộ</span>
           <textarea
             name="notes"
             rows={4}
@@ -142,10 +142,10 @@ export function LicenseKeyActionsForm({
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Saving..." : "Save lifecycle changes"}
+          {status === "loading" ? "Đang lưu..." : "Lưu thay đổi vòng đời"}
         </button>
         <p className="text-sm text-slate-600">
-          {status === "done" ? message : status === "error" ? message || "Update failed." : null}
+          {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
         </p>
       </div>
     </form>

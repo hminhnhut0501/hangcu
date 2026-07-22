@@ -1,6 +1,7 @@
 import { SupabaseWebhookRepository } from "./repository";
 import type { WebhookSummary } from "./types";
 import { writeSystemAuditLog } from "../audit/service";
+import type { PaymentEvent } from "./schema";
 
 const webhookRepository = new SupabaseWebhookRepository();
 
@@ -19,6 +20,10 @@ export async function listWebhookSummaries(): Promise<WebhookSummary[]> {
 
 export async function getWebhookEvent(provider: string, providerEventId: string) {
   return webhookRepository.findByProviderEventId(provider, providerEventId);
+}
+
+export async function recordWebhookEvent(event: PaymentEvent) {
+  return webhookRepository.create(event);
 }
 
 export async function retryWebhook(provider: string, providerEventId: string) {

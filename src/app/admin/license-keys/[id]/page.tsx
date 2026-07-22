@@ -1,11 +1,25 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { LicenseKeyActionsForm } from "@/components/admin/license-key-actions-form";
 import { getLicenseKeyById } from "@/modules/license-keys/service";
+
+const statusStyles: Record<string, string> = {
+  available: "bg-slate-100 text-slate-700",
+  reserved: "bg-amber-100 text-amber-800",
+  issued: "bg-blue-100 text-blue-800",
+  redeemed: "bg-emerald-100 text-emerald-800",
+  expired: "bg-rose-100 text-rose-800",
+  revoked: "bg-zinc-100 text-zinc-800"
+};
 
 function formatDate(value: Date | string | null) {
   if (!value) return "N/A";
   const date = value instanceof Date ? value : new Date(value);
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date);
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function formatStatus(value: string) {
+  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
 }
 
 export default async function AdminLicenseKeyDetailPage({
@@ -21,75 +35,101 @@ export default async function AdminLicenseKeyDetailPage({
   }
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">License detail</p>
+    <section className="space-y-8">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="space-y-3">
+          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Chi tiết license</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">****{key.codeLastFour}</h2>
-          <p className="mt-2 text-sm text-slate-600">{key.id}</p>
+          <p className="text-sm text-slate-600">{key.id}</p>
+          <div className="flex flex-wrap gap-2">
+            {formatStatus(key.status)}
+            <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+              {key.licensePlanId}
+            </span>
+          </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Current status</p>
-          <p className="mt-2 text-2xl font-semibold">{key.status}</p>
+        <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Thao tác nhanh</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href="/admin/license-keys"
+              className="rounded-full border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
+            >
+              Về danh sách
+            </Link>
+          </div>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Plan</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Gói</p>
           <p className="mt-2 text-lg font-semibold">{key.licensePlanId}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Order</p>
-          <p className="mt-2 text-lg font-semibold">{key.orderId ?? "None"}</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Đơn</p>
+          <p className="mt-2 text-lg font-semibold">{key.orderId ?? "Không có"}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Issued at</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Đã cấp lúc</p>
           <p className="mt-2 text-lg font-semibold">{formatDate(key.issuedAt)}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Expires at</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Hết hạn lúc</p>
           <p className="mt-2 text-lg font-semibold">{formatDate(key.expiresAt)}</p>
+        </article>
+        <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Binding</p>
+          <p className="mt-2 text-lg font-semibold">{key.bindingType ?? "unbound"}</p>
+          <p className="mt-1 text-xs text-slate-500">{key.externalUserId ?? key.customerRef ?? "Chưa có binding"}</p>
         </article>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold">Lifecycle details</h3>
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <h3 className="text-lg font-semibold">Chi tiết vòng đời</h3>
             <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
               <div>
-                <dt className="text-slate-500">Redeemed at</dt>
+                <dt className="text-slate-500">Redeemed lúc</dt>
                 <dd className="mt-1 font-medium">{formatDate(key.redeemedAt)}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Redeemed by</dt>
+                <dt className="text-slate-500">Đã redeem bởi</dt>
                 <dd className="mt-1 font-medium">{key.redeemedByExternalUserId ?? "N/A"}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Revoked at</dt>
+                <dt className="text-slate-500">Thu hồi lúc</dt>
                 <dd className="mt-1 font-medium">{formatDate(key.revokedAt)}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Revoked reason</dt>
+                <dt className="text-slate-500">Lý do thu hồi</dt>
                 <dd className="mt-1 font-medium">{key.revokedReason ?? "N/A"}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">Customer ref</dt>
-                <dd className="mt-1 font-medium">{key.customerRef ?? "N/A"}</dd>
+                <dt className="text-slate-500">Tham chiếu khách</dt>
+                <dd className="mt-1 font-medium">{key.customerRef ?? "Không có"}</dd>
               </div>
               <div>
-                <dt className="text-slate-500">External user ID</dt>
-                <dd className="mt-1 font-medium">{key.externalUserId ?? "N/A"}</dd>
+                <dt className="text-slate-500">ID user ngoài</dt>
+                <dd className="mt-1 font-medium">{key.externalUserId ?? "Không có"}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Trạng thái hiện tại</dt>
+                <dd className="mt-1 font-medium">{formatStatus(key.status)}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Order item</dt>
+                <dd className="mt-1 font-medium">{key.orderItemId ?? "Không có"}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
             <h3 className="text-lg font-semibold">Entitlements</h3>
             <div className="mt-4 flex flex-wrap gap-2">
               {key.entitlementSnapshot.length === 0 ? (
-                <span className="text-sm text-slate-500">No entitlement snapshot yet.</span>
+                <span className="text-sm text-slate-500">Chưa có entitlement snapshot.</span>
               ) : (
                 key.entitlementSnapshot.map((tag) => (
                   <span key={tag} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
@@ -100,8 +140,8 @@ export default async function AdminLicenseKeyDetailPage({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-sm">
-            Next phase can add bulk lifecycle actions, batch revoke, and export for support.
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            Màn chi tiết này tối ưu cho hỗ trợ và chỉnh vòng đời. Chỉ dùng revoke hoặc expiry khi key không còn hợp lệ cho khách.
           </div>
         </div>
 
@@ -115,13 +155,22 @@ export default async function AdminLicenseKeyDetailPage({
             currentExternalUserId={key.externalUserId}
             currentNotes={(key.metadata.notes as string | undefined) ?? null}
           />
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
             <div className="border-b border-slate-200 px-6 py-4">
-              <h3 className="text-lg font-semibold">Raw metadata</h3>
+              <h3 className="text-lg font-semibold">Metadata thô</h3>
             </div>
             <pre className="overflow-auto p-6 text-xs text-slate-700">
               {JSON.stringify(key.metadata, null, 2)}
             </pre>
+          </div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <h3 className="text-lg font-semibold">Tóm tắt vòng đời</h3>
+            <ul className="mt-4 space-y-2 text-sm text-slate-600">
+              <li>Đã cấp: {formatDate(key.issuedAt)}</li>
+              <li>Đã redeem: {formatDate(key.redeemedAt)}</li>
+              <li>Đã thu hồi: {formatDate(key.revokedAt)}</li>
+              <li>Lần đổi trạng thái gần nhất: {formatDate((key.metadata.updatedAt as string | undefined) ?? null)}</li>
+            </ul>
           </div>
         </div>
       </div>

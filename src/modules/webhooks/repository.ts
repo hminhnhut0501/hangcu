@@ -19,6 +19,7 @@ const paymentEvents: PaymentEvent[] = [
 export interface WebhookRepository {
   list(): Promise<PaymentEvent[]>;
   findByProviderEventId(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
+  create(event: PaymentEvent): Promise<PaymentEvent>;
   retry(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
 }
 
@@ -33,6 +34,11 @@ export class InMemoryWebhookRepository implements WebhookRepository {
         (entry) => entry.provider === provider && entry.providerEventId === providerEventId
       ) ?? null
     );
+  }
+
+  async create(event: PaymentEvent): Promise<PaymentEvent> {
+    paymentEvents.unshift(event);
+    return event;
   }
 
   async retry(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
@@ -109,6 +115,33 @@ export class SupabaseWebhookRepository implements WebhookRepository {
       errorMessage: data.error_message ?? null,
       processedAt: data.processed_at ? new Date(data.processed_at) : null
     };
+  }
+
+  async create(event: PaymentEvent): Promise<PaymentEvent> {
+    if (!this.client) {
+      return new InMemoryWebhookRepository().create(event);
+    }
+
+    const { error } = await this.client.from("payment_events").insert({
+      id: event.id,
+      provider: event.provider,
+      provider_event_id: event.providerEventId,
+      event_type: event.eventType,
+      payload: event.payload,
+      signature_valid: event.signatureValid,
+      processing_status: event.processingStatus,
+      error_message: event.errorMessage,
+      processed_at: event.processedAt?.toISOString() ?? null
+    });
+
+    if (error) {
+      if (isMissingSupabaseTableError(error, "payment_events")) {
+        return new InMemoryWebhookRepository().create(event);
+      }
+      throw error;
+    }
+
+    return event;
   }
 
   async retry(provider: string, providerEventId: string): Promise<PaymentEvent | null> {

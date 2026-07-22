@@ -1,6 +1,34 @@
+import Link from "next/link";
 import { LicenseKeyBulkActions } from "@/components/admin/license-key-bulk-actions";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { listLicenseKeys } from "@/modules/license-keys/service";
+
+const statusStyles: Record<string, string> = {
+  available: "bg-slate-100 text-slate-700",
+  reserved: "bg-amber-100 text-amber-800",
+  issued: "bg-blue-100 text-blue-800",
+  redeemed: "bg-emerald-100 text-emerald-800",
+  expired: "bg-rose-100 text-rose-800",
+  revoked: "bg-zinc-100 text-zinc-800"
+};
+
+const quickFilters = [
+  { label: "Tất cả", href: "/admin/license-keys" },
+  { label: "Đã cấp", href: "/admin/license-keys?status=issued" },
+  { label: "Đã redeem", href: "/admin/license-keys?status=redeemed" },
+  { label: "Sẵn sàng", href: "/admin/license-keys?status=available" },
+  { label: "Đã thu hồi", href: "/admin/license-keys?status=revoked" }
+];
+
+function formatDate(value: Date | string | null) {
+  if (!value) return "N/A";
+  const date = value instanceof Date ? value : new Date(value);
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function formatStatus(value: string) {
+  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+}
 
 export default async function AdminLicenseKeysPage({
   searchParams
@@ -25,56 +53,85 @@ export default async function AdminLicenseKeysPage({
     return matchesQuery && matchesStatus && matchesPlan;
   });
 
+  const availableCount = filtered.filter((key) => key.status === "available").length;
+  const issuedCount = filtered.filter((key) => key.status === "issued").length;
+  const redeemedCount = filtered.filter((key) => key.status === "redeemed").length;
+  const revokedCount = filtered.filter((key) => key.status === "revoked").length;
+
   return (
     <section className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">License lifecycle</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Manage license keys</h2>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Quản lý license keys</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Inspect issued keys, track redemption state, and perform admin lifecycle actions.
+            Xem các key đã cấp, theo dõi trạng thái redeem và thực hiện thao tác lifecycle cho admin.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
             <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Keys</p>
             <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
           </article>
           <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Issued</p>
-            <p className="mt-2 text-2xl font-semibold">{filtered.filter((key) => key.status === "issued").length}</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Sẵn sàng</p>
+            <p className="mt-2 text-2xl font-semibold">{availableCount}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Redeemed</p>
-            <p className="mt-2 text-2xl font-semibold">{filtered.filter((key) => key.status === "redeemed").length}</p>
+          <article className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.3em] text-blue-700">Đã cấp</p>
+            <p className="mt-2 text-2xl font-semibold">{issuedCount}</p>
+          </article>
+          <article className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">Đã redeem</p>
+            <p className="mt-2 text-2xl font-semibold">{redeemedCount}</p>
           </article>
         </div>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        {quickFilters.map((filter) => {
+          const active =
+            filter.href === "/admin/license-keys"
+              ? !status
+              : filter.href.includes(`status=${status}`);
+          return (
+            <Link
+              key={filter.href}
+              href={filter.href as any}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                active ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {filter.label}
+            </Link>
+          );
+        })}
+      </div>
+
       <SimpleAdminForm
         endpoint="/api/admin/license-keys"
-        submitLabel="Create key"
-        onSuccessMessage="License key created."
+        submitLabel="Tạo key"
+        onSuccessMessage="Đã tạo license key."
         fields={[
           { name: "licensePlanId", label: "License plan ID", defaultValue: "lp_30d" },
           { name: "orderId", label: "Order ID", defaultValue: "order_demo" },
           { name: "orderItemId", label: "Order item ID", defaultValue: "item_demo" },
-          { name: "code", label: "Key code", defaultValue: "HC-TEST-KEY1" },
-          { name: "expiresAt", label: "Expires at", defaultValue: "" }
+          { name: "code", label: "Mã key", defaultValue: "HC-TEST-KEY1" },
+          { name: "expiresAt", label: "Hết hạn lúc", defaultValue: "" }
         ]}
       />
 
-      <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-3">
+      <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-4">
         <input
           name="q"
           defaultValue={typeof params.q === "string" ? params.q : ""}
-          placeholder="Search key id, customer ref, or last four"
-          className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+          placeholder="Tìm key id, customer ref hoặc 4 số cuối"
+          className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 lg:col-span-2"
         />
         <input
           name="status"
           defaultValue={status}
-          placeholder="Status"
+          placeholder="Trạng thái"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
         <input
@@ -83,6 +140,21 @@ export default async function AdminLicenseKeysPage({
           placeholder="License plan ID"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
+        <div className="flex items-center gap-2 lg:col-span-4">
+          <button
+            type="submit"
+            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white"
+          >
+            Áp dụng bộ lọc
+          </button>
+          <Link
+            href="/admin/license-keys"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Xóa lọc
+          </Link>
+          <span className="text-sm text-slate-500">Đã thu hồi: {revokedCount}</span>
+        </div>
       </form>
 
       <LicenseKeyBulkActions
@@ -96,6 +168,61 @@ export default async function AdminLicenseKeysPage({
           href: `/admin/license-keys/${key.id}`
         }))}
       />
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <table className="min-w-full divide-y divide-slate-200 text-sm">
+          <thead className="bg-slate-50 text-left text-slate-500">
+            <tr>
+              <th className="px-6 py-4 font-medium">Key</th>
+              <th className="px-6 py-4 font-medium">Gói</th>
+              <th className="px-6 py-4 font-medium">Trạng thái</th>
+              <th className="px-6 py-4 font-medium">Binding</th>
+              <th className="px-6 py-4 font-medium">Vòng đời</th>
+              <th className="px-6 py-4 font-medium">Hành động</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {filtered.length === 0 ? (
+              <tr>
+                <td className="px-6 py-10 text-center text-slate-500" colSpan={6}>
+                  Chưa có license key nào phù hợp.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((key) => (
+                <tr key={key.id}>
+                  <td className="px-6 py-4">
+                    <p className="font-medium">****{key.codeLastFour}</p>
+                    <p className="text-xs text-slate-500">{key.id}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="font-medium">{key.licensePlanId}</p>
+                    <p className="text-xs text-slate-500">Order: {key.orderId ?? "không có"}</p>
+                  </td>
+                  <td className="px-6 py-4">{formatStatus(key.status)}</td>
+                  <td className="px-6 py-4">
+                    <p className="font-medium">{key.bindingType ?? "unbound"}</p>
+                    <p className="text-xs text-slate-500">{key.externalUserId ?? key.customerRef ?? "Chưa gắn customer"}</p>
+                  </td>
+                  <td className="px-6 py-4 text-slate-600">
+                    <p>Đã cấp: {formatDate(key.issuedAt)}</p>
+                    <p>Hết hạn: {formatDate(key.expiresAt)}</p>
+                    <p>Đã redeem: {formatDate(key.redeemedAt)}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <Link
+                      href={`/admin/license-keys/${key.id}`}
+                      className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                    >
+                      Mở chi tiết
+                    </Link>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

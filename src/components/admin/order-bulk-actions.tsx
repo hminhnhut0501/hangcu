@@ -37,7 +37,7 @@ export function OrderBulkActions({ orders }: Props) {
 
   async function applyBulk() {
     if (selectedCount === 0) return;
-    if (!window.confirm(`Apply bulk status to ${selectedCount} orders?`)) return;
+    if (!window.confirm(`Áp dụng trạng thái hàng loạt cho ${selectedCount} đơn hàng?`)) return;
 
     setMessage("");
     const csrfResponse = await fetch("/api/admin/csrf", { method: "GET", credentials: "include" });
@@ -62,7 +62,7 @@ export function OrderBulkActions({ orders }: Props) {
       throw new Error(await readErrorMessage(response));
     }
 
-    setMessage(`Updated ${selectedCount} orders.`);
+    setMessage(`Đã cập nhật ${selectedCount} đơn hàng.`);
     setSelected([]);
     router.refresh();
   }
@@ -71,7 +71,7 @@ export function OrderBulkActions({ orders }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <label className="flex items-center gap-2 text-sm">
-          <span className="font-medium text-slate-700">Bulk status</span>
+          <span className="font-medium text-slate-700">Trạng thái hàng loạt</span>
           <select
             value={status}
             onChange={(event) => setStatus(event.target.value)}
@@ -91,21 +91,21 @@ export function OrderBulkActions({ orders }: Props) {
           disabled={selectedCount === 0}
           className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
         >
-          Apply to {selectedCount} orders
+          Áp dụng cho {selectedCount} đơn
         </button>
         <button
           type="button"
           onClick={() => setSelected(orders.map((order) => order.orderNumber))}
           className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
         >
-          Select all
+          Chọn tất cả
         </button>
         <button
           type="button"
           onClick={() => setSelected([])}
           className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
         >
-          Clear
+          Bỏ chọn
         </button>
         <p className="text-sm text-slate-600">{message}</p>
       </div>
@@ -114,11 +114,11 @@ export function OrderBulkActions({ orders }: Props) {
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50 text-left text-slate-500">
             <tr>
-              <th className="px-6 py-4 font-medium">Select</th>
-              <th className="px-6 py-4 font-medium">Order</th>
-              <th className="px-6 py-4 font-medium">Customer</th>
-              <th className="px-6 py-4 font-medium">Statuses</th>
-              <th className="px-6 py-4 font-medium">Action</th>
+              <th className="px-6 py-4 font-medium">Chọn</th>
+              <th className="px-6 py-4 font-medium">Đơn</th>
+              <th className="px-6 py-4 font-medium">Khách</th>
+              <th className="px-6 py-4 font-medium">Trạng thái</th>
+              <th className="px-6 py-4 font-medium">Hành động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -142,7 +142,7 @@ export function OrderBulkActions({ orders }: Props) {
                     href={order.href as any}
                     className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700"
                   >
-                    Open detail
+                    Mở chi tiết
                   </Link>
                 </td>
               </tr>

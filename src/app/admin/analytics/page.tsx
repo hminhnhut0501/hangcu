@@ -1,6 +1,6 @@
 import { getAnalyticsSummary } from "@/modules/analytics/service";
 
-const currencyFormat = new Intl.NumberFormat("en-US", {
+const currencyFormat = new Intl.NumberFormat("vi-VN", {
   style: "currency",
   currency: "USD"
 });
@@ -13,40 +13,40 @@ export default async function AdminAnalyticsPage() {
   const analytics = await getAnalyticsSummary();
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Overview</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Analytics</h2>
+        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Tổng quan</p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Phân tích vận hành</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Revenue, conversion, fulfillment, and operational health across the storefront and license lifecycle.
+          Doanh thu, chuyển đổi, fulfillment và sức khỏe vận hành của storefront và vòng đời license.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Revenue month</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Doanh thu tháng</p>
           <p className="mt-3 text-3xl font-semibold">{currencyFormat.format(analytics.monthRevenueMinor / 100)}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Revenue week</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Doanh thu tuần</p>
           <p className="mt-3 text-3xl font-semibold">{currencyFormat.format(analytics.weekRevenueMinor / 100)}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Conversion</p>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <p className="text-sm text-slate-500">Chuyển đổi</p>
           <p className="mt-3 text-3xl font-semibold">{formatPercent(analytics.conversionRate)}</p>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
           <p className="text-sm text-slate-500">Fulfillment</p>
           <p className="mt-3 text-3xl font-semibold">{formatPercent(analytics.fulfillmentRate)}</p>
         </article>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Daily revenue</h3>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <h3 className="text-lg font-semibold">Doanh thu theo ngày</h3>
           <div className="mt-4 space-y-3">
             {analytics.dailyRevenue.length === 0 ? (
-              <p className="text-sm text-slate-500">No revenue data with timestamps yet.</p>
+              <p className="text-sm text-slate-500">Chưa có dữ liệu doanh thu kèm thời gian.</p>
             ) : (
               analytics.dailyRevenue.map(([day, value]) => (
                 <div key={day} className="grid grid-cols-[92px_1fr_96px] items-center gap-3 text-sm">
@@ -69,32 +69,32 @@ export default async function AdminAnalyticsPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Operational signals</h3>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <h3 className="text-lg font-semibold">Tín hiệu vận hành</h3>
           <ul className="mt-4 space-y-3 text-sm text-slate-600">
-            <li>Today orders: {analytics.todayOrderCount}</li>
-            <li>Week orders: {analytics.weekOrderCount}</li>
-            <li>Month orders: {analytics.monthOrderCount}</li>
-            <li>Average order value: {currencyFormat.format(analytics.averageOrderValueMinor / 100)}</li>
-            <li>Pending orders: {analytics.pendingOrdersCount}</li>
-            <li>Refunded orders: {analytics.refundedOrdersCount}</li>
-            <li>Webhook errors: {analytics.webhookErrorsCount}</li>
-            <li>Audit events: {analytics.auditEventsCount}</li>
+            <li>Đơn hôm nay: {analytics.todayOrderCount}</li>
+            <li>Đơn tuần này: {analytics.weekOrderCount}</li>
+            <li>Đơn tháng này: {analytics.monthOrderCount}</li>
+            <li>Giá trị đơn trung bình: {currencyFormat.format(analytics.averageOrderValueMinor / 100)}</li>
+            <li>Đơn chờ: {analytics.pendingOrdersCount}</li>
+            <li>Đơn hoàn tiền: {analytics.refundedOrdersCount}</li>
+            <li>Lỗi webhook: {analytics.webhookErrorsCount}</li>
+            <li>Sự kiện audit: {analytics.auditEventsCount}</li>
           </ul>
         </article>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">License inventory</h3>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <h3 className="text-lg font-semibold">Tồn kho license</h3>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
-            <li>Available: {analytics.licenseKeyAvailableCount}</li>
-            <li>Issued: {analytics.licenseKeyIssuedCount}</li>
-            <li>Redeemed: {analytics.licenseKeyRedeemedCount}</li>
+            <li>Sẵn sàng: {analytics.licenseKeyAvailableCount}</li>
+            <li>Đã cấp: {analytics.licenseKeyIssuedCount}</li>
+            <li>Đã redeem: {analytics.licenseKeyRedeemedCount}</li>
           </ul>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Recent audit actions</h3>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <h3 className="text-lg font-semibold">Hành động audit gần đây</h3>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
             {Object.entries(analytics.auditByAction)
               .sort((a, b) => b[1] - a[1])
@@ -107,12 +107,12 @@ export default async function AdminAnalyticsPage() {
               ))}
           </ul>
         </article>
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Recommended focus</h3>
+        <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+          <h3 className="text-lg font-semibold">Ưu tiên khuyến nghị</h3>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
-            <li>Prioritize pending orders if conversion dips.</li>
-            <li>Investigate webhook failures if fulfillment stalls.</li>
-            <li>Check license inventory before running marketing pushes.</li>
+            <li>Ưu tiên đơn chờ nếu chuyển đổi giảm.</li>
+            <li>Điều tra webhook lỗi nếu fulfillment chậm.</li>
+            <li>Kiểm tra tồn kho license trước khi chạy marketing lớn.</li>
           </ul>
         </article>
       </div>

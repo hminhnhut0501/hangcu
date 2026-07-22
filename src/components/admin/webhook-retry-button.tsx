@@ -19,7 +19,7 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
   }
 
   async function onRetry() {
-    if (!window.confirm(`Retry webhook ${providerEventId}?`)) {
+    if (!window.confirm(`Thử lại webhook ${providerEventId}?`)) {
       return;
     }
     setStatus("loading");
@@ -48,11 +48,11 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
       }
 
       setStatus("done");
-      setMessage("Webhook retried.");
+      setMessage("Đã retry webhook.");
       router.refresh();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Retry failed.");
+      setMessage(error instanceof Error ? error.message : "Retry thất bại.");
     }
   }
 
@@ -64,9 +64,9 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
         className="text-xs font-medium text-blue-600 disabled:opacity-50"
         disabled={status === "loading"}
       >
-        {status === "loading" ? "Retrying..." : status === "done" ? "Retried" : "Retry"}
+        {status === "loading" ? "Đang thử lại..." : status === "done" ? "Đã thử lại" : "Thử lại"}
       </button>
-      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry failed."}</p> : null}
+      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry thất bại."}</p> : null}
       {status === "done" ? <p className="text-xs text-emerald-600">{message}</p> : null}
     </div>
   );

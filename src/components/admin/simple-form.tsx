@@ -14,7 +14,12 @@ type Field = {
 
 type Props = {
   endpoint: string;
-  fields: Field[];
+  fields?: Field[];
+  sections?: Array<{
+    title: string;
+    description?: string;
+    fields: Field[];
+  }>;
   submitLabel: string;
   onSuccessMessage: string;
   confirmMessage?: string;
@@ -25,10 +30,11 @@ async function readErrorMessage(response: Response) {
   return json?.error?.message ?? json?.message ?? json?.error ?? `Request failed (${response.status})`;
 }
 
-export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessage, confirmMessage }: Props) {
+export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, onSuccessMessage, confirmMessage }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState<string>("");
+  const formSections = sections?.length ? sections : [{ title: "", fields }];
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -83,31 +89,43 @@ export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessag
 
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-2">
-        {fields.map((field) => (
-          <label key={field.name} className="block">
-            <span className="text-sm font-medium text-slate-700">{field.label}</span>
-            {field.type === "textarea" ? (
-              <textarea
-                name={field.name}
-                placeholder={field.placeholder}
-                defaultValue={field.defaultValue}
-                rows={field.rows ?? 5}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm outline-none ring-0 focus:border-blue-500"
-              />
-            ) : (
-              <input
-                name={field.name}
-                type={field.type ?? "text"}
-                placeholder={field.placeholder}
-                defaultValue={field.type === "checkbox" ? undefined : field.defaultValue}
-                defaultChecked={field.type === "checkbox" ? field.defaultValue === "true" || field.defaultValue === "on" : undefined}
-                className={field.type === "checkbox"
-                  ? "mt-2 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  : "mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"}
-              />
-            )}
-          </label>
+      <div className="space-y-6">
+        {formSections.map((section) => (
+          <div key={section.title || "default"} className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            {section.title ? (
+              <div>
+                <h3 className="text-base font-semibold text-slate-950">{section.title}</h3>
+                {section.description ? <p className="mt-1 text-sm text-slate-600">{section.description}</p> : null}
+              </div>
+            ) : null}
+            <div className="grid gap-4 md:grid-cols-2">
+              {section.fields.map((field) => (
+                <label key={field.name} className="block">
+                  <span className="text-sm font-medium text-slate-700">{field.label}</span>
+                  {field.type === "textarea" ? (
+                    <textarea
+                      name={field.name}
+                      placeholder={field.placeholder}
+                      defaultValue={field.defaultValue}
+                      rows={field.rows ?? 5}
+                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm outline-none ring-0 focus:border-blue-500"
+                    />
+                  ) : (
+                    <input
+                      name={field.name}
+                      type={field.type ?? "text"}
+                      placeholder={field.placeholder}
+                      defaultValue={field.type === "checkbox" ? undefined : field.defaultValue}
+                      defaultChecked={field.type === "checkbox" ? field.defaultValue === "true" || field.defaultValue === "on" : undefined}
+                      className={field.type === "checkbox"
+                        ? "mt-2 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        : "mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"}
+                    />
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
       <div className="mt-6 flex items-center gap-3">
@@ -116,10 +134,10 @@ export function SimpleAdminForm({ endpoint, fields, submitLabel, onSuccessMessag
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Saving..." : submitLabel}
+          {status === "loading" ? "Đang lưu..." : submitLabel}
         </button>
         <p className="text-sm text-slate-600">
-          {status === "done" ? message || onSuccessMessage : status === "error" ? message || "Submission failed." : null}
+          {status === "done" ? message || onSuccessMessage : status === "error" ? message || "Gửi biểu mẫu thất bại." : null}
         </p>
       </div>
     </form>

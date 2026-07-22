@@ -4,5 +4,5 @@ export type PaymentIntentDraft = {
   amountMinor: number;
   currency: string;
   customerEmail: string;
-  provider: "manual" | "sandbox" | "stripe" | "paypal";
+  provider: "manual" | "sandbox" | "stripe" | "paypal" | "payos";
 };

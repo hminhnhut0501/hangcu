@@ -1,4 +1,5 @@
 import { ManualPaymentProvider } from "@/providers/payments/manual";
+import { PayOSPaymentProvider } from "@/providers/payments/payos";
 import { SandboxPaymentProvider } from "@/providers/payments/sandbox";
 import { PayPalPaymentProvider } from "@/providers/payments/paypal";
 import { StripePaymentProvider } from "@/providers/payments/stripe";
@@ -10,7 +11,8 @@ const providers: Record<PaymentIntentDraft["provider"], PaymentProvider> = {
   manual: new ManualPaymentProvider(),
   sandbox: new SandboxPaymentProvider(),
   stripe: new StripePaymentProvider(),
-  paypal: new PayPalPaymentProvider()
+  paypal: new PayPalPaymentProvider(),
+  payos: new PayOSPaymentProvider()
 };
 
 export function getPaymentProvider(name: PaymentIntentDraft["provider"]) {

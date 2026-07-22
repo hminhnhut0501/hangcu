@@ -1,16 +1,20 @@
 import Link from "next/link";
+import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
-
-const sampleCheckoutItems = [
-  {
-    name: "Hang Cú Video License - 30 Days",
-    slug: "skyline-after-rain",
-    price: "USD 49.00"
-  }
-];
+import { listFeaturedProducts, listProducts } from "@/modules/products/service";
 
 export default async function CheckoutPage() {
   const locale = await getStorefrontLocale();
+  const featured = await listFeaturedProducts();
+  const allProducts = await listProducts();
+  const options = (featured.length > 0 ? featured : allProducts).map((product) => ({
+    slug: product.slug,
+    name: product.name,
+    description: product.shortDescription,
+    amountMinor: product.amountMinor,
+    currency: product.currency
+  }));
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
@@ -20,56 +24,33 @@ export default async function CheckoutPage() {
               {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-              {locale === "vi" ? "Kiểm tra đơn license" : "Review your license order"}
+              {locale === "vi" ? "Thanh toán license" : "Pay for your license"}
             </h1>
             <p className="mt-4 text-lg leading-8 text-slate-600">
               {locale === "vi"
-                ? "Kiểm tra lại thông tin gói license trước khi thanh toán."
-                : "Review your license package details before paying."}
+                ? "Chọn gói license và phương thức thanh toán, hiện đã có PayOS cho thanh toán chuyển khoản/QR."
+                : "Choose a license plan and payment method. PayOS is now available for bank transfer and QR checkout."}
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="space-y-4">
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Email</span>
-                <input
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"
-                  type="email"
-                  placeholder="you@example.com"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Full name</span>
-                <input
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"
-                  type="text"
-                  placeholder="Optional"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium text-slate-700">Coupon code / Mã giảm giá</span>
-                <input
-                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"
-                  type="text"
-                  placeholder="Optional"
-                />
-              </label>
-            </div>
-          </div>
+
+          <CheckoutPaymentForm locale={locale} options={options} />
         </section>
+
         <aside className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold">
-              {locale === "vi" ? "Tóm tắt đơn hàng" : "Order summary"}
+              {locale === "vi" ? "Gói đang bán" : "Available plans"}
             </h2>
             <ul className="mt-4 space-y-4">
-              {sampleCheckoutItems.map((item) => (
-                <li key={item.slug} className="flex items-center justify-between">
+              {options.map((item) => (
+                <li key={item.slug} className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-slate-500">{item.slug}</p>
+                    <p className="text-sm text-slate-500">{item.description}</p>
                   </div>
-                  <span className="text-sm font-medium">{item.price}</span>
+                  <span className="text-sm font-medium">
+                    {item.currency} {(item.amountMinor / 100).toFixed(2)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -77,14 +58,14 @@ export default async function CheckoutPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-600">
               {locale === "vi"
-                ? "Thanh toán sẽ được kết nối ở phase tiếp theo. Hiện tại đây là khung checkout cho license store."
-                : "Payments will be connected in the next phase. This is the checkout shell for the license store."}
+                ? "Sau khi thanh toán, PayOS sẽ chuyển khách hàng về returnUrl và gửi webhook để hệ thống ghi nhận trạng thái."
+                : "After payment, PayOS will redirect customers back to returnUrl and send a webhook so the system can record the status."}
             </p>
             <Link
               href="/products"
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white"
             >
-              {locale === "vi" ? "Về gói license" : "Back to license plans"}
+              {locale === "vi" ? "Xem lại gói license" : "Review license plans"}
             </Link>
           </div>
         </aside>

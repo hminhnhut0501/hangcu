@@ -49,12 +49,16 @@ function rateLimit(key: string, now: number) {
   state.count += 1;
 }
 
+export function getIntegrationSecret() {
+  return process.env.BOT_WEB_HMAC_SECRET ?? process.env.APP_HMAC_SECRET ?? null;
+}
+
 export function buildIntegrationSignature(input: {
   timestamp: number;
   nonce: string;
   rawBody: string;
 }) {
-  const secret = process.env.APP_HMAC_SECRET;
+  const secret = getIntegrationSecret();
   if (!secret) {
     throw integrationErrors.internalError;
   }
@@ -69,7 +73,7 @@ export function verifyIntegrationRequest(input: {
   rawBody: string;
   rateLimitKey: string;
 }) {
-  const secret = process.env.APP_HMAC_SECRET;
+  const secret = getIntegrationSecret();
   if (!secret) {
     throw integrationErrors.internalError;
   }

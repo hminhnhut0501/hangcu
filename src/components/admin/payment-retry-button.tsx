@@ -19,7 +19,7 @@ export function PaymentRetryButton({ provider, providerEventId }: Props) {
   }
 
   async function onRetry() {
-    if (!window.confirm(`Retry payment event ${providerEventId}?`)) {
+    if (!window.confirm(`Thử lại payment event ${providerEventId}?`)) {
       return;
     }
     setStatus("loading");
@@ -48,11 +48,11 @@ export function PaymentRetryButton({ provider, providerEventId }: Props) {
       }
 
       setStatus("done");
-      setMessage("Payment event retried.");
+      setMessage("Đã retry payment event.");
       router.refresh();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Retry failed.");
+      setMessage(error instanceof Error ? error.message : "Retry thất bại.");
     }
   }
 
@@ -64,9 +64,9 @@ export function PaymentRetryButton({ provider, providerEventId }: Props) {
         className="rounded-full border border-blue-200 px-4 py-2 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50"
         disabled={status === "loading"}
       >
-        {status === "loading" ? "Retrying..." : status === "done" ? "Retried" : "Retry event"}
+        {status === "loading" ? "Đang thử lại..." : status === "done" ? "Đã thử lại" : "Thử lại event"}
       </button>
-      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry failed."}</p> : null}
+      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry thất bại."}</p> : null}
       {status === "done" ? <p className="text-xs text-emerald-600">{message}</p> : null}
     </div>
   );

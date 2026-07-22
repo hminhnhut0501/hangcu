@@ -5,36 +5,37 @@ export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
-          Donate packages
+        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Donate packages</p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý donate packages</h2>
+        <p className="mt-2 max-w-3xl text-sm text-slate-600">
+          Quản lý các gói donate để tạo bonus license và tặng thêm mã 30 ngày hoặc trọn đời.
         </p>
-        <h2 className="mt-3 text-3xl font-semibold tracking-tight">Manage donate packages</h2>
       </div>
       <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
-        submitLabel="Save package"
-        onSuccessMessage="Donate package saved."
+        submitLabel="Lưu gói"
+        onSuccessMessage="Đã lưu donate package."
         fields={[
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "DONATE_NEW" },
-          { name: "name", label: "Name", defaultValue: "New Donate Package" },
+          { name: "name", label: "Tên", defaultValue: "New Donate Package" },
           { name: "slug", label: "Slug", defaultValue: "new-donate-package" },
-          { name: "description", label: "Description", defaultValue: "Description" },
-          { name: "suggestedAmountMinor", label: "Suggested amount minor", type: "number", defaultValue: "2000" },
-          { name: "currency", label: "Currency", defaultValue: "USD" },
-          { name: "status", label: "Status", defaultValue: "active" }
+          { name: "description", label: "Mô tả", defaultValue: "Description" },
+          { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "2000" },
+          { name: "currency", label: "Tiền tệ", defaultValue: "USD" },
+          { name: "status", label: "Trạng thái", defaultValue: "active" }
         ]}
       />
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-[#f8fbff] text-left text-slate-500">
             <tr>
               <th className="px-6 py-4 font-medium">Code</th>
-              <th className="px-6 py-4 font-medium">Name</th>
-              <th className="px-6 py-4 font-medium">Suggested</th>
-              <th className="px-6 py-4 font-medium">Status</th>
+              <th className="px-6 py-4 font-medium">Tên</th>
+              <th className="px-6 py-4 font-medium">Số tiền gợi ý</th>
+              <th className="px-6 py-4 font-medium">Trạng thái</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">

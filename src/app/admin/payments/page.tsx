@@ -7,6 +7,22 @@ const statusStyles: Record<string, string> = {
   failed: "bg-rose-100 text-rose-800"
 };
 
+const quickFilters = [
+  { label: "Tất cả", href: "/admin/payments" },
+  { label: "Lỗi", href: "/admin/payments?status=failed" },
+  { label: "Chờ", href: "/admin/payments?status=pending" },
+  { label: "Đã xử lý", href: "/admin/payments?status=processed" }
+];
+
+function renderStatusBadge(value: string) {
+  const labelMap: Record<string, string> = {
+    pending: "Chờ",
+    processed: "Đã xử lý",
+    failed: "Lỗi"
+  };
+  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{labelMap[value] ?? value}</span>;
+}
+
 export default async function AdminPaymentsPage({
   searchParams
 }: {
@@ -30,39 +46,63 @@ export default async function AdminPaymentsPage({
   });
 
   const failedCount = filtered.filter((event) => event.processingStatus === "failed").length;
+  const pendingCount = filtered.filter((event) => event.processingStatus === "pending").length;
+  const processedCount = filtered.filter((event) => event.processingStatus === "processed").length;
+  const providerCount = new Set(filtered.map((event) => event.provider)).size;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Commerce</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">Payments</h2>
+          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Bán hàng</p>
+          <h2 className="mt-3 text-4xl font-semibold tracking-tight">Thanh toán</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Review payment events, diagnose failures, and retry provider-linked operations from one place.
+            Xem event payment, chẩn đoán lỗi và retry thao tác liên quan cổng thanh toán ở một nơi.
           </p>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Events</p>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Event</p>
             <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Failed</p>
+          <article className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Chờ</p>
+            <p className="mt-2 text-2xl font-semibold">{pendingCount}</p>
+          </article>
+          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Lỗi</p>
             <p className="mt-2 text-2xl font-semibold">{failedCount}</p>
           </article>
-          <article className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Providers</p>
-            <p className="mt-2 text-2xl font-semibold">{new Set(filtered.map((event) => event.provider)).size}</p>
+          <article className="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">Đã xử lý</p>
+            <p className="mt-2 text-2xl font-semibold">{processedCount}</p>
           </article>
         </div>
       </div>
 
-      <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-3">
+      <div className="flex flex-wrap gap-2">
+        {quickFilters.map((filter) => {
+          const active = filter.href === "/admin/payments" ? !status : filter.href.includes(`status=${status}`);
+          return (
+            <Link
+              key={filter.href}
+              href={filter.href as any}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                active ? "bg-slate-950 text-white" : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {filter.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      <form className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] lg:grid-cols-4">
         <input
           name="q"
           defaultValue={typeof params.q === "string" ? params.q : ""}
-          placeholder="Search provider, event ID, or event type"
-          className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+          placeholder="Tìm provider, event ID hoặc event type"
+          className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 lg:col-span-2"
         />
         <input
           name="provider"
@@ -73,53 +113,67 @@ export default async function AdminPaymentsPage({
         <input
           name="status"
           defaultValue={status}
-          placeholder="Processing status"
+          placeholder="Trạng thái xử lý"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
+        <div className="flex items-center gap-2 lg:col-span-4">
+          <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+            Áp dụng bộ lọc
+          </button>
+          <Link
+            href="/admin/payments"
+            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Xóa lọc
+          </Link>
+          <span className="text-sm text-slate-500">Providers: {providerCount}</span>
+        </div>
       </form>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+          <thead className="bg-[#f8fbff] text-left text-slate-500">
             <tr>
               <th className="px-6 py-4 font-medium">Provider</th>
               <th className="px-6 py-4 font-medium">Event</th>
-              <th className="px-6 py-4 font-medium">Order</th>
-              <th className="px-6 py-4 font-medium">Status</th>
+              <th className="px-6 py-4 font-medium">Đơn</th>
+              <th className="px-6 py-4 font-medium">Trạng thái</th>
               <th className="px-6 py-4 font-medium">Signature</th>
-              <th className="px-6 py-4 font-medium">Action</th>
+              <th className="px-6 py-4 font-medium">Hành động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
             {filtered.length === 0 ? (
               <tr>
                 <td className="px-6 py-10 text-center text-slate-500" colSpan={6}>
-                  No matching payment events yet.
+                  Chưa có event payment nào phù hợp. Hãy xóa lọc hoặc đổi provider.
                 </td>
               </tr>
             ) : (
               filtered.map((event) => (
                 <tr key={`${event.provider}-${event.eventId}`}>
-                  <td className="px-6 py-4 font-medium">{event.provider}</td>
+                  <td className="px-6 py-4 font-medium">
+                    <p>{event.provider}</p>
+                    <p className="text-xs text-slate-500">{event.signatureValid ? "signature hợp lệ" : "signature lỗi"}</p>
+                  </td>
                   <td className="px-6 py-4">
                     <p className="font-medium">{event.eventType}</p>
                     <p className="text-xs text-slate-500">{event.eventId}</p>
                   </td>
                   <td className="px-6 py-4">
-                    {event.errorMessage ?? "See detail"}
+                    <p className="font-medium">{event.errorMessage ?? "Xem chi tiết"}</p>
+                    <p className="text-xs text-slate-500">Nhận lúc: {event.receivedAt}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[event.processingStatus] ?? "bg-slate-100 text-slate-700"}`}>
-                      {event.processingStatus}
-                    </span>
+                    {renderStatusBadge(event.processingStatus)}
                   </td>
-                  <td className="px-6 py-4">{event.signatureValid ? "valid" : "invalid"}</td>
+                  <td className="px-6 py-4">{event.signatureValid ? "Hợp lệ" : "Không hợp lệ"}</td>
                   <td className="px-6 py-4">
                     <Link
                       href={`/admin/payments/${event.provider}/${event.eventId}` as any}
                       className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                     >
-                      Open detail
+                      Mở chi tiết
                     </Link>
                   </td>
                 </tr>

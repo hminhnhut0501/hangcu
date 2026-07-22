@@ -29,7 +29,7 @@ export function OrderStatusForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!window.confirm("Apply these order changes?")) {
+    if (!window.confirm("Áp dụng các thay đổi cho đơn này?")) {
       return;
     }
     setStatus("loading");
@@ -62,11 +62,11 @@ export function OrderStatusForm({
 
       if (!response.ok) throw new Error(await readErrorMessage(response));
       setStatus("done");
-      setMessage("Order updated.");
+      setMessage("Đã cập nhật đơn.");
       router.refresh();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Update failed.");
+      setMessage(error instanceof Error ? error.message : "Cập nhật thất bại.");
     }
   }
 
@@ -74,7 +74,7 @@ export function OrderStatusForm({
     <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="grid gap-4 md:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Order status</span>
+          <span className="text-sm font-medium text-slate-700">Trạng thái đơn</span>
           <select
             name="status"
             defaultValue={currentStatus}
@@ -89,7 +89,7 @@ export function OrderStatusForm({
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Payment status</span>
+          <span className="text-sm font-medium text-slate-700">Trạng thái thanh toán</span>
           <select
             name="paymentStatus"
             defaultValue={currentPaymentStatus}
@@ -104,7 +104,7 @@ export function OrderStatusForm({
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-medium text-slate-700">Fulfillment status</span>
+          <span className="text-sm font-medium text-slate-700">Trạng thái fulfillment</span>
           <select
             name="fulfillmentStatus"
             defaultValue={currentFulfillmentStatus}
@@ -118,13 +118,13 @@ export function OrderStatusForm({
           </select>
         </label>
         <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Internal notes</span>
+          <span className="text-sm font-medium text-slate-700">Ghi chú nội bộ</span>
           <textarea
             name="notes"
             rows={4}
             defaultValue={currentNotes ?? ""}
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-            placeholder="Add admin-only notes..."
+            placeholder="Thêm ghi chú chỉ admin xem..."
           />
         </label>
       </div>
@@ -134,10 +134,10 @@ export function OrderStatusForm({
           className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Saving..." : "Save changes"}
+          {status === "loading" ? "Đang lưu..." : "Lưu thay đổi"}
         </button>
         <p className="text-sm text-slate-600">
-          {status === "done" ? message : status === "error" ? message || "Update failed." : null}
+          {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
         </p>
       </div>
     </form>
