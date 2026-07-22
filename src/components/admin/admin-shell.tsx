@@ -86,6 +86,7 @@ const quickActions: QuickAction[] = [
   { label: "Xuất audit", description: "Xem và xuất audit log.", href: "/admin/audit", shortcut: "G A" },
   { label: "Mở webhooks", description: "Theo dõi callback và retry.", href: "/admin/webhooks", shortcut: "G W" },
   { label: "Hardening", description: "Xem trạng thái bảo vệ hệ thống.", href: "/admin/hardening", shortcut: "G H" },
+  { label: "Login test", description: "Set nhanh admin_session.", href: "/admin/login-test", shortcut: "G L" },
   { label: "Đơn chờ payment", description: "Đi tới đơn chưa thanh toán.", href: "/admin/orders?paymentStatus=pending", shortcut: "G 1" },
   { label: "Thanh toán lỗi", description: "Đi tới event payment thất bại.", href: "/admin/payments?status=failed", shortcut: "G 2" },
   { label: "Webhook lỗi", description: "Đi tới event webhook thất bại.", href: "/admin/webhooks?status=failed", shortcut: "G 3" }
@@ -165,6 +166,11 @@ function getRouteInfo(pathname: string): RecentRoute {
       label: "Hardening",
       description: "CSRF, role và lớp an toàn."
     },
+    "/admin/login-test": {
+      href: "/admin/login-test",
+      label: "Login test",
+      description: "Set nhanh admin_session."
+    },
     "/admin/orders?paymentStatus=pending": {
       href: "/admin/orders?paymentStatus=pending",
       label: "Đơn chờ payment",
@@ -201,6 +207,9 @@ function getRouteInfo(pathname: string): RecentRoute {
 
 export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
+  if (pathname === "/admin/login" || pathname === "/admin/login-test") {
+    return <>{children}</>;
+  }
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [sidebarQuery, setSidebarQuery] = useState("");
