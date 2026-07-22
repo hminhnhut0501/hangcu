@@ -201,9 +201,7 @@ function getRouteInfo(pathname: string): RecentRoute {
 
 export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
-  if (pathname === "/admin/login" || pathname === "/admin/login-test") {
-    return <>{children}</>;
-  }
+  const isAuthPage = pathname === "/admin/login" || pathname === "/admin/login-test";
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [sidebarQuery, setSidebarQuery] = useState("");
@@ -274,6 +272,10 @@ export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>
     window.localStorage.setItem("hangcu.admin.recentRoutes", JSON.stringify(nextRecent));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRoute.href]);
+
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950">
