@@ -64,7 +64,23 @@ export function PaymentRetryButton({ provider, providerEventId }: Props) {
         onClick={onRetry}
         variant="outlined"
         size="small"
-        sx={{ borderColor: "#bfdbfe", color: "#1d4ed8", bgcolor: "#fff" }}
+        sx={{
+          borderColor: "#cfe1ff",
+          color: "#1d4ed8",
+          bgcolor: "#fff",
+          borderRadius: 999,
+          px: 1.5,
+          py: 0.7,
+          textTransform: "none",
+          boxShadow: "0 6px 18px rgba(15, 23, 42, 0.03)",
+          transition: "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease",
+          "&:hover": {
+            borderColor: "#93c5fd",
+            bgcolor: "#f8fbff",
+            boxShadow: "0 10px 24px rgba(15, 23, 42, 0.05)",
+            transform: "translateY(-1px)"
+          }
+        }}
         disabled={status === "loading"}
       >
         {status === "loading" ? "Đang thử lại..." : status === "done" ? "Đã thử lại" : "Thử lại event"}

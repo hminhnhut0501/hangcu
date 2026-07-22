@@ -54,6 +54,17 @@ const adminTheme = createTheme({
         }
       }
     },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: 999,
+          fontWeight: 700
+        },
+        sizeSmall: {
+          height: 22
+        }
+      }
+    },
     MuiPaper: {
       styleOverrides: {
         root: {

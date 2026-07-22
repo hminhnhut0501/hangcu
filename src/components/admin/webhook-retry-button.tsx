@@ -64,7 +64,18 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
         onClick={onRetry}
         variant="text"
         size="small"
-        sx={{ color: "#2563eb", px: 0.5, minWidth: 0 }}
+        sx={{
+          color: "#2563eb",
+          px: 1,
+          minWidth: 0,
+          borderRadius: 999,
+          textTransform: "none",
+          transition: "transform 160ms ease, background-color 160ms ease",
+          "&:hover": {
+            backgroundColor: "#eff6ff",
+            transform: "translateY(-1px)"
+          }
+        }}
         disabled={status === "loading"}
       >
         {status === "loading" ? "Đang thử lại..." : status === "done" ? "Đã thử lại" : "Thử lại"}

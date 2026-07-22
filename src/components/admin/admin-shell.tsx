@@ -249,26 +249,26 @@ export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>
 
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-950">
-      <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
+      <div className="grid min-h-screen lg:grid-cols-[248px_1fr]">
         <aside className="border-b border-white/10 bg-[#1d2435] text-slate-100 lg:border-b-0 lg:border-r lg:border-r-white/10">
           <div className="flex h-full flex-col">
-            <div className="border-b border-white/10 px-5 py-5">
+            <div className="border-b border-white/10 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#5cc8ff]">Hang Cú VIP</p>
               <h1 className="mt-1 text-xl font-semibold tracking-tight">Admin</h1>
             </div>
-            <nav className="flex-1 overflow-y-auto px-3 py-4">
-              <div className="space-y-4">
+            <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+              <div className="space-y-3">
                 {filteredNavGroups.length === 0 ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-sm text-slate-300">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-300">
                     Không có mục phù hợp.
                   </div>
                 ) : null}
                 {filteredNavGroups.map((group) => (
                   <div key={group.label}>
-                    <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-slate-400">
+                    <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-400">
                       {group.label}
                     </p>
-                    <div className="mt-1 space-y-1">
+                    <div className="mt-1 space-y-0.5">
                       {group.items.map((item) => {
                         const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                         const ItemIcon = navItemIcons[item.href] ?? Home;
@@ -276,13 +276,13 @@ export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>
                           <Link
                             key={item.href}
                             href={item.href as any}
-                            className={`flex items-center gap-3 rounded-2xl border px-3 py-2.5 transition ${
+                            className={`flex items-center gap-2.5 rounded-2xl border px-3 py-2 transition ${
                               active
                                 ? "border-[#58a6ff]/30 bg-[#2577f4] text-white shadow-[0_10px_30px_rgba(37,119,244,0.25)]"
-                                : "border-transparent text-slate-200 hover:border-white/10 hover:bg-white/8"
+                                : "border-transparent text-slate-200 hover:border-white/10 hover:bg-white/10"
                             }`}
                           >
-                            <ItemIcon className="h-4 w-4 shrink-0" />
+                            <ItemIcon className="h-3.5 w-3.5 shrink-0" />
                             <p className="text-sm font-medium leading-tight">{item.label}</p>
                           </Link>
                         );
@@ -297,7 +297,7 @@ export function AdminShell({ children }: Readonly<{ children: React.ReactNode }>
 
         <div className="flex min-w-0 flex-col">
           <header className="border-b border-slate-200 bg-white shadow-[0_1px_0_rgba(15,23,42,0.04)]">
-            <div className="flex flex-col gap-3 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-2.5 px-6 py-3.5 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[#2577f4]">
                   {breadcrumbs.join(" / ")}
