@@ -1,5 +1,6 @@
 "use client";
 
+import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -76,78 +77,78 @@ export function LicenseKeyActionsForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Trạng thái</span>
-          <select
+    <form onSubmit={handleSubmit}>
+      <Box
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
+          bgcolor: "background.paper",
+          p: 3,
+          boxShadow: "0 10px 35px rgba(15, 23, 42, 0.06)"
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }
+          }}
+        >
+          <TextField
+            select
             name="status"
+            label="Trạng thái"
             defaultValue={currentStatus}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+            slotProps={{ select: { MenuProps: { disableScrollLock: true } } }}
           >
-            <option value="available">available</option>
-            <option value="reserved">reserved</option>
-            <option value="issued">issued</option>
-            <option value="redeemed">redeemed</option>
-            <option value="expired">expired</option>
-            <option value="revoked">revoked</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Hết hạn lúc</span>
-          <input
+            <MenuItem value="available">available</MenuItem>
+            <MenuItem value="reserved">reserved</MenuItem>
+            <MenuItem value="issued">issued</MenuItem>
+            <MenuItem value="redeemed">redeemed</MenuItem>
+            <MenuItem value="expired">expired</MenuItem>
+            <MenuItem value="revoked">revoked</MenuItem>
+          </TextField>
+          <TextField
             name="expiresAt"
+            label="Hết hạn lúc"
             defaultValue={currentExpiresAt ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
             placeholder="2026-07-21T00:00:00.000Z"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Tham chiếu khách</span>
-          <input
+          <TextField
             name="customerRef"
+            label="Tham chiếu khách"
             defaultValue={currentCustomerRef ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
           />
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">ID user ngoài</span>
-          <input
+          <TextField
             name="externalUserId"
+            label="ID user ngoài"
             defaultValue={currentExternalUserId ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
           />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Lý do thu hồi</span>
-          <input
+          <TextField
             name="revokedReason"
+            label="Lý do thu hồi"
             defaultValue={currentRevokedReason ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+            sx={{ gridColumn: { md: "1 / -1" } }}
           />
-        </label>
-        <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Ghi chú nội bộ</span>
-          <textarea
+          <TextField
             name="notes"
-            rows={4}
+            label="Ghi chú nội bộ"
+            multiline
+            minRows={4}
             defaultValue={currentNotes ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
+            sx={{ gridColumn: { md: "1 / -1" } }}
           />
-        </label>
-      </div>
-      <div className="mt-6 flex items-center gap-3">
-        <button
-          type="submit"
-          className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
-          disabled={status === "loading"}
-        >
-          {status === "loading" ? "Đang lưu..." : "Lưu thay đổi vòng đời"}
-        </button>
-        <p className="text-sm text-slate-600">
-          {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
-        </p>
-      </div>
+        </Box>
+        <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Button type="submit" disabled={status === "loading"}>
+            {status === "loading" ? "Đang lưu..." : "Lưu thay đổi vòng đời"}
+          </Button>
+          <Typography variant="body2" color="text.secondary">
+            {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
+          </Typography>
+        </Box>
+      </Box>
     </form>
   );
 }

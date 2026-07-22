@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Box, Button, Card, CardContent, Chip, Typography } from "@mui/material";
 import { getDashboardSummary } from "@/modules/dashboard/service";
 import { getAnalyticsSummary } from "@/modules/analytics/service";
 
@@ -109,19 +110,32 @@ export default async function AdminHomePage() {
 
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {urgencyCards.map((card) => (
-          <Link
+          <Card
             key={card.label}
+            component={Link}
             href={card.href as any}
-            className="rounded-3xl border border-[#d7f2e9] bg-[#f3fff9] p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-[#9ae6c9] hover:bg-white"
+            className="transition hover:-translate-y-0.5"
+            sx={{
+              background: "linear-gradient(180deg, #f3fff9 0%, #ffffff 100%)",
+              borderColor: "#d7f2e9",
+              "&:hover": {
+                borderColor: "#9ae6c9",
+                background: "#ffffff"
+              }
+            }}
           >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700">Cần xử lý</p>
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">Live</span>
-            </div>
-            <p className="mt-3 text-sm font-medium text-slate-700">{card.label}</p>
-            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{card.value}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{card.description}</p>
-          </Link>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: "0.24em", color: "#047857" }}>
+                  Cần xử lý
+                </Typography>
+                <Chip label="Live" size="small" sx={{ fontWeight: 700, bgcolor: "#d1fae5", color: "#047857" }} />
+              </Box>
+              <Typography sx={{ mt: 1.5, fontSize: 14, fontWeight: 600, color: "text.secondary" }}>{card.label}</Typography>
+              <Typography sx={{ mt: 1, fontSize: 30, fontWeight: 700, letterSpacing: -0.5 }}>{card.value}</Typography>
+              <Typography sx={{ mt: 1, fontSize: 14, lineHeight: 1.7, color: "text.secondary" }}>{card.description}</Typography>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -135,14 +149,28 @@ export default async function AdminHomePage() {
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {dailyOps.map((item) => (
-            <Link
+            <Button
               key={item.href}
+              component={Link}
               href={item.href as any}
-              className="rounded-3xl border border-[#dbeafe] bg-[#f8fbff] px-4 py-4 transition hover:border-[#93c5fd] hover:bg-white"
+              variant="outlined"
+              sx={{
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                borderColor: "#dbeafe",
+                bgcolor: "#f8fbff",
+                color: "text.primary",
+                px: 2,
+                py: 1.5,
+                textAlign: "left",
+                "&:hover": { borderColor: "#93c5fd", bgcolor: "#ffffff" }
+              }}
             >
-              <p className="text-sm font-medium text-slate-900">{item.label}</p>
-              <p className="mt-1 text-xs text-slate-500">{item.description}</p>
-            </Link>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-start" }}>
+                <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{item.label}</Typography>
+                <Typography sx={{ fontSize: 12, color: "text.secondary" }}>{item.description}</Typography>
+              </Box>
+            </Button>
           ))}
         </div>
       </div>
@@ -159,14 +187,28 @@ export default async function AdminHomePage() {
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {attentionLinks.map((item) => (
-              <Link
+              <Button
                 key={item.href}
+                component={Link}
                 href={item.href as any}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50"
+                variant="outlined"
+                sx={{
+                  justifyContent: "flex-start",
+                  alignItems: "flex-start",
+                  bgcolor: "#f8fafc",
+                  borderColor: "#e2e8f0",
+                  color: "text.primary",
+                  px: 2,
+                  py: 1.5,
+                  textAlign: "left",
+                  "&:hover": { borderColor: "#93c5fd", bgcolor: "#eff6ff" }
+                }}
               >
-                <p className="text-sm font-medium text-slate-900">{item.label}</p>
-                <p className="mt-1 text-xs text-slate-500">Mở hàng đợi đã lọc</p>
-              </Link>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-start" }}>
+                  <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{item.label}</Typography>
+                  <Typography sx={{ fontSize: 12, color: "text.secondary" }}>Mở hàng đợi đã lọc</Typography>
+                </Box>
+              </Button>
             ))}
           </div>
 

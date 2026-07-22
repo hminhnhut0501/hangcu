@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -71,75 +72,84 @@ export function OrderStatusForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Trạng thái đơn</span>
-          <select
-            name="status"
-            defaultValue={currentStatus}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-          >
-            <option value="pending">pending</option>
-            <option value="paid">paid</option>
-            <option value="processing">processing</option>
-            <option value="fulfilled">fulfilled</option>
-            <option value="failed">failed</option>
-            <option value="cancelled">cancelled</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Trạng thái thanh toán</span>
-          <select
-            name="paymentStatus"
-            defaultValue={currentPaymentStatus}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-          >
-            <option value="unpaid">unpaid</option>
-            <option value="pending">pending</option>
-            <option value="paid">paid</option>
-            <option value="failed">failed</option>
-            <option value="refunded">refunded</option>
-            <option value="partially_refunded">partially_refunded</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Trạng thái fulfillment</span>
-          <select
-            name="fulfillmentStatus"
-            defaultValue={currentFulfillmentStatus}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-          >
-            <option value="unfulfilled">unfulfilled</option>
-            <option value="processing">processing</option>
-            <option value="partially_fulfilled">partially_fulfilled</option>
-            <option value="fulfilled">fulfilled</option>
-            <option value="failed">failed</option>
-          </select>
-        </label>
-        <label className="block md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">Ghi chú nội bộ</span>
-          <textarea
-            name="notes"
-            rows={4}
-            defaultValue={currentNotes ?? ""}
-            className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
-            placeholder="Thêm ghi chú chỉ admin xem..."
-          />
-        </label>
-      </div>
-      <div className="mt-6 flex items-center gap-3">
-        <button
-          type="submit"
-          className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-50"
-          disabled={status === "loading"}
+    <form onSubmit={handleSubmit}>
+      <Box
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
+          bgcolor: "background.paper",
+          p: 3,
+          boxShadow: "0 10px 35px rgba(15, 23, 42, 0.06)"
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }
+          }}
         >
-          {status === "loading" ? "Đang lưu..." : "Lưu thay đổi"}
-        </button>
-        <p className="text-sm text-slate-600">
-          {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
-        </p>
-      </div>
+          <TextField
+            select
+            name="status"
+            label="Trạng thái đơn"
+            defaultValue={currentStatus}
+            slotProps={{ select: { MenuProps: { disableScrollLock: true } } }}
+          >
+            <MenuItem value="pending">pending</MenuItem>
+            <MenuItem value="paid">paid</MenuItem>
+            <MenuItem value="processing">processing</MenuItem>
+            <MenuItem value="fulfilled">fulfilled</MenuItem>
+            <MenuItem value="failed">failed</MenuItem>
+            <MenuItem value="cancelled">cancelled</MenuItem>
+          </TextField>
+          <TextField
+            select
+            name="paymentStatus"
+            label="Trạng thái thanh toán"
+            defaultValue={currentPaymentStatus}
+            slotProps={{ select: { MenuProps: { disableScrollLock: true } } }}
+          >
+            <MenuItem value="unpaid">unpaid</MenuItem>
+            <MenuItem value="pending">pending</MenuItem>
+            <MenuItem value="paid">paid</MenuItem>
+            <MenuItem value="failed">failed</MenuItem>
+            <MenuItem value="refunded">refunded</MenuItem>
+            <MenuItem value="partially_refunded">partially_refunded</MenuItem>
+          </TextField>
+          <TextField
+            select
+            name="fulfillmentStatus"
+            label="Trạng thái fulfillment"
+            defaultValue={currentFulfillmentStatus}
+            slotProps={{ select: { MenuProps: { disableScrollLock: true } } }}
+          >
+            <MenuItem value="unfulfilled">unfulfilled</MenuItem>
+            <MenuItem value="processing">processing</MenuItem>
+            <MenuItem value="partially_fulfilled">partially_fulfilled</MenuItem>
+            <MenuItem value="fulfilled">fulfilled</MenuItem>
+            <MenuItem value="failed">failed</MenuItem>
+          </TextField>
+          <TextField
+            name="notes"
+            label="Ghi chú nội bộ"
+            multiline
+            minRows={4}
+            defaultValue={currentNotes ?? ""}
+            placeholder="Thêm ghi chú chỉ admin xem..."
+            sx={{ gridColumn: { md: "1 / -1" } }}
+          />
+        </Box>
+        <Box sx={{ mt: 3, display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Button type="submit" disabled={status === "loading"}>
+            {status === "loading" ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+          <Typography variant="body2" color="text.secondary">
+            {status === "done" ? message : status === "error" ? message || "Cập nhật thất bại." : null}
+          </Typography>
+        </Box>
+      </Box>
     </form>
   );
 }

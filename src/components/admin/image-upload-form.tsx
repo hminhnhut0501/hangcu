@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
 
 type Props = {
   title: string;
@@ -20,10 +21,13 @@ type Props = {
 export function ImageUploadForm({ title, endpoint, folder, assetKey, description, extraFields = [] }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [url, setUrl] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("loading");
+    setMessage("");
+
     try {
       const formData = new FormData(event.currentTarget);
       const csrfResponse = await fetch("/api/admin/csrf", { method: "GET", credentials: "include" });
@@ -38,13 +42,21 @@ export function ImageUploadForm({ title, endpoint, folder, assetKey, description
         body: formData
       });
 
-      const json = (await response.json()) as { data?: { publicUrl?: string } };
-      if (!response.ok || !json.data?.publicUrl) throw new Error("Upload failed");
+      const json = (await response.json().catch(() => null)) as { data?: { publicUrl?: string }; error?: { code?: string; message?: string } } | null;
+      if (!response.ok) {
+        throw new Error(json?.error?.code ?? json?.error?.message ?? "Upload failed");
+      }
+      if (!json?.data?.publicUrl) {
+        throw new Error("Upload failed");
+      }
 
       setUrl(json.data.publicUrl);
       setStatus("done");
-    } catch {
+      setMessage("Upload completed.");
+    } catch (error) {
+      setUrl(null);
       setStatus("error");
+      setMessage(getAdminErrorMessage(error, "Upload failed."));
     }
   }
 
@@ -78,9 +90,10 @@ export function ImageUploadForm({ title, endpoint, folder, assetKey, description
           <p className="break-all">{url}</p>
         </div>
       ) : null}
-      <p className="mt-3 text-sm text-slate-600">
-        {status === "done" ? "Upload completed." : status === "error" ? "Upload failed." : null}
-      </p>
+      <div className="mt-3 text-sm text-slate-600">
+        {status === "done" ? <AdminBanner tone="success" message={message} /> : null}
+        {status === "error" ? <AdminBanner tone="error" message={message} /> : null}
+      </div>
     </form>
   );
 }

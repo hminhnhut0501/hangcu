@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -58,16 +59,26 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
 
   return (
     <div className="flex flex-col items-start gap-1">
-      <button
+      <Button
         type="button"
         onClick={onRetry}
-        className="text-xs font-medium text-blue-600 disabled:opacity-50"
+        variant="text"
+        size="small"
+        sx={{ color: "#2563eb", px: 0.5, minWidth: 0 }}
         disabled={status === "loading"}
       >
         {status === "loading" ? "Đang thử lại..." : status === "done" ? "Đã thử lại" : "Thử lại"}
-      </button>
-      {status === "error" ? <p className="text-xs text-rose-600">{message || "Retry thất bại."}</p> : null}
-      {status === "done" ? <p className="text-xs text-emerald-600">{message}</p> : null}
+      </Button>
+      {status === "error" ? (
+        <Typography variant="caption" color="error">
+          {message || "Retry thất bại."}
+        </Typography>
+      ) : null}
+      {status === "done" ? (
+        <Typography variant="caption" color="success.main">
+          {message}
+        </Typography>
+      ) : null}
     </div>
   );
 }

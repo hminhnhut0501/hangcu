@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
 
 type Field = {
   name: string;
@@ -27,7 +28,8 @@ type Props = {
 
 async function readErrorMessage(response: Response) {
   const json = await response.json().catch(() => null);
-  return json?.error?.message ?? json?.message ?? json?.error ?? `Request failed (${response.status})`;
+  const error = json?.error?.message ?? json?.message ?? json?.error ?? `Request failed (${response.status})`;
+  return getAdminErrorMessage(error, `Request failed (${response.status})`);
 }
 
 export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, onSuccessMessage, confirmMessage }: Props) {
@@ -83,8 +85,8 @@ export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, 
       router.refresh();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Submission failed.");
-    }
+        setMessage(getAdminErrorMessage(error, "Submission failed."));
+      }
   }
 
   return (
@@ -136,9 +138,10 @@ export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, 
         >
           {status === "loading" ? "Đang lưu..." : submitLabel}
         </button>
-        <p className="text-sm text-slate-600">
-          {status === "done" ? message || onSuccessMessage : status === "error" ? message || "Gửi biểu mẫu thất bại." : null}
-        </p>
+        <div className="text-sm text-slate-600">
+          {status === "done" ? <AdminBanner tone="success" message={message || onSuccessMessage} /> : null}
+          {status === "error" ? <AdminBanner tone="error" message={message || "Gửi biểu mẫu thất bại."} /> : null}
+        </div>
       </div>
     </form>
   );

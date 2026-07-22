@@ -1,5 +1,9 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
 
+export const STORAGE_BUCKET_MISSING_CODE = "STORAGE_BUCKET_MISSING" as const;
+export const STORAGE_BUCKET_MISSING_MESSAGE =
+  "Thiếu bucket Supabase Storage cho upload. Hãy chạy migration tạo bucket hoặc cấu hình SUPABASE_STORAGE_BUCKET đúng tên bucket.";
+
 export function getStorageBucketName() {
   return process.env.SUPABASE_STORAGE_BUCKET ?? "site-assets";
 }
@@ -27,6 +31,19 @@ export function isStorageBucketMissingError(error: unknown) {
     message.includes("chưa tồn tại") ||
     message.toLowerCase().includes("bucket not found") ||
     message.includes("SUPABASE_STORAGE_BUCKET")
+  );
+}
+
+export function storageBucketMissingResponse() {
+  return Response.json(
+    {
+      success: false,
+      error: {
+        code: STORAGE_BUCKET_MISSING_CODE,
+        message: STORAGE_BUCKET_MISSING_MESSAGE
+      }
+    },
+    { status: 503 }
   );
 }
 

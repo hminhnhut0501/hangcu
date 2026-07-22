@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
+import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
 import type { ProductSummary } from "@/modules/products/types";
 import type { SiteAsset } from "@/modules/site-assets/types";
 import type { SiteContentSettings } from "@/modules/site-settings/types";
@@ -16,7 +17,7 @@ async function fetchJson(url: string, init?: RequestInit) {
   const response = await fetch(url, init);
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(json?.error?.message ?? "Request failed");
+    throw new Error(json?.error?.code ?? json?.error?.message ?? "Request failed");
   }
   return json as any;
 }
@@ -173,8 +174,8 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
       await withCsrf("/api/admin/site-assets", { method: "POST", body: formData });
       await refreshData();
       setStatus("Đã tải lên site asset.");
-    } catch {
-      setStatus("Tải lên site asset thất bại.");
+    } catch (error) {
+      setStatus(getAdminErrorMessage(error, "Tải lên site asset thất bại."));
     }
   }
 
@@ -189,8 +190,8 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
         current.map((product) => (product.slug === selectedProductSlug ? { ...product, media: result.data?.media ?? product.media } : product))
       );
       setStatus("Đã tải lên product media.");
-    } catch {
-      setStatus("Tải lên product media thất bại.");
+    } catch (error) {
+      setStatus(getAdminErrorMessage(error, "Tải lên product media thất bại."));
     }
   }
 
@@ -266,6 +267,7 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
 
   return (
     <div className="space-y-8">
+      {status ? <AdminBanner tone={status.includes("thất bại") ? "error" : "info"} message={status} /> : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Asset</p>
