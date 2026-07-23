@@ -1,12 +1,17 @@
 import type { ProductSummary } from "../products/types";
 import { createOrderRepository } from "./repository";
 import type { OrderDraft, OrderSummary } from "./types";
+import { randomUUID } from "crypto";
 
 const orderRepository = createOrderRepository();
 
 function createOrderNumber() {
   const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `ORD-${suffix}`;
+}
+
+function createOrderId() {
+  return typeof randomUUID === "function" ? randomUUID() : `order_${createOrderNumber().toLowerCase()}`;
 }
 
 function calculateTotals(items: OrderDraft["items"]) {
@@ -56,7 +61,7 @@ export async function createOrder(draft: OrderDraft) {
   const totals = calculateTotals(draft.items);
   const orderNumber = createOrderNumber();
   const order: OrderSummary = {
-    id: `order_${orderNumber.toLowerCase()}`,
+    id: createOrderId(),
     orderNumber,
     customerEmail: draft.customerEmail,
     currency: draft.currency,
