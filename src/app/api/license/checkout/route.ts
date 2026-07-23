@@ -35,20 +35,45 @@ function verifyTimestamp(body: Record<string, unknown>) {
 }
 
 export async function POST(request: Request) {
+  let trace: {
+    orderId?: string;
+    telegramUserId?: string;
+    planCode?: string;
+    currency?: string;
+    locale?: string;
+    timestamp?: number;
+  } = {};
   try {
     const rawBody = await readJsonBody(request);
     const body = JSON.parse(rawBody) as Record<string, unknown>;
     const parsed = checkoutRequestSchema.safeParse(body);
     if (!parsed.success) {
+      console.info(
+        `[license-checkout] invalid_request stage=schema orderId=${String(body.orderId ?? body.order_id ?? "n/a")} planCode=${String(body.planCode ?? "n/a")} currency=${String(body.currency ?? "n/a")} secret=${getIntegrationSecret() ? "set" : "missing"}`
+      );
       return jsonResponse({ success: false, error: { code: integrationErrors.invalidRequest.code, message: integrationErrors.invalidRequest.message } }, { status: 400 });
     }
+    trace = {
+      orderId: String(parsed.data.orderId ?? ""),
+      telegramUserId: String(parsed.data.telegramUserId ?? ""),
+      planCode: String(parsed.data.planCode ?? ""),
+      currency: String(parsed.data.currency ?? ""),
+      locale: String(parsed.data.locale ?? ""),
+      timestamp: parsed.data.timestamp
+    };
     verifyTimestamp(body);
     verifyLegacySignature(body, parsed.data.signature);
+    console.info(
+      `[license-checkout] verified orderId=${trace.orderId || "n/a"} telegramUserId=${trace.telegramUserId || "n/a"} planCode=${trace.planCode || "n/a"} currency=${trace.currency || "n/a"} secret=${getIntegrationSecret() ? "set" : "missing"}`
+    );
 
     const data = await createLicenseCheckout(parsed.data);
     return jsonResponse({ success: true, data });
   } catch (error) {
     const apiError = toApiError(error);
+    console.error(
+      `[license-checkout] failed orderId=${trace.orderId || "n/a"} telegramUserId=${trace.telegramUserId || "n/a"} planCode=${trace.planCode || "n/a"} currency=${trace.currency || "n/a"} locale=${trace.locale || "n/a"} secret=${getIntegrationSecret() ? "set" : "missing"} code=${apiError.error.code} message=${apiError.error.message}`
+    );
     return jsonResponse(apiError, { status: statusForErrorCode(apiError.error.code) });
   }
 }

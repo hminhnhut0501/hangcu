@@ -198,6 +198,9 @@ export async function createLicenseCheckout(input: unknown) {
   const seedPlan = findSeedPlanByCode(canonicalPlanCode);
   const plan = dbPlan ?? seedPlan;
   if (!plan) {
+    console.info(
+      `[license-checkout] plan_missing requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} currency=${parsed.currency} dbPlan=${dbPlan ? "yes" : "no"} seedPlan=${seedPlan ? "yes" : "no"}`
+    );
     throw integrationErrors.planNotFound;
   }
 
