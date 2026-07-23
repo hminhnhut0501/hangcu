@@ -114,6 +114,11 @@ export class PayOSPaymentProvider implements PaymentProvider {
       });
 
       const rawText = await response.text().catch(() => "");
+      if (!response.ok || rawText) {
+        console.info(
+          `[payos-checkout] orderNumber=${input.orderNumber} orderId=${input.orderId} orderCode=${orderCode} status=${response.status} body=${rawText || "empty"}`
+        );
+      }
       const json = (rawText ? JSON.parse(rawText) : null) as
         | { code?: string; desc?: string; data?: { checkoutUrl?: string; paymentLinkId?: string } }
         | null;

@@ -227,6 +227,9 @@ export async function createLicenseCheckout(input: unknown) {
     throw integrationErrors.internalError;
   }
   const licenseCode = String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
+  console.info(
+    `[license-checkout] creating_order requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} price=${resolvedPrice} currency=${parsed.currency} locale=${parsed.locale} telegramUserId=${parsed.telegramUserId || "n/a"} customerRef=${parsed.customerRef || "n/a"}`
+  );
 
   const order = await createOrder({
     customerEmail: `${parsed.telegramUserId ?? parsed.customerRef ?? parsed.orderId}@telegram.local`,
@@ -264,10 +267,19 @@ export async function createLicenseCheckout(input: unknown) {
         }
       }
     ]
+  }).catch((error) => {
+    console.error(
+      `[license-checkout] create_order_failed requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} price=${resolvedPrice} currency=${parsed.currency} locale=${parsed.locale} error=${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
   });
+  console.info(`[license-checkout] order_created orderNumber=${order.orderNumber} orderId=${order.id} planCode=${plan.code} price=${resolvedPrice}`);
   const returnUrl = buildReturnUrl({ orderNumber: order.orderNumber, returnUrl: parsed.returnUrl });
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
   const provider = parsed.currency === "VND" ? "payos" : "sandbox";
+  console.info(
+    `[license-checkout] creating_checkout orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} returnUrl=${returnUrl} cancelUrl=${cancelUrl}`
+  );
   const checkout = await createPaymentCheckout({
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -277,8 +289,14 @@ export async function createLicenseCheckout(input: unknown) {
     provider,
     returnUrl,
     cancelUrl
-  }).catch(async () => {
+  }).catch(async (error) => {
+    console.error(
+      `[license-checkout] create_checkout_failed orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} error=${error instanceof Error ? error.message : String(error)}`
+    );
     const fallbackProvider = "sandbox" as const;
+    console.info(
+      `[license-checkout] retry_checkout orderNumber=${order.orderNumber} orderId=${order.id} provider=${fallbackProvider} amount=${order.totalMinor} currency=${order.currency}`
+    );
     return createPaymentCheckout({
       orderId: order.id,
       orderNumber: order.orderNumber,
