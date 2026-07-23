@@ -16,9 +16,10 @@ export async function calculateCheckoutFromSlugs(input: {
     amountMinor: prices[index]?.amountMinor ?? product.amountMinor,
     currency: prices[index]?.currency ?? product.currency
   }));
+  const customerEmail = input.form.email ?? `${input.source ?? "storefront_checkout"}@hangcu.local`;
 
   const draft = buildOrderDraftFromProducts({
-    customerEmail: input.form.email,
+    customerEmail,
     source: input.source ?? "storefront_checkout",
     products: enrichedProducts,
     notes: input.form.notes ?? null

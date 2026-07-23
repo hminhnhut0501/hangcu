@@ -3,8 +3,6 @@ import Link from "next/link";
 import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
-import { listFeaturedProducts, listProducts } from "@/modules/products/service";
-
 type CheckoutSearchParams = {
   order?: string | string[];
   planCode?: string | string[];
@@ -49,17 +47,6 @@ function formatMinorAmount(amountMinor: number | undefined, currency: string | u
   return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
 }
 
-function formatPlanPrice(amountMinor: number, currency: string, locale: "vi" | "en") {
-  const normalizedCurrency = currency.toUpperCase();
-  if (normalizedCurrency === "VND") {
-    return locale === "vi"
-      ? `${new Intl.NumberFormat("vi-VN").format(amountMinor)}đ`
-      : `${new Intl.NumberFormat("en-US").format(amountMinor)} VND`;
-  }
-
-  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
-}
-
 export default async function CheckoutPage({
   searchParams
 }: {
@@ -67,15 +54,6 @@ export default async function CheckoutPage({
 }) {
   const locale = await getStorefrontLocale();
   const resolvedSearchParams = (await searchParams) ?? {};
-  const featured = await listFeaturedProducts();
-  const allProducts = await listProducts();
-  const options = (featured.length > 0 ? featured : allProducts).map((product) => ({
-    slug: product.slug,
-    name: product.name,
-    description: product.shortDescription,
-    amountMinor: product.amountMinor,
-    currency: product.currency
-  }));
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
@@ -141,39 +119,31 @@ export default async function CheckoutPage({
             </div>
           ) : null}
 
-          <CheckoutPaymentForm locale={locale} options={options} />
+          <CheckoutPaymentForm
+            locale={locale}
+            options={[]}
+            orderSummary={{
+              orderNumber,
+              checkoutId,
+              planLabel: summaryPlan,
+              amountLabel: summaryAmount,
+              customerRef: resolvedCustomerRef
+            }}
+          />
         </section>
 
         <aside className="space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold">
-              {locale === "vi" ? "Gói đang bán" : "Available plans"}
-            </h2>
-            <ul className="mt-4 space-y-4">
-              {options.map((item) => (
-                <li key={item.slug} className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-slate-500">{item.description}</p>
-                  </div>
-                  <span className="text-sm font-medium">
-                    {formatPlanPrice(item.amountMinor, item.currency, locale)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-600">
               {locale === "vi"
-                ? "Sau khi thanh toán, PayOS sẽ chuyển khách hàng về returnUrl và gửi webhook để hệ thống ghi nhận trạng thái."
-                : "After payment, PayOS will redirect customers back to returnUrl and send a webhook so the system can record the status."}
+                ? "Sau khi thanh toán, web sẽ ghi nhận đơn, trạng thái và mã lic để bot cấp quyền tự động."
+                : "After payment, the web records the order, status, and license code so the bot can fulfill it automatically."}
             </p>
             <Link
-              href="/products"
+              href="/orders"
               className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white"
             >
-              {locale === "vi" ? "Xem lại gói license" : "Review license plans"}
+              {locale === "vi" ? "Xem đơn hàng" : "View orders"}
             </Link>
           </div>
         </aside>
