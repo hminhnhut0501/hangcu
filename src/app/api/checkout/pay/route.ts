@@ -112,6 +112,22 @@ export async function POST(request: Request) {
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
   const returnUrl = `${appBaseUrl}/checkout?status=success&order=${encodeURIComponent(order.orderNumber)}`;
   const cancelUrl = `${appBaseUrl}/checkout?status=cancelled&order=${encodeURIComponent(order.orderNumber)}`;
+
+  const existingCheckoutUrl = String(order.metadata?.paymentCheckoutUrl ?? "").trim();
+  const existingPayosOrderCode = String(order.metadata?.payosOrderCode ?? "").trim();
+  if (parsed.data.provider === "payos" && existingCheckoutUrl && existingPayosOrderCode) {
+    return Response.json({
+      success: true,
+      data: {
+        orderNumber: order.orderNumber,
+        checkoutUrl: existingCheckoutUrl,
+        provider: parsed.data.provider,
+        providerCheckoutId: String(order.metadata?.providerCheckoutId ?? ""),
+        orderNumberFromBot: parsed.data.orderNumber ?? null
+      }
+    });
+  }
+
   const checkout = await createPaymentCheckout({
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -126,10 +142,10 @@ export async function POST(request: Request) {
   await updateOrder(order.orderNumber, {
     metadata: {
       ...order.metadata,
-      payosOrderCode: checkout.providerPaymentId ?? null,
       paymentProvider: parsed.data.provider,
       paymentCheckoutUrl: checkout.checkoutUrl,
-      providerCheckoutId: checkout.providerCheckoutId
+      providerCheckoutId: checkout.providerCheckoutId,
+      payosOrderCode: checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null
     }
   });
 
