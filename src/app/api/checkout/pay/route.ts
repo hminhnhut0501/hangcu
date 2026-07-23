@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getProductBySlug } from "@/modules/products/service";
 import { getCurrentPriceForProduct } from "@/modules/prices/service";
 import { createOrder } from "@/modules/orders/service";
+import { getOrderByOrderNumber } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
 
@@ -27,10 +28,17 @@ export async function POST(request: Request) {
 
   let order;
   if (parsed.data.orderNumber || parsed.data.planCode || parsed.data.amountMinor != null || parsed.data.checkoutId) {
-    const amountMinor = parsed.data.amountMinor ?? 0;
+    const existingOrder = parsed.data.orderNumber ? await getOrderByOrderNumber(parsed.data.orderNumber) : null;
+    const amountMinor = parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0;
     const currency = parsed.data.currency ?? "VND";
     const planName = parsed.data.plan ?? parsed.data.planCode ?? "Bot checkout";
     const orderNumber = parsed.data.orderNumber ?? parsed.data.checkoutId ?? `BOT-${Date.now()}`;
+    if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
+      return Response.json({
+        success: false,
+        error: { code: "INVALID_REQUEST", message: "Request is invalid." }
+      }, { status: 400 });
+    }
     order = await createOrder({
       customerEmail: `${parsed.data.customerRef ?? orderNumber}@hangcu.local`,
       currency,
