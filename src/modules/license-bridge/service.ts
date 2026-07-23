@@ -45,13 +45,20 @@ function buildLicenseCode() {
   return `LIC-${part()}-${part()}-${part()}`;
 }
 
-function resolveCheckoutPlanCode(planCode: string) {
+export function resolveCheckoutPlanCode(planCode: string) {
   const normalized = String(planCode || "").trim().toUpperCase();
   const aliases: Record<string, string> = {
     FULL_1M: "HCV_30D",
     FULL_LIFE: "HCV_LIFETIME"
   };
-  return aliases[normalized] ?? normalized;
+  if (aliases[normalized]) {
+    return aliases[normalized];
+  }
+  const groupDurationMatch = normalized.match(/^G\d+:(1M|LIFE)$/);
+  if (groupDurationMatch) {
+    return groupDurationMatch[1] === "1M" ? "HCV_30D" : "HCV_LIFETIME";
+  }
+  return normalized;
 }
 
 function findSeedPlanByCode(code: string) {

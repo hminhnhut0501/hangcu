@@ -4,6 +4,7 @@ import { createOrder, updateOrder } from "@/modules/orders/service";
 import { getLicensePlanByCode } from "@/modules/license-plans/service";
 import { POST as payosWebhookPost } from "@/app/api/payments/payos/webhook/route";
 import { PayOSPaymentProvider } from "@/providers/payments/payos";
+import { resolveCheckoutPlanCode } from "@/modules/license-bridge/service";
 
 describe("integration api service", () => {
   beforeEach(() => {
@@ -24,6 +25,12 @@ describe("integration api service", () => {
     } finally {
       process.env.APP_HMAC_SECRET = previousSecret;
     }
+  });
+
+  it("maps bot group plan tokens to canonical checkout plan codes", () => {
+    expect(resolveCheckoutPlanCode("G1:1M")).toBe("HCV_30D");
+    expect(resolveCheckoutPlanCode("G4:LIFE")).toBe("HCV_LIFETIME");
+    expect(resolveCheckoutPlanCode("FULL_1M")).toBe("HCV_30D");
   });
 
   it("creates checkout payloads with entitlement metadata", async () => {
