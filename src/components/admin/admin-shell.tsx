@@ -5,20 +5,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Activity,
-  Bot,
-  CalendarClock,
   ChevronRight,
   CircleDollarSign,
+  ClipboardList,
+  FileText,
   LayoutDashboard,
   ListChecks,
-  Megaphone,
-  Repeat,
-  Settings2,
   ShoppingCart,
-  Shield,
+  ShieldAlert,
   ShieldCheck,
+  Sparkles,
   Ticket,
-  Users
+  Upload,
+  Webhook,
+  FileCog
 } from "lucide-react";
 
 type AdminPanelProps = {
@@ -65,27 +65,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
       items: [
         { label: "Tổng quan", href: "/admin" },
         { label: "Thống kê", href: "/admin/analytics" },
+        { label: "Audit", href: "/admin/audit" },
         { label: "Đơn hàng", href: "/admin/orders" },
         { label: "Thanh toán", href: "/admin/payments" },
-        { label: "Khách hàng", href: "/admin/customers" },
-        { label: "Nhật ký", href: "/admin/audit" },
-        { label: "Campaign", href: "/admin/campaigns" },
-        { label: "Đăng channel", href: "/admin/channels" },
-        { label: "Gia hạn", href: "/admin/renewals" }
+        { label: "License plans", href: "/admin/license-plans" },
+        { label: "License keys", href: "/admin/license-keys" }
       ]
     },
     {
       title: "CẤU HÌNH",
       items: [
-        { label: "Khu vực hỗ trợ", href: "/admin/support" },
-        { label: "Cấu hình bot", href: "/admin/bot-config" },
-        { label: "Auto payment", href: "/admin/auto-payment" },
-        { label: "UI Bot tiếng Việt", href: "/admin/ui-bot-vi" },
-        { label: "UI Bot tiếng Anh", href: "/admin/ui-bot-en" },
-        { label: "Phản hồi & cảnh báo", href: "/admin/alerts" },
-        { label: "Special Group", href: "/admin/special-group" },
-        { label: "Menu Bot", href: "/admin/menu-bot" },
-        { label: "Coupon", href: "/admin/coupons" }
+        { label: "Donate packages", href: "/admin/donate-packages" },
+        { label: "Coupons", href: "/admin/coupons" },
+        { label: "Media", href: "/admin/media" },
+        { label: "Site settings", href: "/admin/site-settings" },
+        { label: "Webhooks", href: "/admin/webhooks" },
+        { label: "Compliance", href: "/admin/compliance" },
+        { label: "Hardening", href: "/admin/hardening" }
       ]
     }
   ];
@@ -93,22 +89,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const iconMap: Record<string, NavIcon> = {
     "/admin": LayoutDashboard,
     "/admin/analytics": Activity,
+    "/admin/audit": ListChecks,
     "/admin/orders": ShoppingCart,
     "/admin/payments": CircleDollarSign,
-    "/admin/customers": Users,
-    "/admin/audit": ListChecks,
-    "/admin/campaigns": Megaphone,
-    "/admin/channels": Megaphone,
-    "/admin/renewals": Repeat,
-    "/admin/support": Shield,
-    "/admin/bot-config": Bot,
-    "/admin/auto-payment": CalendarClock,
-    "/admin/ui-bot-vi": Settings2,
-    "/admin/ui-bot-en": Settings2,
-    "/admin/alerts": Settings2,
-    "/admin/special-group": ShieldCheck,
-    "/admin/menu-bot": Settings2,
-    "/admin/coupons": Ticket
+    "/admin/license-plans": FileText,
+    "/admin/license-keys": ClipboardList,
+    "/admin/donate-packages": Sparkles,
+    "/admin/coupons": Ticket,
+    "/admin/media": Upload,
+    "/admin/site-settings": FileCog,
+    "/admin/webhooks": Webhook,
+    "/admin/compliance": ShieldCheck,
+    "/admin/hardening": ShieldAlert
   };
 
   const sidebarWidth = collapsed ? "lg:grid-cols-[88px_1fr]" : "lg:grid-cols-[280px_1fr]";
@@ -119,7 +111,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#f6f8fc] text-slate-950">
-      <div className={`mx-auto grid min-h-screen max-w-[1600px] transition-all duration-200 ${sidebarWidth}`}>
+      <div className={`grid min-h-screen transition-all duration-200 ${sidebarWidth}`}>
         <aside className="border-b border-slate-200 bg-[#0f172a] text-slate-100 lg:border-b-0 lg:border-r lg:border-slate-200">
           <div className="sticky top-0 flex h-full flex-col px-4 py-5">
             <div className={`rounded-3xl border border-white/10 bg-white/5 px-4 py-4 ${collapsed ? "lg:px-3" : ""}`}>
