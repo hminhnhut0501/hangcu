@@ -3,6 +3,7 @@ import { hmacSha256 } from "@/lib/crypto/hash";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { getAdminMutationContext } from "@/modules/admin-auth/context";
 import { createOrder, getOrderByOrderNumber, listAllOrders, updateOrder } from "@/modules/orders/service";
+import { licensePlansSeed } from "@/lib/license/mock-data";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { getLicensePlanByCode, getLicensePlanById } from "@/modules/license-plans/service";
 import {
@@ -51,6 +52,11 @@ function resolveCheckoutPlanCode(planCode: string) {
     FULL_LIFE: "HCV_LIFETIME"
   };
   return aliases[normalized] ?? normalized;
+}
+
+function findSeedPlanByCode(code: string) {
+  const normalized = String(code || "").trim().toUpperCase();
+  return licensePlansSeed.find((plan) => plan.code === normalized) ?? null;
 }
 
 function buildBotActivationUrl(licenseCode: string) {
@@ -188,13 +194,26 @@ export async function createLicenseCheckout(input: unknown) {
 
   const requestedPlanCode = String(parsed.planCode || "").trim().toUpperCase();
   const canonicalPlanCode = resolveCheckoutPlanCode(requestedPlanCode);
-  const plan = await getLicensePlanByCode(canonicalPlanCode);
+  const dbPlan = await getLicensePlanByCode(canonicalPlanCode);
+  const seedPlan = findSeedPlanByCode(canonicalPlanCode);
+  const plan = dbPlan ?? seedPlan;
   if (!plan) {
     throw integrationErrors.planNotFound;
   }
 
   const price = plan.currencyPrices[parsed.currency];
   if (price == null) {
+    console.info(
+      `[license-checkout] price_missing requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} currency=${parsed.currency} source=${dbPlan ? "db" : "seed"}`
+    );
+    const fallbackPrice = seedPlan?.currencyPrices?.[parsed.currency];
+    if (fallbackPrice == null) {
+      throw integrationErrors.internalError;
+    }
+    plan.currencyPrices[parsed.currency] = fallbackPrice;
+  }
+  const resolvedPrice = plan.currencyPrices[parsed.currency];
+  if (resolvedPrice == null) {
     throw integrationErrors.internalError;
   }
   const licenseCode = String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
@@ -223,8 +242,8 @@ export async function createLicenseCheckout(input: unknown) {
         sku: plan.code,
         productName: parsed.locale === "vi" ? plan.nameVi : plan.nameEn,
         quantity: 1,
-        unitAmountMinor: price,
-        totalAmountMinor: price,
+        unitAmountMinor: resolvedPrice,
+        totalAmountMinor: resolvedPrice,
         productSnapshot: {
           name: parsed.locale === "vi" ? plan.nameVi : plan.nameEn,
           slug: plan.slug,
