@@ -54,6 +54,7 @@ export function getIntegrationSecret() {
     process.env.BOT_WEB_HMAC_SECRET ??
     process.env.WEB_PAYMENT_SECRET ??
     process.env.LICENSE_WEBHOOK_SECRET ??
+    process.env.BOT_API_SECRET ??
     process.env.APP_HMAC_SECRET ??
     null
   );
