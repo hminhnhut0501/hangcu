@@ -64,8 +64,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
       title: "VẬN HÀNH",
       items: [
         { label: "Tổng quan", href: "/admin" },
-        { label: "Thống kê", href: "/admin/analytics" },
-        { label: "Audit", href: "/admin/audit" },
         { label: "Đơn hàng", href: "/admin/orders" },
         { label: "Thanh toán", href: "/admin/payments" },
         { label: "License plans", href: "/admin/license-plans" },
@@ -80,6 +78,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
         { label: "Media", href: "/admin/media" },
         { label: "Site settings", href: "/admin/site-settings" },
         { label: "Webhooks", href: "/admin/webhooks" },
+        { label: "Audit", href: "/admin/audit" },
+        { label: "Thống kê", href: "/admin/analytics" },
         { label: "Compliance", href: "/admin/compliance" },
         { label: "Hardening", href: "/admin/hardening" }
       ]
