@@ -148,7 +148,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                       return (
                         <Link
                           key={item.href}
-                          href={item.href}
+                          href={item.href as any}
                           title={collapsed ? item.label : undefined}
                           aria-label={item.label}
                           className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition ${
