@@ -44,6 +44,15 @@ function buildLicenseCode() {
   return `LIC-${part()}-${part()}-${part()}`;
 }
 
+function resolveCheckoutPlanCode(planCode: string) {
+  const normalized = String(planCode || "").trim().toUpperCase();
+  const aliases: Record<string, string> = {
+    FULL_1M: "HCV_30D",
+    FULL_LIFE: "HCV_LIFETIME"
+  };
+  return aliases[normalized] ?? normalized;
+}
+
 function buildBotActivationUrl(licenseCode: string) {
   const normalized = String(licenseCode || "").trim().toUpperCase();
   const baseUrl = process.env.BOT_NEW_URL?.replace(/\/$/, "") || "";
@@ -177,7 +186,9 @@ export async function createLicenseCheckout(input: unknown) {
   const parsed = licenseCheckoutSchema.parse(input);
   verifyLegacyCheckoutSignature(parsed);
 
-  const plan = await getLicensePlanByCode(parsed.planCode);
+  const requestedPlanCode = String(parsed.planCode || "").trim().toUpperCase();
+  const canonicalPlanCode = resolveCheckoutPlanCode(requestedPlanCode);
+  const plan = await getLicensePlanByCode(canonicalPlanCode);
   if (!plan) {
     throw integrationErrors.planNotFound;
   }
@@ -196,7 +207,8 @@ export async function createLicenseCheckout(input: unknown) {
     metadata: {
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
-      planCode: parsed.planCode,
+      planCode: plan.code,
+      requestedPlanCode,
       locale: parsed.locale,
       currency: parsed.currency,
       activationCode: licenseCode,
