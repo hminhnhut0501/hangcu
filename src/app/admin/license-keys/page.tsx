@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import Link from "next/link";
 import { LicenseKeyBulkActions } from "@/components/admin/license-key-bulk-actions";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
@@ -65,20 +66,16 @@ export default async function AdminLicenseKeysPage({
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">License lifecycle</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Quản lý license keys</h2>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Xem các key đã cấp, theo dõi trạng thái redeem và thực hiện thao tác lifecycle cho admin.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard label="Keys" value={filtered.length} />
-          <SummaryCard label="Sẵn sàng" value={availableCount} tone="default" />
-          <SummaryCard label="Đã cấp" value={issuedCount} tone="blue" />
-          <SummaryCard label="Đã redeem" value={redeemedCount} tone="emerald" />
-        </div>
+      <AdminPageHeader
+        eyebrow="License lifecycle"
+        title="Quản lý license keys"
+        description="Xem các key đã cấp, theo dõi trạng thái redeem và thực hiện thao tác lifecycle cho admin."
+      />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard label="Keys" value={filtered.length} />
+        <SummaryCard label="Sẵn sàng" value={availableCount} tone="default" />
+        <SummaryCard label="Đã cấp" value={issuedCount} tone="blue" />
+        <SummaryCard label="Đã redeem" value={redeemedCount} tone="emerald" />
       </div>
 
       <ModeSwitchHeader

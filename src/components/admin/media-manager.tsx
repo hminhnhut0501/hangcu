@@ -270,22 +270,22 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
       {status ? <AdminBanner tone={status.includes("thất bại") ? "error" : "info"} message={status} /> : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Asset</p>
+          <p className="text-xs font-medium text-slate-400">Asset</p>
           <p className="mt-2 text-3xl font-semibold">{assetStats.total}</p>
           <p className="mt-1 text-sm text-slate-600">Tất cả site asset đã tải lên</p>
         </article>
         <article className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.3em] text-blue-700">Hero</p>
+          <p className="text-xs font-medium text-blue-700">Hero</p>
           <p className="mt-2 text-3xl font-semibold">{assetStats.hero}</p>
           <p className="mt-1 text-sm text-slate-600">Ảnh sẵn sàng cho hero</p>
         </article>
         <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.3em] text-emerald-700">Media sản phẩm</p>
+          <p className="text-xs font-medium text-emerald-700">Media sản phẩm</p>
           <p className="mt-2 text-3xl font-semibold">{productMediaStats.total}</p>
           <p className="mt-1 text-sm text-slate-600">Số media của sản phẩm đang chọn</p>
         </article>
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Trạng thái</p>
+          <p className="text-xs font-medium text-slate-400">Trạng thái</p>
           <p className="mt-2 text-sm font-medium text-slate-950">Thư viện asset và gallery sản phẩm</p>
           <p className="mt-1 text-sm text-slate-600">Gán nhanh, sửa nhanh, đổi thứ tự và xóa</p>
         </article>
@@ -295,7 +295,7 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Chỉnh hero</p>
+              <p className="text-xs font-semibold text-blue-600">Chỉnh hero</p>
               <h3 className="mt-2 text-xl font-semibold">Xem trước trực tiếp</h3>
             </div>
             <p className="text-xs text-slate-500">Chọn asset từ thư viện hoặc tải ảnh mới lên</p>
@@ -347,7 +347,7 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Site asset</p>
+              <p className="text-xs font-semibold text-blue-600">Site asset</p>
               <h3 className="mt-2 text-xl font-semibold">Thư viện và bộ chọn</h3>
             </div>
             <p className="text-xs text-slate-500">Lọc, xem và gán tại một chỗ</p>
@@ -437,7 +437,7 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">Tải lên</p>
+              <p className="text-xs font-semibold text-emerald-600">Tải lên</p>
               <h3 className="mt-2 text-xl font-semibold">Tải site asset</h3>
             </div>
             <p className="text-xs text-slate-500">Tải một lần, dùng ở nhiều nơi</p>
@@ -482,10 +482,10 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">Media sản phẩm</p>
+              <p className="text-xs font-semibold text-emerald-600">Media sản phẩm</p>
               <h3 className="mt-2 text-xl font-semibold">Gallery và trình chỉnh</h3>
             </div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Preview / detail / lifestyle</p>
+            <p className="text-xs font-medium text-slate-400">Preview / detail / lifestyle</p>
           </div>
           <div className="mt-4 grid gap-3">
             <input
@@ -595,7 +595,7 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                           <p className="text-sm font-medium">{media.type}</p>
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
                               #{media.sortOrder}
                             </span>
                           </div>

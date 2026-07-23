@@ -57,7 +57,7 @@ export default async function AdminOrderDetailPage({
     <section className="space-y-8">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-3">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Chi tiết đơn</p>
+          <p className="text-sm font-medium text-blue-600">Chi tiết đơn</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">{order.orderNumber}</h2>
           <p className="text-sm text-slate-600">{order.customerEmail}</p>
           <div className="flex flex-wrap gap-2">
@@ -70,7 +70,7 @@ export default async function AdminOrderDetailPage({
           </p>
         </div>
         <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Tổng đơn</p>
+          <p className="text-xs font-medium text-slate-400">Tổng đơn</p>
           <p className="mt-2 text-2xl font-semibold">{formatMoney(order.totalMinor, order.currency)}</p>
           <p className="mt-1 text-sm text-slate-500">Số sản phẩm: {order.items.length}</p>
         </div>

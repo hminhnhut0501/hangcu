@@ -44,7 +44,7 @@ export default async function AdminLicenseKeyDetailPage({
     <section className="space-y-8">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-3">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Chi tiết license</p>
+          <p className="text-sm font-medium text-blue-600">Chi tiết license</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">****{key.codeLastFour}</h2>
           <p className="text-sm text-slate-600">{key.id}</p>
           <div className="flex flex-wrap gap-2">
@@ -55,7 +55,7 @@ export default async function AdminLicenseKeyDetailPage({
           </div>
         </div>
         <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Thao tác nhanh</p>
+          <p className="text-xs font-medium text-slate-400">Thao tác nhanh</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href={`/admin/license-keys?mode=${isAdvanced ? "advanced" : "basic"}`}

@@ -7,7 +7,7 @@ export default async function AdminWebhooksPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Webhooks</p>
+        <p className="text-sm font-medium text-blue-600">Webhooks</p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Giám sát webhook</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Theo dõi event từ cổng thanh toán, kiểm tra chữ ký và retry khi cần.

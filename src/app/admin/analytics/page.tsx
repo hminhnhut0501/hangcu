@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { getAnalyticsSummary } from "@/modules/analytics/service";
 
 const currencyFormat = new Intl.NumberFormat("vi-VN", {
@@ -14,13 +15,11 @@ export default async function AdminAnalyticsPage() {
 
   return (
     <section className="space-y-8">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Tổng quan</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Phân tích vận hành</h2>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Doanh thu, chuyển đổi, fulfillment và sức khỏe vận hành của storefront và vòng đời license.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Tổng quan"
+        title="Phân tích vận hành"
+        description="Doanh thu, chuyển đổi, fulfillment và sức khỏe vận hành của storefront và vòng đời license."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">

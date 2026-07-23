@@ -6,7 +6,7 @@ export default async function AdminCouponsPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Coupons</p>
+        <p className="text-sm font-medium text-blue-600">Coupons</p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý coupons</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Theo dõi mã giảm giá, kiểu giảm, giá trị và số lượt redeem còn lại.

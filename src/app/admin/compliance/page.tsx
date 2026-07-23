@@ -66,7 +66,7 @@ export default function AdminCompliancePage() {
     <section className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Compliance</p>
+          <p className="text-sm font-medium text-blue-600">Compliance</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">Sẵn sàng cho merchant</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             Dùng trang này như checklist trước khi gửi cho PayPal, Lemon Squeezy hoặc bất kỳ bên duyệt nào cần câu chuyện
@@ -105,7 +105,7 @@ export default function AdminCompliancePage() {
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Hồ sơ chứng minh</p>
+              <p className="text-xs font-semibold text-blue-600">Hồ sơ chứng minh</p>
               <h3 className="mt-2 text-xl font-semibold">Cần chuẩn bị gì để duyệt</h3>
             </div>
             <p className="text-xs text-slate-500">Chuẩn bị trước khi nộp hồ sơ</p>
@@ -122,7 +122,7 @@ export default function AdminCompliancePage() {
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Ghi chú nhà cung cấp</p>
+              <p className="text-xs font-semibold text-blue-600">Ghi chú nhà cung cấp</p>
               <h3 className="mt-2 text-xl font-semibold">Bên duyệt thường cần gì</h3>
             </div>
             <p className="text-xs text-slate-500">Đồng bộ nội dung trước khi gửi</p>
@@ -130,7 +130,7 @@ export default function AdminCompliancePage() {
           <div className="mt-5 space-y-4">
             {providerReadiness.map((provider) => (
               <div key={provider.provider} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <h4 className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">{provider.provider}</h4>
+                <h4 className="text-sm font-semibold text-slate-500">{provider.provider}</h4>
                 <ul className="mt-3 space-y-2 text-sm text-slate-600">
                   {provider.points.map((point) => (
                     <li key={point} className="rounded-xl border border-white/60 bg-white px-3 py-2 shadow-sm">

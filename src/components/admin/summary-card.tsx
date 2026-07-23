@@ -16,7 +16,7 @@ const toneStyles: Record<NonNullable<SummaryCardProps["tone"]>, string> = {
 export function SummaryCard({ label, value, tone = "default", className = "" }: SummaryCardProps) {
   return (
     <article className={`rounded-2xl border px-4 py-3 shadow-sm ${toneStyles[tone]} ${className}`.trim()}>
-      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{label}</p>
+      <p className="text-xs font-medium text-slate-400">{label}</p>
       <p className="mt-2 text-2xl font-semibold">{value}</p>
     </article>
   );

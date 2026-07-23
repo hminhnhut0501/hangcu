@@ -7,7 +7,7 @@ export default async function AdminDonatePackagesPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Donate packages</p>
+        <p className="text-sm font-medium text-blue-600">Donate packages</p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý donate packages</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Quản lý các gói donate để tạo bonus license và tặng thêm mã 30 ngày hoặc trọn đời.

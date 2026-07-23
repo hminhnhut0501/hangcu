@@ -55,7 +55,7 @@ export default function AdminHardeningPage() {
     <section className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Hardening</p>
+          <p className="text-sm font-medium text-blue-600">Hardening</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">Tư thế bảo mật và lớp an toàn</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             Trang này tóm tắt các lớp bảo vệ phía server cho admin panel và nhắc lại những bước kiểm tra còn lại trước khi
@@ -88,7 +88,7 @@ export default function AdminHardeningPage() {
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Checklist hardening</p>
+              <p className="text-xs font-semibold text-blue-600">Checklist hardening</p>
               <h3 className="mt-2 text-xl font-semibold">Trạng thái kiểm soát hiện tại</h3>
             </div>
             <p className="text-xs text-slate-500">Checklist sẵn sàng production</p>
@@ -96,7 +96,7 @@ export default function AdminHardeningPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {checklist.map((item) => (
               <div key={item.label} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-400">{item.label}</p>
+                <p className="text-xs font-medium text-slate-400">{item.label}</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">{item.value}</p>
               </div>
             ))}
@@ -106,7 +106,7 @@ export default function AdminHardeningPage() {
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Ghi chú vận hành</p>
+              <p className="text-xs font-semibold text-blue-600">Ghi chú vận hành</p>
               <h3 className="mt-2 text-xl font-semibold">Những điểm vẫn cần giữ chặt</h3>
             </div>
             <p className="text-xs text-slate-500">Trước mỗi lần deploy</p>

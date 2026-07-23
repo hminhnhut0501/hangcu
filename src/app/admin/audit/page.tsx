@@ -95,7 +95,7 @@ export default async function AdminAuditPage({
     <section className="space-y-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Audit</p>
+          <p className="text-sm font-medium text-blue-600">Audit</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">Nhật ký audit</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             Lọc mọi sự kiện của admin, hệ thống và tích hợp, xem payload và xuất log khi cần hỗ trợ.
@@ -138,7 +138,7 @@ export default async function AdminAuditPage({
         <div className="grid gap-2 sm:grid-cols-2">
           {topActions.map((action) => (
             <article key={action.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{action.label}</p>
+              <p className="text-xs font-medium text-slate-400">{action.label}</p>
               <p className="mt-2 text-2xl font-semibold">{action.count}</p>
             </article>
           ))}

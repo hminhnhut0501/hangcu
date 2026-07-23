@@ -48,7 +48,7 @@ export function AdminLoginForm({ nextUrl }: Props) {
     <section className="min-h-[calc(100vh-2rem)] bg-[radial-gradient(circle_at_top,_#eef6ff,_#f4f7fb_45%,_#eef2f7_100%)] px-4 py-8">
       <div className="mx-auto grid max-w-5xl gap-6 xl:grid-cols-[1fr_0.9fr]">
         <article className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Admin login</p>
+          <p className="text-sm font-medium text-blue-600">Admin login</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight">Đăng nhập admin</h1>
           <p className="mt-3 max-w-2xl text-sm text-slate-600">
             Nhập tài khoản và mật khẩu admin để set cookie <code>admin_session</code> trước khi vào <code>/admin</code>.

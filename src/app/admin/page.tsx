@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Box, Button, Card, CardContent, Chip, Typography } from "@mui/material";
 import { getDashboardSummary } from "@/modules/dashboard/service";
 import { getAnalyticsSummary } from "@/modules/analytics/service";
+import { hasSupabasePersistence } from "@/lib/db/persistence";
 
 const currencyFormat = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -28,6 +29,36 @@ function formatCount(value: number) {
 
 export default async function AdminHomePage() {
   const [summary, analytics] = await Promise.all([getDashboardSummary(), getAnalyticsSummary()]);
+  const supabaseConnected = hasSupabasePersistence();
+  const webhookHealthy = analytics.webhookErrorsCount === 0;
+  const paymentHealthy = analytics.failedOrdersCount === 0;
+  const licenseHealthy = analytics.licenseKeyAvailableCount > 0 || summary.licenseKeyRemaining > 0;
+  const statusCards = [
+    {
+      label: "DB / Supabase",
+      value: supabaseConnected ? "Đã nối" : "Chưa nối",
+      hint: supabaseConnected ? "Đang đọc dữ liệu thật hoặc fallback an toàn." : "Đang chạy seed nội bộ.",
+      tone: supabaseConnected ? "success" : "warning"
+    },
+    {
+      label: "Webhook",
+      value: webhookHealthy ? "Ổn" : `${analytics.webhookErrorsCount} lỗi`,
+      hint: webhookHealthy ? "Không thấy event lỗi." : "Có event payment/webhook chưa xử lý xong.",
+      tone: webhookHealthy ? "success" : "danger"
+    },
+    {
+      label: "Thanh toán",
+      value: paymentHealthy ? "Ổn" : `${analytics.failedOrdersCount} lỗi`,
+      hint: paymentHealthy ? "Chưa thấy đơn payment thất bại." : "Có đơn/payment event đang lỗi.",
+      tone: paymentHealthy ? "success" : "danger"
+    },
+    {
+      label: "License",
+      value: licenseHealthy ? "Sẵn" : "Thiếu",
+      hint: licenseHealthy ? "Có key khả dụng hoặc dữ liệu license đang có." : "Chưa có key khả dụng.",
+      tone: licenseHealthy ? "success" : "warning"
+    }
+  ] as const;
 
   const urgencyCards = [
     {
@@ -87,6 +118,9 @@ export default async function AdminHomePage() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-4xl font-semibold tracking-tight">Tổng quan admin</h2>
+          <p className="mt-2 max-w-3xl text-sm text-slate-600">
+            Báo cáo ngắn gọn trạng thái hệ thống, để nhìn nhanh biết phần nào đang hoạt động, phần nào cần kiểm tra.
+          </p>
         </div>
         <Link
           href="/admin/analytics"
@@ -94,6 +128,32 @@ export default async function AdminHomePage() {
         >
           Mở analytics
         </Link>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {statusCards.map((card) => (
+          <article
+            key={card.label}
+            className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)]"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold text-slate-500">{card.label}</p>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  card.tone === "success"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : card.tone === "danger"
+                      ? "bg-rose-100 text-rose-700"
+                      : "bg-amber-100 text-amber-700"
+                }`}
+              >
+                {card.value}
+              </span>
+            </div>
+            <p className="mt-3 text-sm font-medium text-slate-900">{card.value}</p>
+            <p className="mt-1 text-sm text-slate-600">{card.hint}</p>
+          </article>
+        ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">

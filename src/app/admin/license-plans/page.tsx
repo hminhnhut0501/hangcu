@@ -1,3 +1,4 @@
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { LicensePlanActions } from "@/components/admin/license-plan-actions";
@@ -12,13 +13,11 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
 
   return (
     <section className="space-y-8">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">License plans</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý license plans</h2>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Giữ giao diện gọn cho payment-only mode. Có thể sửa plan hiện tại hoặc xóa plan cũ mà không đụng các field nội bộ.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="License plans"
+        title="Quản lý license plans"
+        description="Giữ giao diện gọn cho payment-only mode. Có thể sửa plan hiện tại hoặc xóa plan cũ mà không đụng các field nội bộ."
+      />
       <ModeSwitchHeader
         currentMode={isAdvanced ? "advanced" : "payment-only"}
         options={[

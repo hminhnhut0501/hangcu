@@ -85,7 +85,7 @@ export default async function AdminSiteSettingsPage({
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
+        <p className="text-sm font-medium text-blue-600">
           Nội dung
         </p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Cài đặt nội dung website</h2>
@@ -115,7 +115,7 @@ export default async function AdminSiteSettingsPage({
           <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h3 className="text-lg font-semibold">Xem trước homepage</h3>
             <div className="mt-4 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">
+              <p className="text-xs font-semibold text-blue-600">
                 {settings.heroEyebrowEn}
               </p>
               <h4 className="text-2xl font-semibold tracking-tight">{settings.heroTitleEn}</h4>

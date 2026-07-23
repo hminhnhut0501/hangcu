@@ -60,7 +60,7 @@ export default function AdminLoginTestPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Test login</p>
+        <p className="text-sm font-medium text-blue-600">Test login</p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Đăng nhập admin test</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
           Dùng trang này để set nhanh cookie <code>admin_session</code> mà không cần luồng đăng nhập thật.

@@ -65,7 +65,7 @@ export default async function AdminOrdersPage({
     <section className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Bán hàng</p>
+          <p className="text-sm font-medium text-blue-600">Bán hàng</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">Đơn hàng</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             Theo dõi đơn khách, kiểm tra trạng thái fulfillment và xử lý thủ công khi cần.
@@ -73,19 +73,19 @@ export default async function AdminOrdersPage({
         </div>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Đơn</p>
+            <p className="text-xs font-medium text-slate-400">Đơn</p>
             <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
           </article>
           <article className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-amber-700">Chờ payment</p>
+            <p className="text-xs font-medium text-amber-700">Chờ payment</p>
             <p className="mt-2 text-2xl font-semibold">{pendingCount}</p>
           </article>
           <article className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-rose-700">Lỗi</p>
+            <p className="text-xs font-medium text-rose-700">Lỗi</p>
             <p className="mt-2 text-2xl font-semibold">{failedCount}</p>
           </article>
           <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Chưa fulfillment</p>
+            <p className="text-xs font-medium text-slate-400">Chưa fulfillment</p>
             <p className="mt-2 text-2xl font-semibold">{unfulfilledCount}</p>
           </article>
         </div>

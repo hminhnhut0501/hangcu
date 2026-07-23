@@ -56,7 +56,7 @@ export default async function AdminPaymentsPage({
     <section className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Bán hàng</p>
+          <p className="text-sm font-medium text-blue-600">Bán hàng</p>
           <h2 className="mt-3 text-4xl font-semibold tracking-tight">Thanh toán</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-600">
             Xem event payment, chẩn đoán lỗi và retry thao tác liên quan cổng thanh toán ở một nơi.
