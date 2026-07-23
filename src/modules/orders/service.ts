@@ -1,8 +1,8 @@
 import type { ProductSummary } from "../products/types";
-import { InMemoryOrderRepository } from "./repository";
+import { createOrderRepository } from "./repository";
 import type { OrderDraft, OrderSummary } from "./types";
 
-const orderRepository = new InMemoryOrderRepository();
+const orderRepository = createOrderRepository();
 
 function createOrderNumber() {
   const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();

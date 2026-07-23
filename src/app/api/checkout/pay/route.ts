@@ -138,7 +138,7 @@ export async function POST(request: Request) {
 
   const payosOrderCode =
     parsed.data.provider === "payos"
-      ? Number(order.metadata?.payosOrderCode ?? 0) || generatePayosOrderCode()
+      ? String(order.metadata?.payosOrderCode ?? "") || String(generatePayosOrderCode())
       : null;
 
   if (parsed.data.provider === "payos") {
