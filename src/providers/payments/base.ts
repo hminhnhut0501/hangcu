@@ -3,7 +3,7 @@ export type CreateCheckoutInput = {
   orderNumber: string;
   amountMinor: number;
   currency: string;
-  customerEmail: string;
+  customerEmail?: string;
   returnUrl: string;
   cancelUrl: string;
   metadata?: Record<string, unknown>;

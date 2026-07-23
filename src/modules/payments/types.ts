@@ -3,7 +3,7 @@ export type PaymentIntentDraft = {
   orderNumber: string;
   amountMinor: number;
   currency: string;
-  customerEmail: string;
+  customerEmail?: string;
   provider: "manual" | "sandbox" | "stripe" | "paypal" | "payos";
   metadata?: Record<string, unknown>;
 };

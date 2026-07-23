@@ -49,6 +49,12 @@ function normalizeBaseUrl(value: string | undefined, fallback: string) {
   }
 }
 
+function isValidEmail(value: string | undefined) {
+  const email = (value ?? "").trim();
+  if (!email) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export class PayOSPaymentProvider implements PaymentProvider {
   readonly name = "payos";
 
@@ -79,7 +85,6 @@ export class PayOSPaymentProvider implements PaymentProvider {
         orderCode,
         amount: input.amountMinor,
         description,
-        buyerEmail: input.customerEmail,
         cancelUrl: input.cancelUrl,
         returnUrl: input.returnUrl,
         items: [
@@ -101,6 +106,9 @@ export class PayOSPaymentProvider implements PaymentProvider {
           config.checksumKey
         )
       };
+      if (isValidEmail(input.customerEmail)) {
+        payload.buyerEmail = input.customerEmail.trim();
+      }
 
       const response = await fetch(new URL("/v2/payment-requests", config.baseUrl).toString(), {
         method: "POST",
