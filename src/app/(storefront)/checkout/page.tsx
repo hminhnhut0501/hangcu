@@ -8,6 +8,7 @@ type CheckoutSearchParams = {
   planCode?: string | string[];
   plan?: string | string[];
   amount?: string | string[];
+  amountMinor?: string | string[];
   currency?: string | string[];
   checkout?: string | string[];
   customerRef?: string | string[];
@@ -19,6 +20,12 @@ type CheckoutSearchParams = {
 function firstValue(value: string | string[] | undefined) {
   if (Array.isArray(value)) return value[0];
   return value;
+}
+
+function parseAmountMinor(value: string | undefined) {
+  if (!value) return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
 }
 
 function normalizeCheckoutStatus(value: string | undefined) {
@@ -68,13 +75,14 @@ export default async function CheckoutPage({
   const planCode = firstValue(resolvedSearchParams.planCode);
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
   const amountLabel = formatCurrencyLabel(firstValue(resolvedSearchParams.amount), firstValue(resolvedSearchParams.currency), locale);
+  const amountMinorParam = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const checkoutId = firstValue(resolvedSearchParams.checkout);
   const customerRef = firstValue(resolvedSearchParams.customerRef);
   const status = normalizeCheckoutStatus(firstValue(resolvedSearchParams.status) ?? firstValue(resolvedSearchParams.code));
   const returnedOrderCode = firstValue(resolvedSearchParams.orderCode);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
   const resolvedOrderLabel = order?.items?.[0]?.productName ?? (order?.metadata?.planName as string | undefined) ?? null;
-  const resolvedAmountLabel = formatMinorAmount(order?.totalMinor, order?.currency, locale);
+  const resolvedAmountLabel = formatMinorAmount(amountMinorParam ?? order?.totalMinor, order?.currency ?? firstValue(resolvedSearchParams.currency), locale);
   const resolvedCustomerRef = customerRef ?? (order?.metadata?.customerRef as string | undefined) ?? null;
   const resolvedPlanCode = planLabel ?? (order?.metadata?.planCode as string | undefined) ?? null;
   const summaryAmount = amountLabel ?? resolvedAmountLabel;
@@ -170,7 +178,9 @@ export default async function CheckoutPage({
               checkoutId,
               planLabel: summaryPlan,
               amountLabel: summaryAmount,
-              customerRef: resolvedCustomerRef
+              customerRef: resolvedCustomerRef,
+              amountMinor: amountMinorParam ?? order?.totalMinor ?? null,
+              currency: firstValue(resolvedSearchParams.currency) ?? order?.currency ?? null
             }}
           />
         </section>

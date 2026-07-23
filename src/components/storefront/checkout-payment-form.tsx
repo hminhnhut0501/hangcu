@@ -19,6 +19,8 @@ type Props = {
     planLabel?: string | null;
     amountLabel?: string | null;
     customerRef?: string | null;
+    amountMinor?: number | null;
+    currency?: string | null;
   };
 };
 
@@ -40,6 +42,8 @@ export function CheckoutPaymentForm({ locale, options, orderSummary }: Props) {
     if (orderSummary.planLabel) payload.plan = orderSummary.planLabel;
     if (orderSummary.amountLabel) payload.amountLabel = orderSummary.amountLabel;
     if (orderSummary.customerRef) payload.customerRef = orderSummary.customerRef;
+    if (typeof orderSummary.amountMinor === "number") payload.amountMinor = String(orderSummary.amountMinor);
+    if (orderSummary.currency) payload.currency = orderSummary.currency;
     if (selectedOption?.slug) payload.productSlug = selectedOption.slug;
     try {
       const response = await fetch("/api/checkout/pay", {
