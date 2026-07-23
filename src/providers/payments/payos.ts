@@ -52,7 +52,12 @@ function normalizeBaseUrl(value: string | undefined, fallback: string) {
 function isValidEmail(value: string | undefined) {
   const email = (value ?? "").trim();
   if (!email) return false;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  const domain = email.split("@")[1]?.toLowerCase() ?? "";
+  if (!domain || domain.endsWith(".local") || domain.endsWith(".localhost") || domain.endsWith(".internal") || domain.endsWith(".test")) {
+    return false;
+  }
+  return true;
 }
 
 export class PayOSPaymentProvider implements PaymentProvider {
