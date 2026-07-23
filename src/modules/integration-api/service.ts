@@ -50,7 +50,13 @@ function rateLimit(key: string, now: number) {
 }
 
 export function getIntegrationSecret() {
-  return process.env.BOT_WEB_HMAC_SECRET ?? process.env.APP_HMAC_SECRET ?? null;
+  return (
+    process.env.BOT_WEB_HMAC_SECRET ??
+    process.env.WEB_PAYMENT_SECRET ??
+    process.env.LICENSE_WEBHOOK_SECRET ??
+    process.env.APP_HMAC_SECRET ??
+    null
+  );
 }
 
 export function buildIntegrationSignature(input: {
@@ -170,6 +176,11 @@ export async function createCheckoutViaIntegration(input: CheckoutRequestInput) 
   const resolvedReturnUrl = parsed.returnUrl ?? fallbackReturnUrl;
 
   if (!resolvedReturnUrl) {
+    throw integrationErrors.internalError;
+  }
+
+  const price = plan.currencyPrices[parsed.currency];
+  if (price == null) {
     throw integrationErrors.internalError;
   }
 
