@@ -49,12 +49,24 @@ function formatMinorAmount(amountMinor: number | undefined, currency: string | u
   return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
 }
 
+function formatPlanPrice(amountMinor: number, currency: string, locale: "vi" | "en") {
+  const normalizedCurrency = currency.toUpperCase();
+  if (normalizedCurrency === "VND") {
+    return locale === "vi"
+      ? `${new Intl.NumberFormat("vi-VN").format(amountMinor)}đ`
+      : `${new Intl.NumberFormat("en-US").format(amountMinor)} VND`;
+  }
+
+  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
+}
+
 export default async function CheckoutPage({
   searchParams
 }: {
-  searchParams?: CheckoutSearchParams;
+  searchParams?: Promise<CheckoutSearchParams>;
 }) {
   const locale = await getStorefrontLocale();
+  const resolvedSearchParams = (await searchParams) ?? {};
   const featured = await listFeaturedProducts();
   const allProducts = await listProducts();
   const options = (featured.length > 0 ? featured : allProducts).map((product) => ({
@@ -64,14 +76,14 @@ export default async function CheckoutPage({
     amountMinor: product.amountMinor,
     currency: product.currency
   }));
-  const orderNumber = firstValue(searchParams?.order);
-  const planCode = firstValue(searchParams?.planCode);
-  const planLabel = firstValue(searchParams?.plan) ?? planCode;
-  const amountLabel = formatCurrencyLabel(firstValue(searchParams?.amount), firstValue(searchParams?.currency), locale);
-  const checkoutId = firstValue(searchParams?.checkout);
-  const customerRef = firstValue(searchParams?.customerRef);
+  const orderNumber = firstValue(resolvedSearchParams.order);
+  const planCode = firstValue(resolvedSearchParams.planCode);
+  const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
+  const amountLabel = formatCurrencyLabel(firstValue(resolvedSearchParams.amount), firstValue(resolvedSearchParams.currency), locale);
+  const checkoutId = firstValue(resolvedSearchParams.checkout);
+  const customerRef = firstValue(resolvedSearchParams.customerRef);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
-  const resolvedOrderLabel = order?.items?.[0]?.productName ?? order?.metadata?.planName ?? null;
+  const resolvedOrderLabel = order?.items?.[0]?.productName ?? (order?.metadata?.planName as string | undefined) ?? null;
   const resolvedAmountLabel = formatMinorAmount(order?.totalMinor, order?.currency, locale);
   const resolvedCustomerRef = customerRef ?? (order?.metadata?.customerRef as string | undefined) ?? null;
   const resolvedPlanCode = planLabel ?? (order?.metadata?.planCode as string | undefined) ?? null;
@@ -100,6 +112,9 @@ export default async function CheckoutPage({
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-blue-700">
                 <span>{locale === "vi" ? "Thông tin từ bot" : "Bot checkout context"}</span>
+                <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                  {locale === "vi" ? "Nguồn từ bot" : "From bot"}
+                </span>
                 {orderNumber ? <span className="rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-blue-200">#{orderNumber}</span> : null}
                 {checkoutId ? <span className="rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-blue-200">{checkoutId}</span> : null}
               </div>
@@ -142,7 +157,7 @@ export default async function CheckoutPage({
                     <p className="text-sm text-slate-500">{item.description}</p>
                   </div>
                   <span className="text-sm font-medium">
-                    {item.currency} {(item.amountMinor / 100).toFixed(2)}
+                    {formatPlanPrice(item.amountMinor, item.currency, locale)}
                   </span>
                 </li>
               ))}
