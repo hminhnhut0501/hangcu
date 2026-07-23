@@ -81,7 +81,17 @@ export class PayOSPaymentProvider implements PaymentProvider {
     const description = "HangCu";
     const initialOrderCode = Number(input.metadata?.payosOrderCode ?? 0) || toPayosOrderCode();
     const attemptCheckout = async (orderCode: number) => {
-      const payload = {
+      const customerEmail = input.customerEmail?.trim();
+      const payload: {
+        orderCode: number;
+        amount: number;
+        description: string;
+        cancelUrl: string;
+        returnUrl: string;
+        items: Array<{ name: string; quantity: number; price: number; unit: string }>;
+        signature: string;
+        buyerEmail?: string;
+      } = {
         orderCode,
         amount: input.amountMinor,
         description,
@@ -106,8 +116,8 @@ export class PayOSPaymentProvider implements PaymentProvider {
           config.checksumKey
         )
       };
-      if (isValidEmail(input.customerEmail)) {
-        payload.buyerEmail = input.customerEmail.trim();
+      if (isValidEmail(customerEmail)) {
+        payload.buyerEmail = customerEmail;
       }
 
       const response = await fetch(new URL("/v2/payment-requests", config.baseUrl).toString(), {
