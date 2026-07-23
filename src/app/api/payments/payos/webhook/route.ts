@@ -7,20 +7,34 @@ import { getOrderByMetadataKey } from "@/modules/orders/service";
 const provider = new PayOSPaymentProvider();
 
 export async function POST(request: Request) {
-  const event = await provider.verifyWebhook(request);
+  const rawBody = await request.clone().text().catch(() => "");
+  console.info(`[payos-webhook] received raw_bytes=${rawBody.length}`);
+
+  let event;
+  try {
+    event = await provider.verifyWebhook(request);
+  } catch (error) {
+    console.error(`[payos-webhook] verify_failed error=${error instanceof Error ? error.message : String(error)} rawBody=${rawBody || "empty"}`);
+    throw error;
+  }
+
   const payload = JSON.parse(event.rawPayload) as {
     orderCode?: string | number;
     data?: {
       orderCode?: string | number;
       orderId?: string | number;
+      paymentLinkId?: string | number;
     };
   };
   const orderCode = String(payload.orderCode ?? payload.data?.orderCode ?? payload.data?.orderId ?? "");
-  const linkedOrder = orderCode ? await getOrderByMetadataKey("payosOrderCode", orderCode) : null;
+  const paymentLinkId = String(payload.data?.paymentLinkId ?? "");
+  const linkedOrder =
+    (orderCode ? await getOrderByMetadataKey("payosOrderCode", orderCode) : null) ||
+    (paymentLinkId ? await getOrderByMetadataKey("providerCheckoutId", paymentLinkId) : null);
   const existingEvent = await getWebhookEvent("payos", event.providerEventId);
 
   console.info(
-    `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"} duplicate=${existingEvent ? "yes" : "no"}`
+    `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"} duplicate=${existingEvent ? "yes" : "no"}`
   );
 
   if (existingEvent?.processingStatus === "processed") {
@@ -44,7 +58,7 @@ export async function POST(request: Request) {
 
   if (orderCode) {
     console.info(
-      `[payos-webhook] dispatch license issue eventId=${event.providerEventId} orderCode=${orderCode} linkedOrder=${linkedOrder?.orderNumber || "none"}`
+      `[payos-webhook] dispatch license issue eventId=${event.providerEventId} orderCode=${orderCode} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
     );
     await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
   }

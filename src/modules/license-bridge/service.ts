@@ -86,11 +86,16 @@ function buildBotActivationUrl(licenseCode: string) {
 }
 
 function buildBotCallbackUrl() {
-  return (
+  const callbackUrl =
     process.env.LICENSE_BOT_CALLBACK_URL?.replace(/\/$/, "") ||
     process.env.BOT_LICENSE_CALLBACK_URL?.replace(/\/$/, "") ||
-    ""
-  );
+    "";
+  if (!callbackUrl) {
+    console.info(
+      `[license-delivery] callback_url_missing LICENSE_BOT_CALLBACK_URL=${process.env.LICENSE_BOT_CALLBACK_URL ? "set" : "missing"} BOT_LICENSE_CALLBACK_URL=${process.env.BOT_LICENSE_CALLBACK_URL ? "set" : "missing"}`
+    );
+  }
+  return callbackUrl;
 }
 
 function signBotCallbackPayload(payload: Record<string, unknown>) {
