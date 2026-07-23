@@ -44,6 +44,98 @@ function buildLicenseCode() {
   return `LIC-${part()}-${part()}-${part()}`;
 }
 
+function buildBotActivationUrl(licenseCode: string) {
+  const normalized = String(licenseCode || "").trim().toUpperCase();
+  const baseUrl = process.env.BOT_NEW_URL?.replace(/\/$/, "") || "";
+  const username = process.env.BOT_USERNAME?.trim().replace(/^@/, "") || "";
+  if (baseUrl) {
+    return `${baseUrl}?start=lic_${encodeURIComponent(normalized)}`;
+  }
+  if (username) {
+    return `https://t.me/${username}?start=lic_${encodeURIComponent(normalized)}`;
+  }
+  return `https://t.me/?start=lic_${encodeURIComponent(normalized)}`;
+}
+
+function buildBotCallbackUrl() {
+  return (
+    process.env.LICENSE_BOT_CALLBACK_URL?.replace(/\/$/, "") ||
+    process.env.BOT_LICENSE_CALLBACK_URL?.replace(/\/$/, "") ||
+    ""
+  );
+}
+
+function signBotCallbackPayload(payload: Record<string, unknown>) {
+  const secret = process.env.WEB_PAYMENT_SECRET?.trim() || process.env.BOT_WEB_HMAC_SECRET?.trim() || "";
+  if (!secret) {
+    return "";
+  }
+  const message = [
+    String(payload.orderId ?? ""),
+    String(payload.telegramUserId ?? ""),
+    String(payload.timestamp ?? ""),
+    String(payload.nonce ?? "")
+  ].join("|");
+  return hmacSha256(secret, message);
+}
+
+async function notifyBotLicenseIssued(input: {
+  orderId: string;
+  orderNumber: string;
+  telegramUserId?: string | null;
+  customerRef?: string | null;
+  planCode: string;
+  planName: string;
+  currency: string;
+  amountMinor: number;
+  licenseCode: string;
+  activationUrl: string;
+  groupIds: string[];
+  entitlements: string[];
+  locale: "vi" | "en";
+}) {
+  const baseUrl = buildBotCallbackUrl();
+  if (!baseUrl) {
+    return null;
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const nonce = generateRandomToken(16);
+  const payload = {
+    orderId: input.orderId,
+    orderNumber: input.orderNumber,
+    telegramUserId: input.telegramUserId ?? "",
+    customerRef: input.customerRef ?? "",
+    planCode: input.planCode,
+    planName: input.planName,
+    currency: input.currency,
+    amountMinor: input.amountMinor,
+    licenseCode: input.licenseCode,
+    activationUrl: input.activationUrl,
+    groupIds: input.groupIds,
+    entitlements: input.entitlements,
+    locale: input.locale,
+    timestamp,
+    nonce
+  };
+  const signature = signBotCallbackPayload(payload);
+  if (!signature) {
+    return null;
+  }
+
+  const response = await fetch(`${baseUrl}/license-delivery`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ ...payload, signature })
+  });
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(`Bot callback failed: ${response.status} ${body}`);
+  }
+
+  return response.json().catch(() => null);
+}
+
 async function findOrderByOrderNumber(orderNumber: string) {
   const order = await getOrderByOrderNumber(orderNumber);
   if (order) return order;
@@ -363,5 +455,42 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     }
   });
 
-  return issued;
+  const activationUrl = buildBotActivationUrl(activationCode);
+  const vipGroupPolicy = plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined;
+  const groupIds = Array.isArray(vipGroupPolicy?.groupIds) ? vipGroupPolicy.groupIds : [];
+
+  try {
+    const planName = String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code);
+    await notifyBotLicenseIssued({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      telegramUserId: order.metadata?.telegramUserId ? String(order.metadata.telegramUserId) : null,
+      customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
+      planCode: plan.code,
+      planName,
+      currency: order.currency,
+      amountMinor: order.totalMinor,
+      licenseCode: activationCode,
+      activationUrl,
+      groupIds,
+      entitlements: plan.entitlementTags,
+      locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi"
+    });
+  } catch (error) {
+    console.log(`⚠️ Bot callback failed for order ${order.orderNumber}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  return {
+    ...issued,
+    orderNumber: order.orderNumber,
+    planCode: plan.code,
+    planName: String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code),
+    telegramUserId: order.metadata?.telegramUserId ? String(order.metadata.telegramUserId) : null,
+    customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
+    activationUrl,
+    licenseCode: activationCode,
+    groupIds,
+    entitlements: plan.entitlementTags,
+    locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi"
+  };
 }
