@@ -37,6 +37,17 @@ function buildSignature(input: Record<string, unknown>, checksumKey: string) {
   return hmacSha256(checksumKey, sortAndJoin(input));
 }
 
+function normalizeBaseUrl(value: string | undefined, fallback: string) {
+  const candidate = (value ?? "").trim();
+  if (!candidate) return fallback;
+  if (candidate.startsWith("/")) return fallback;
+  try {
+    return new URL(candidate).toString().replace(/\/$/, "");
+  } catch {
+    return fallback;
+  }
+}
+
 export class PayOSPaymentProvider implements PaymentProvider {
   readonly name = "payos";
 
@@ -45,7 +56,7 @@ export class PayOSPaymentProvider implements PaymentProvider {
     const apiKey = process.env.PAYOS_API_KEY;
     const checksumKey = process.env.PAYOS_CHECKSUM_KEY;
     const partnerCode = process.env.PAYOS_PARTNER_CODE;
-    const baseUrl = process.env.PAYOS_API_BASE_URL ?? "https://api-merchant.payos.vn";
+    const baseUrl = normalizeBaseUrl(process.env.PAYOS_API_BASE_URL, "https://api-merchant.payos.vn");
 
     if (!clientId || !apiKey || !checksumKey) {
       throw new Error("PayOS is not configured");
@@ -88,7 +99,7 @@ export class PayOSPaymentProvider implements PaymentProvider {
       )
     };
 
-    const response = await fetch(`${config.baseUrl.replace(/\/$/, "")}/v2/payment-requests`, {
+    const response = await fetch(new URL("/v2/payment-requests", config.baseUrl).toString(), {
       method: "POST",
       headers: {
         "content-type": "application/json",
