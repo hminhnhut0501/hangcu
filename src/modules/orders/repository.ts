@@ -126,10 +126,13 @@ class SupabaseOrderRepository implements OrderRepository {
       .maybeSingle();
 
     if (error) {
+      console.error(
+        `[orders-repository] supabase_create_failed orderNumber=${order.orderNumber} orderId=${order.id} code=${String((error as { code?: string }).code ?? "n/a")} message=${String((error as { message?: string }).message ?? "n/a")} details=${String((error as { details?: string }).details ?? "")} hint=${String((error as { hint?: string }).hint ?? "")}`
+      );
       if (isMissingSupabaseTableError(error, "orders")) {
         return new InMemoryOrderRepository().create(order);
       }
-      throw error;
+      return new InMemoryOrderRepository().create(order);
     }
 
     return data ? mapRowToOrderSummary(data as Parameters<typeof mapRowToOrderSummary>[0]) : order;
