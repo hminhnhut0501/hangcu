@@ -32,6 +32,7 @@ export async function createPaymentCheckout(input: PaymentIntentDraft & { return
     currency: input.currency,
     customerEmail: input.customerEmail,
     returnUrl: input.returnUrl,
-    cancelUrl: input.cancelUrl
+    cancelUrl: input.cancelUrl,
+    metadata: input.metadata
   });
 }

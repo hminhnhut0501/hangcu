@@ -1,4 +1,4 @@
-import { hmacSha256 } from "@/lib/crypto/hash";
+import { generateRandomToken, hmacSha256 } from "@/lib/crypto/hash";
 import type {
   CreateCheckoutInput,
   CreateCheckoutResult,
@@ -17,11 +17,11 @@ type PayosWebhookPayload = {
   signature?: string;
 };
 
-function toOrderCode(orderId: string, orderNumber: string) {
-  const seed = `${orderId}:${orderNumber}:${Date.now()}:${Math.random()}`;
-  const hex = Buffer.from(seed).toString("hex").slice(0, 12) || "1";
-  const numeric = Number(BigInt(`0x${hex}`) % 900000000n);
-  return numeric + 100000000;
+function toPayosOrderCode() {
+  const timestamp = Date.now().toString().slice(-8);
+  const randomPart = generateRandomToken(6).replace(/[^0-9]/g, "").padEnd(6, "7").slice(0, 6);
+  const candidate = `${timestamp}${randomPart}`.replace(/^0+/, "");
+  return candidate.length > 0 ? candidate : `${Date.now()}`;
 }
 
 function sortAndJoin(values: Record<string, unknown>) {
@@ -73,8 +73,8 @@ export class PayOSPaymentProvider implements PaymentProvider {
 
     const config = this.getConfig();
     const description = "HangCu";
-    const attemptCheckout = async () => {
-      const orderCode = toOrderCode(input.orderId, input.orderNumber);
+    const initialOrderCode = String(input.metadata?.payosOrderCode ?? "").trim() || toPayosOrderCode();
+    const attemptCheckout = async (orderCode: string) => {
       const payload = {
         orderCode,
         amount: input.amountMinor,
@@ -122,6 +122,7 @@ export class PayOSPaymentProvider implements PaymentProvider {
         return {
           ok: false as const,
           orderCode,
+          code: json?.code ?? "",
           errorText: `PayOS checkout creation failed${response.status ? ` (${response.status})` : ""}${json?.desc ? `: ${json.desc}` : ""}${rawText ? ` | body: ${rawText}` : ""}`
         };
       }
@@ -134,20 +135,25 @@ export class PayOSPaymentProvider implements PaymentProvider {
       };
     };
 
-    const firstAttempt = await attemptCheckout();
-    if (firstAttempt.ok) {
-      return firstAttempt;
-    }
-
-    if (firstAttempt.errorText.includes("231")) {
-      const retry = await attemptCheckout();
-      if (retry.ok) {
-        return retry;
+    const attempts = [initialOrderCode, toPayosOrderCode(), toPayosOrderCode()];
+    const results: Array<{ ok: false; code: string; errorText: string; orderCode: string } | { ok: true; checkoutUrl: string; providerCheckoutId: string; providerPaymentId: string }> = [];
+    for (const orderCode of attempts) {
+      const result = await attemptCheckout(orderCode);
+      results.push(result as never);
+      if (result.ok) {
+        return result;
       }
-      throw new Error(retry.errorText);
+      if (result.code !== "231" && !result.errorText.includes("231")) {
+        throw new Error(result.errorText);
+      }
     }
 
-    throw new Error(firstAttempt.errorText);
+    const last = results[results.length - 1];
+    if (last && !last.ok) {
+      throw new Error(last.errorText);
+    }
+
+    throw new Error("PayOS checkout creation failed");
   }
 
   async verifyWebhook(request: Request): Promise<VerifiedPaymentEvent> {

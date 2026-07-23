@@ -5,4 +5,5 @@ export type PaymentIntentDraft = {
   currency: string;
   customerEmail: string;
   provider: "manual" | "sandbox" | "stripe" | "paypal" | "payos";
+  metadata?: Record<string, unknown>;
 };

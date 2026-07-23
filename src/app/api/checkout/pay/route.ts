@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { generateRandomToken } from "@/lib/crypto/hash";
 import { getProductBySlug } from "@/modules/products/service";
 import { getCurrentPriceForProduct } from "@/modules/prices/service";
 import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
@@ -128,6 +129,24 @@ export async function POST(request: Request) {
     });
   }
 
+  const payosOrderCode =
+    parsed.data.provider === "payos"
+      ? String(order.metadata?.payosOrderCode ?? "").trim() || `${Date.now()}${generateRandomToken(6).replace(/[^0-9]/g, "").padEnd(6, "7").slice(0, 6)}`
+      : null;
+
+  if (parsed.data.provider === "payos") {
+    console.info(
+      `[payos-checkout] orderNumber=${order.orderNumber} orderId=${order.id} payosOrderCode=${payosOrderCode}`
+    );
+    await updateOrder(order.orderNumber, {
+      metadata: {
+        ...order.metadata,
+        payosOrderCode,
+        paymentProvider: parsed.data.provider
+      }
+    });
+  }
+
   const checkout = await createPaymentCheckout({
     orderId: order.id,
     orderNumber: order.orderNumber,
@@ -136,7 +155,8 @@ export async function POST(request: Request) {
     customerEmail: order.customerEmail,
     provider: parsed.data.provider,
     returnUrl,
-    cancelUrl
+    cancelUrl,
+    metadata: payosOrderCode ? { payosOrderCode } : undefined
   });
 
   await updateOrder(order.orderNumber, {
@@ -145,7 +165,7 @@ export async function POST(request: Request) {
       paymentProvider: parsed.data.provider,
       paymentCheckoutUrl: checkout.checkoutUrl,
       providerCheckoutId: checkout.providerCheckoutId,
-      payosOrderCode: checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null
+      payosOrderCode: payosOrderCode ?? checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null
     }
   });
 
