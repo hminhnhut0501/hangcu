@@ -17,8 +17,9 @@ type PayosWebhookPayload = {
   signature?: string;
 };
 
-function toOrderCode(orderId: string) {
-  const hex = Buffer.from(orderId).toString("hex").slice(0, 12) || "1";
+function toOrderCode(orderId: string, orderNumber: string) {
+  const seed = `${orderId}:${orderNumber}:${Date.now()}:${Math.random()}`;
+  const hex = Buffer.from(seed).toString("hex").slice(0, 12) || "1";
   const numeric = Number(BigInt(`0x${hex}`) % 900000000n);
   return numeric + 100000000;
 }
@@ -71,62 +72,82 @@ export class PayOSPaymentProvider implements PaymentProvider {
     }
 
     const config = this.getConfig();
-    const orderCode = toOrderCode(input.orderId);
     const description = "HangCu";
-    const payload = {
-      orderCode,
-      amount: input.amountMinor,
-      description,
-      buyerEmail: input.customerEmail,
-      cancelUrl: input.cancelUrl,
-      returnUrl: input.returnUrl,
-      items: [
-        {
-          name: input.orderNumber,
-          quantity: 1,
-          price: input.amountMinor,
-          unit: "VND"
-        }
-      ],
-      signature: buildSignature(
-        {
-          amount: input.amountMinor,
-          cancelUrl: input.cancelUrl,
-          description,
-          orderCode,
-          returnUrl: input.returnUrl
+    const attemptCheckout = async () => {
+      const orderCode = toOrderCode(input.orderId, input.orderNumber);
+      const payload = {
+        orderCode,
+        amount: input.amountMinor,
+        description,
+        buyerEmail: input.customerEmail,
+        cancelUrl: input.cancelUrl,
+        returnUrl: input.returnUrl,
+        items: [
+          {
+            name: input.orderNumber,
+            quantity: 1,
+            price: input.amountMinor,
+            unit: "VND"
+          }
+        ],
+        signature: buildSignature(
+          {
+            amount: input.amountMinor,
+            cancelUrl: input.cancelUrl,
+            description,
+            orderCode,
+            returnUrl: input.returnUrl
+          },
+          config.checksumKey
+        )
+      };
+
+      const response = await fetch(new URL("/v2/payment-requests", config.baseUrl).toString(), {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-client-id": config.clientId,
+          "x-api-key": config.apiKey,
+          ...(config.partnerCode ? { "x-partner-code": config.partnerCode } : {})
         },
-        config.checksumKey
-      )
+        body: JSON.stringify(payload)
+      });
+
+      const rawText = await response.text().catch(() => "");
+      const json = (rawText ? JSON.parse(rawText) : null) as
+        | { code?: string; desc?: string; data?: { checkoutUrl?: string; paymentLinkId?: string } }
+        | null;
+
+      if (!response.ok || json?.code !== "00" || !json?.data?.checkoutUrl || !json?.data?.paymentLinkId) {
+        return {
+          ok: false as const,
+          orderCode,
+          errorText: `PayOS checkout creation failed${response.status ? ` (${response.status})` : ""}${json?.desc ? `: ${json.desc}` : ""}${rawText ? ` | body: ${rawText}` : ""}`
+        };
+      }
+
+      return {
+        ok: true as const,
+        checkoutUrl: json.data.checkoutUrl,
+        providerCheckoutId: json.data.paymentLinkId,
+        providerPaymentId: String(orderCode)
+      };
     };
 
-    const response = await fetch(new URL("/v2/payment-requests", config.baseUrl).toString(), {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-client-id": config.clientId,
-        "x-api-key": config.apiKey,
-        ...(config.partnerCode ? { "x-partner-code": config.partnerCode } : {})
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const rawText = await response.text().catch(() => "");
-    const json = (rawText ? JSON.parse(rawText) : null) as
-      | { code?: string; desc?: string; data?: { checkoutUrl?: string; paymentLinkId?: string } }
-      | null;
-
-    if (!response.ok || json?.code !== "00" || !json?.data?.checkoutUrl || !json?.data?.paymentLinkId) {
-      throw new Error(
-        `PayOS checkout creation failed${response.status ? ` (${response.status})` : ""}${json?.desc ? `: ${json.desc}` : ""}${rawText ? ` | body: ${rawText}` : ""}`
-      );
+    const firstAttempt = await attemptCheckout();
+    if (firstAttempt.ok) {
+      return firstAttempt;
     }
 
-    return {
-      checkoutUrl: json.data.checkoutUrl,
-      providerCheckoutId: json.data.paymentLinkId,
-      providerPaymentId: String(orderCode)
-    };
+    if (firstAttempt.errorText.includes("231")) {
+      const retry = await attemptCheckout();
+      if (retry.ok) {
+        return retry;
+      }
+      throw new Error(retry.errorText);
+    }
+
+    throw new Error(firstAttempt.errorText);
   }
 
   async verifyWebhook(request: Request): Promise<VerifiedPaymentEvent> {

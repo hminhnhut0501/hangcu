@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { getProductBySlug } from "@/modules/products/service";
 import { getCurrentPriceForProduct } from "@/modules/prices/service";
-import { createOrder } from "@/modules/orders/service";
-import { getOrderByOrderNumber } from "@/modules/orders/service";
+import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
 
@@ -122,6 +121,16 @@ export async function POST(request: Request) {
     provider: parsed.data.provider,
     returnUrl,
     cancelUrl
+  });
+
+  await updateOrder(order.orderNumber, {
+    metadata: {
+      ...order.metadata,
+      payosOrderCode: checkout.providerPaymentId ?? null,
+      paymentProvider: parsed.data.provider,
+      paymentCheckoutUrl: checkout.checkoutUrl,
+      providerCheckoutId: checkout.providerCheckoutId
+    }
   });
 
   return Response.json({

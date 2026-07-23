@@ -2,6 +2,7 @@ import { PayOSPaymentProvider } from "@/providers/payments/payos";
 import { recordWebhookEvent } from "@/modules/webhooks/service";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
+import { getOrderByMetadataKey } from "@/modules/orders/service";
 
 const provider = new PayOSPaymentProvider();
 
@@ -29,7 +30,8 @@ export async function POST(request: Request) {
   });
 
   if (orderCode) {
-    await issueLicenseFromPaidOrder(orderCode);
+    const linkedOrder = await getOrderByMetadataKey("payosOrderCode", orderCode);
+    await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
   }
 
   await writeSystemAuditLog({

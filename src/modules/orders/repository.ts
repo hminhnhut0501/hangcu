@@ -3,6 +3,7 @@ import type { OrderSummary } from "./types";
 export interface OrderRepository {
   create(order: OrderSummary): Promise<OrderSummary>;
   findByOrderNumber(orderNumber: string): Promise<OrderSummary | null>;
+  findByMetadataKey(key: string, value: string): Promise<OrderSummary | null>;
   listByEmail(email: string): Promise<OrderSummary[]>;
   listAll(): Promise<OrderSummary[]>;
   update(orderNumber: string, patch: Partial<OrderSummary>): Promise<OrderSummary | null>;
@@ -18,6 +19,12 @@ export class InMemoryOrderRepository implements OrderRepository {
 
   async findByOrderNumber(orderNumber: string): Promise<OrderSummary | null> {
     return this.orders.get(orderNumber) ?? null;
+  }
+
+  async findByMetadataKey(key: string, value: string): Promise<OrderSummary | null> {
+    return (
+      [...this.orders.values()].find((order) => String(order.metadata?.[key] ?? "") === value) ?? null
+    );
   }
 
   async listByEmail(email: string): Promise<OrderSummary[]> {

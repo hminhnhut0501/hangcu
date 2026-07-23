@@ -83,6 +83,10 @@ export async function getOrderByOrderNumber(orderNumber: string) {
   return orderRepository.findByOrderNumber(orderNumber);
 }
 
+export async function getOrderByMetadataKey(key: string, value: string) {
+  return orderRepository.findByMetadataKey(key, value);
+}
+
 export async function listOrdersByEmail(email: string) {
   return orderRepository.listByEmail(email);
 }
