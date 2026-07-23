@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     };
   };
   const orderCode = String(payload.orderCode ?? payload.data?.orderCode ?? payload.data?.orderId ?? "");
+  const linkedOrder = orderCode ? await getOrderByMetadataKey("payosOrderCode", orderCode) : null;
+
+  console.info(
+    `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
+  );
 
   await recordWebhookEvent({
     id: `evt_${event.providerEventId}`,
@@ -30,7 +35,6 @@ export async function POST(request: Request) {
   });
 
   if (orderCode) {
-    const linkedOrder = await getOrderByMetadataKey("payosOrderCode", orderCode);
     await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
   }
 

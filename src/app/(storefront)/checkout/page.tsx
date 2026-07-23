@@ -11,11 +11,21 @@ type CheckoutSearchParams = {
   currency?: string | string[];
   checkout?: string | string[];
   customerRef?: string | string[];
+  status?: string | string[];
+  orderCode?: string | string[];
+  code?: string | string[];
 };
 
 function firstValue(value: string | string[] | undefined) {
   if (Array.isArray(value)) return value[0];
   return value;
+}
+
+function normalizeCheckoutStatus(value: string | undefined) {
+  const status = String(value || "").trim().toUpperCase();
+  if (["PAID", "SUCCESS", "SUCCEEDED", "COMPLETED", "00"].includes(status)) return "paid";
+  if (["FAILED", "ERROR", "CANCELLED", "CANCELED"].includes(status)) return "failed";
+  return "";
 }
 
 function formatCurrencyLabel(amount: string | undefined, currency: string | undefined, locale: "vi" | "en") {
@@ -60,6 +70,8 @@ export default async function CheckoutPage({
   const amountLabel = formatCurrencyLabel(firstValue(resolvedSearchParams.amount), firstValue(resolvedSearchParams.currency), locale);
   const checkoutId = firstValue(resolvedSearchParams.checkout);
   const customerRef = firstValue(resolvedSearchParams.customerRef);
+  const status = normalizeCheckoutStatus(firstValue(resolvedSearchParams.status) ?? firstValue(resolvedSearchParams.code));
+  const returnedOrderCode = firstValue(resolvedSearchParams.orderCode);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
   const resolvedOrderLabel = order?.items?.[0]?.productName ?? (order?.metadata?.planName as string | undefined) ?? null;
   const resolvedAmountLabel = formatMinorAmount(order?.totalMinor, order?.currency, locale);
@@ -116,6 +128,37 @@ export default async function CheckoutPage({
                   </div>
                 ) : null}
               </div>
+            </div>
+          ) : null}
+
+          {status === "paid" ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+              <p className="text-sm font-medium text-emerald-700">
+                {locale === "vi" ? "✅ Thanh toán đã ghi nhận" : "✅ Payment recorded"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-emerald-900">
+                {locale === "vi"
+                  ? "Web đã nhận trạng thái thanh toán thành công. Bot sẽ gửi link license và link vào group ngay khi webhook xử lý xong."
+                  : "The web has received the successful payment status. The bot will send the license and group links as soon as the webhook finishes processing."}
+              </p>
+              {returnedOrderCode ? (
+                <p className="mt-2 text-xs text-emerald-700">
+                  {locale === "vi" ? "Mã thanh toán:" : "Payment code:"} <code>{returnedOrderCode}</code>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {status === "failed" ? (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
+              <p className="text-sm font-medium text-rose-700">
+                {locale === "vi" ? "⚠️ Thanh toán chưa hoàn tất" : "⚠️ Payment not completed"}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-rose-900">
+                {locale === "vi"
+                  ? "Nếu bạn đã chuyển khoản nhưng chưa thấy cấp quyền, vui lòng chờ vài chục giây để webhook đồng bộ hoặc bấm thử lại từ trang đơn hàng."
+                  : "If you already paid but no license appears yet, please wait a few seconds for the webhook to sync or retry from the order page."}
+              </p>
             </div>
           ) : null}
 
