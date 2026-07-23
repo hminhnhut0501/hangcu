@@ -1,3 +1,4 @@
+import React from "react";
 import Link from "next/link";
 import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
