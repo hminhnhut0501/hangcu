@@ -18,10 +18,10 @@ type PayosWebhookPayload = {
 };
 
 function toPayosOrderCode() {
-  const timestamp = Date.now().toString().slice(-8);
-  const randomPart = generateRandomToken(6).replace(/[^0-9]/g, "").padEnd(6, "7").slice(0, 6);
-  const candidate = `${timestamp}${randomPart}`.replace(/^0+/, "");
-  return candidate.length > 0 ? candidate : `${Date.now()}`;
+  const base = Date.now() % 1_000_000_000_000;
+  const randomPart = Number(generateRandomToken(3).replace(/\D/g, "").padEnd(3, "7").slice(0, 3));
+  const candidate = base * 1000 + randomPart;
+  return Number.isSafeInteger(candidate) && candidate > 0 ? candidate : Math.floor(Math.random() * 1_000_000_000_000_000) + 1;
 }
 
 function sortAndJoin(values: Record<string, unknown>) {
@@ -73,8 +73,8 @@ export class PayOSPaymentProvider implements PaymentProvider {
 
     const config = this.getConfig();
     const description = "HangCu";
-    const initialOrderCode = String(input.metadata?.payosOrderCode ?? "").trim() || toPayosOrderCode();
-    const attemptCheckout = async (orderCode: string) => {
+    const initialOrderCode = Number(input.metadata?.payosOrderCode ?? 0) || toPayosOrderCode();
+    const attemptCheckout = async (orderCode: number) => {
       const payload = {
         orderCode,
         amount: input.amountMinor,

@@ -19,6 +19,13 @@ const schema = checkoutFormSchema.extend({
   provider: z.enum(["payos", "sandbox", "manual"])
 });
 
+function generatePayosOrderCode() {
+  const base = Date.now() % 1_000_000_000_000;
+  const randomPart = Number(generateRandomToken(3).replace(/\D/g, "").padEnd(3, "7").slice(0, 3));
+  const candidate = base * 1000 + randomPart;
+  return Number.isSafeInteger(candidate) && candidate > 0 ? candidate : Math.floor(Math.random() * 1_000_000_000_000_000) + 1;
+}
+
 export async function POST(request: Request) {
   const payload = await request.json().catch(() => null);
   const parsed = schema.safeParse(payload);
@@ -131,7 +138,7 @@ export async function POST(request: Request) {
 
   const payosOrderCode =
     parsed.data.provider === "payos"
-      ? String(order.metadata?.payosOrderCode ?? "").trim() || `${Date.now()}${generateRandomToken(6).replace(/[^0-9]/g, "").padEnd(6, "7").slice(0, 6)}`
+      ? Number(order.metadata?.payosOrderCode ?? 0) || generatePayosOrderCode()
       : null;
 
   if (parsed.data.provider === "payos") {
