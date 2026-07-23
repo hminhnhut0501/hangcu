@@ -5,6 +5,8 @@ import { getLicensePlanByCode } from "@/modules/license-plans/service";
 import { POST as payosWebhookPost } from "@/app/api/payments/payos/webhook/route";
 import { PayOSPaymentProvider } from "@/providers/payments/payos";
 import { resolveCheckoutPlanCode } from "@/modules/license-bridge/service";
+import * as webhookService from "@/modules/webhooks/service";
+import * as licenseBridgeService from "@/modules/license-bridge/service";
 
 describe("integration api service", () => {
   beforeEach(() => {
@@ -207,6 +209,65 @@ describe("integration api service", () => {
       process.env.APP_HMAC_SECRET = previousSecret;
       process.env.BOT_WEB_HMAC_SECRET = previousWebhookSecret;
       process.env.BOT_LICENSE_CALLBACK_URL = previousBotCallbackUrl;
+    }
+  });
+
+  it("skips duplicate payos webhook events after the first processed delivery", async () => {
+    const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const previousSecret = process.env.APP_HMAC_SECRET;
+    process.env.NEXT_PUBLIC_APP_URL = "https://hangcu.vercel.app";
+    process.env.APP_HMAC_SECRET = "test-secret";
+
+    const getWebhookSpy = vi.spyOn(webhookService, "getWebhookEvent").mockResolvedValue({
+      id: "evt_existing",
+      provider: "payos",
+      providerEventId: "evt_700000001",
+      eventType: "paymentLink.paid",
+      payload: { orderCode: "700000001" },
+      signatureValid: true,
+      processingStatus: "processed",
+      errorMessage: null,
+      processedAt: new Date()
+    });
+    const issueSpy = vi.spyOn(licenseBridgeService, "issueLicenseFromPaidOrder");
+    const recordSpy = vi.spyOn(webhookService, "recordWebhookEvent");
+    vi.spyOn(PayOSPaymentProvider.prototype, "verifyWebhook").mockResolvedValue({
+      providerEventId: "evt_700000001",
+      eventType: "paymentLink.paid",
+      providerPaymentId: "700000001",
+      amountMinor: 59000,
+      currency: "VND",
+      rawPayload: JSON.stringify({
+        orderCode: "700000001",
+        data: { orderCode: "700000001", amount: 59000, currency: "VND" }
+      })
+    });
+
+    try {
+      const response = await payosWebhookPost(
+        new Request("https://hangcu.vercel.app/api/payments/payos/webhook", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            orderCode: "700000001",
+            data: {
+              orderCode: "700000001",
+              amount: 59000,
+              currency: "VND"
+            }
+          })
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ success: true, duplicate: true });
+      expect(recordSpy).not.toHaveBeenCalled();
+      expect(issueSpy).not.toHaveBeenCalled();
+      expect(getWebhookSpy).toHaveBeenCalled();
+    } finally {
+      process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
+      process.env.APP_HMAC_SECRET = previousSecret;
+      vi.restoreAllMocks();
     }
   });
 });

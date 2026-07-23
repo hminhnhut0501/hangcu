@@ -1,5 +1,5 @@
 import { PayOSPaymentProvider } from "@/providers/payments/payos";
-import { recordWebhookEvent } from "@/modules/webhooks/service";
+import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
 import { getOrderByMetadataKey } from "@/modules/orders/service";
@@ -17,10 +17,18 @@ export async function POST(request: Request) {
   };
   const orderCode = String(payload.orderCode ?? payload.data?.orderCode ?? payload.data?.orderId ?? "");
   const linkedOrder = orderCode ? await getOrderByMetadataKey("payosOrderCode", orderCode) : null;
+  const existingEvent = await getWebhookEvent("payos", event.providerEventId);
 
   console.info(
-    `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
+    `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"} duplicate=${existingEvent ? "yes" : "no"}`
   );
+
+  if (existingEvent?.processingStatus === "processed") {
+    console.info(
+      `[payos-webhook] skip duplicate eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
+    );
+    return Response.json({ success: true, duplicate: true });
+  }
 
   await recordWebhookEvent({
     id: `evt_${event.providerEventId}`,

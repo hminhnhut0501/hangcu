@@ -45,6 +45,12 @@ function buildLicenseCode() {
   return `LIC-${part()}-${part()}-${part()}`;
 }
 
+function buildPaymentSessionId(orderId: string, orderNumber: string) {
+  const suffix = generateRandomToken(10).replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toUpperCase();
+  const prefix = String(orderNumber || orderId || "session").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  return `ps_${prefix}_${suffix}`;
+}
+
 export function resolveCheckoutPlanCode(planCode: string) {
   const normalized = String(planCode || "").trim().toUpperCase();
   const aliases: Record<string, string> = {
@@ -150,18 +156,35 @@ async function notifyBotLicenseIssued(input: {
   console.info(
     `[license-delivery] sending bot callback orderNumber=${input.orderNumber} orderId=${input.orderId} telegramUserId=${input.telegramUserId || "none"} baseUrl=${baseUrl}`
   );
-  const response = await fetch(`${baseUrl}/license-delivery`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ ...payload, signature })
-  });
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`Bot callback failed: ${response.status} ${body}`);
-  }
+  const requestBody = JSON.stringify({ ...payload, signature });
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(`${baseUrl}/license-delivery`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: requestBody
+      });
+      if (!response.ok) {
+        const body = await response.text().catch(() => "");
+        throw new Error(`Bot callback failed: ${response.status} ${body}`);
+      }
 
-  console.info(`[license-delivery] bot callback delivered orderNumber=${input.orderNumber} orderId=${input.orderId}`);
-  return response.json().catch(() => null);
+      console.info(
+        `[license-delivery] bot callback delivered orderNumber=${input.orderNumber} orderId=${input.orderId} attempt=${attempt}`
+      );
+      return response.json().catch(() => null);
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `[license-delivery] bot callback retry orderNumber=${input.orderNumber} orderId=${input.orderId} attempt=${attempt} error=${error instanceof Error ? error.message : String(error)}`
+      );
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Bot callback failed"));
 }
 
 async function findOrderByOrderNumber(orderNumber: string) {
@@ -227,6 +250,7 @@ export async function createLicenseCheckout(input: unknown) {
     throw integrationErrors.internalError;
   }
   const licenseCode = String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
+  const paymentSessionId = buildPaymentSessionId(parsed.orderId, parsed.orderId);
   console.info(
     `[license-checkout] creating_order requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} price=${resolvedPrice} currency=${parsed.currency} locale=${parsed.locale} telegramUserId=${parsed.telegramUserId || "n/a"} customerRef=${parsed.customerRef || "n/a"}`
   );
@@ -245,6 +269,7 @@ export async function createLicenseCheckout(input: unknown) {
       currency: parsed.currency,
       activationCode: licenseCode,
       licenseCode,
+      paymentSessionId,
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment",
       orderId: parsed.orderId
@@ -312,7 +337,7 @@ export async function createLicenseCheckout(input: unknown) {
   await updateOrder(order.orderNumber, {
     metadata: {
       ...order.metadata,
-      paymentProvider: (checkout as { providerCheckoutId?: string } ? provider : provider),
+      paymentProvider: provider,
       paymentCheckoutUrl: checkout.checkoutUrl,
       providerCheckoutId: checkout.providerCheckoutId,
       telegramUserId: parsed.telegramUserId ?? null,
@@ -322,6 +347,7 @@ export async function createLicenseCheckout(input: unknown) {
       currency: parsed.currency,
       activationCode: licenseCode,
       licenseCode,
+      paymentSessionId,
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment"
     }
@@ -342,6 +368,8 @@ export async function createLicenseCheckout(input: unknown) {
     activation_code: licenseCode,
     licenseCode,
     license_code: licenseCode,
+    paymentSessionId,
+    payment_session_id: paymentSessionId,
     paymentProvider: provider,
     payment_provider: provider,
     telegramUserId: parsed.telegramUserId ?? null,
