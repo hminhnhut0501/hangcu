@@ -72,10 +72,11 @@ export class PayOSPaymentProvider implements PaymentProvider {
 
     const config = this.getConfig();
     const orderCode = toOrderCode(input.orderId);
+    const description = "HangCu";
     const payload = {
       orderCode,
       amount: input.amountMinor,
-      description: `Hang Cú ${input.orderNumber}`,
+      description,
       buyerEmail: input.customerEmail,
       cancelUrl: input.cancelUrl,
       returnUrl: input.returnUrl,
@@ -91,7 +92,7 @@ export class PayOSPaymentProvider implements PaymentProvider {
         {
           amount: input.amountMinor,
           cancelUrl: input.cancelUrl,
-          description: `Hang Cú ${input.orderNumber}`,
+          description,
           orderCode,
           returnUrl: input.returnUrl
         },
@@ -110,12 +111,15 @@ export class PayOSPaymentProvider implements PaymentProvider {
       body: JSON.stringify(payload)
     });
 
-    const json = (await response.json().catch(() => null)) as
-      | { code?: string; data?: { checkoutUrl?: string; paymentLinkId?: string } }
+    const rawText = await response.text().catch(() => "");
+    const json = (rawText ? JSON.parse(rawText) : null) as
+      | { code?: string; desc?: string; data?: { checkoutUrl?: string; paymentLinkId?: string } }
       | null;
 
     if (!response.ok || json?.code !== "00" || !json?.data?.checkoutUrl || !json?.data?.paymentLinkId) {
-      throw new Error("PayOS checkout creation failed");
+      throw new Error(
+        `PayOS checkout creation failed${response.status ? ` (${response.status})` : ""}${json?.desc ? `: ${json.desc}` : ""}${rawText ? ` | body: ${rawText}` : ""}`
+      );
     }
 
     return {
