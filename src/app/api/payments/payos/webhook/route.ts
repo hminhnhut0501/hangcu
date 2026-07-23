@@ -35,6 +35,9 @@ export async function POST(request: Request) {
   });
 
   if (orderCode) {
+    console.info(
+      `[payos-webhook] dispatch license issue eventId=${event.providerEventId} orderCode=${orderCode} linkedOrder=${linkedOrder?.orderNumber || "none"}`
+    );
     await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
   }
 

@@ -96,6 +96,7 @@ async function notifyBotLicenseIssued(input: {
 }) {
   const baseUrl = buildBotCallbackUrl();
   if (!baseUrl) {
+    console.info(`[license-delivery] skip bot callback orderNumber=${input.orderNumber} reason=no_callback_url`);
     return null;
   }
 
@@ -120,9 +121,13 @@ async function notifyBotLicenseIssued(input: {
   };
   const signature = signBotCallbackPayload(payload);
   if (!signature) {
+    console.info(`[license-delivery] skip bot callback orderNumber=${input.orderNumber} reason=no_signature`);
     return null;
   }
 
+  console.info(
+    `[license-delivery] sending bot callback orderNumber=${input.orderNumber} orderId=${input.orderId} telegramUserId=${input.telegramUserId || "none"} baseUrl=${baseUrl}`
+  );
   const response = await fetch(`${baseUrl}/license-delivery`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -133,6 +138,7 @@ async function notifyBotLicenseIssued(input: {
     throw new Error(`Bot callback failed: ${response.status} ${body}`);
   }
 
+  console.info(`[license-delivery] bot callback delivered orderNumber=${input.orderNumber} orderId=${input.orderId}`);
   return response.json().catch(() => null);
 }
 
@@ -395,19 +401,30 @@ export async function revokeLicense(input: unknown) {
 }
 
 export async function issueLicenseFromPaidOrder(orderNumber: string) {
+  console.info(`[license-issue] start orderNumber=${orderNumber}`);
   const order = await findOrderByOrderNumber(orderNumber);
-  if (!order) return null;
+  if (!order) {
+    console.info(`[license-issue] stop orderNumber=${orderNumber} reason=order_not_found`);
+    return null;
+  }
 
   const planCode = String(order.metadata?.planCode ?? "");
-  if (!planCode) return null;
+  if (!planCode) {
+    console.info(`[license-issue] stop orderNumber=${order.orderNumber} reason=plan_code_missing`);
+    return null;
+  }
 
   const plan = await getLicensePlanByCode(planCode);
-  if (!plan) return null;
+  if (!plan) {
+    console.info(`[license-issue] stop orderNumber=${order.orderNumber} reason=plan_not_found planCode=${planCode}`);
+    return null;
+  }
 
   const activationCode = String(order.metadata?.activationCode ?? buildLicenseCode());
   const existing = await listLicenseKeys();
   const alreadyIssued = existing.find((entry) => entry.orderId === order.id && entry.licensePlanId === plan.id);
   if (alreadyIssued) {
+    console.info(`[license-issue] skip orderNumber=${order.orderNumber} reason=already_issued licenseKeyId=${alreadyIssued.id}`);
     return alreadyIssued;
   }
 
