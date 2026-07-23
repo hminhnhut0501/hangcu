@@ -17,6 +17,9 @@ export default async function AdminDonatePackagesPage() {
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
         onSuccessMessage="Đã lưu donate package."
+        triggerLabel="Thêm donate package"
+        drawerTitle="Thêm donate package"
+        drawerDescription="Nhập thông tin gói donate trong drawer để màn hình gọn hơn."
         fields={[
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "DONATE_NEW" },

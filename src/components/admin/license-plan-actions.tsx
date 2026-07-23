@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
@@ -44,9 +43,6 @@ export function LicensePlanActions({ id }: { id: string }) {
 
   return (
     <div className="flex items-center gap-3">
-      <Link href={`/admin/license-plans?edit=${encodeURIComponent(id)}`} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">
-        Sửa
-      </Link>
       <button
         type="button"
         onClick={handleDelete}

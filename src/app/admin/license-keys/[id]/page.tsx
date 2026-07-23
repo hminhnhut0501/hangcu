@@ -176,6 +176,9 @@ export default async function AdminLicenseKeyDetailPage({
               currentCustomerRef={key.customerRef}
               currentExternalUserId={key.externalUserId}
               currentNotes={(key.metadata.notes as string | undefined) ?? null}
+              triggerLabel="Chỉnh vòng đời"
+              drawerTitle="Chỉnh vòng đời license key"
+              drawerDescription="Mở drawer để cập nhật trạng thái và metadata của key."
             />
           ) : (
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">

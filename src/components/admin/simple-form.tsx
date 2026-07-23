@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
 import { AdminPanel } from "@/components/admin/admin-shell";
+import { AdminDrawer } from "@/components/admin/admin-drawer";
 
 type Field = {
   name: string;
@@ -25,6 +26,10 @@ type Props = {
   submitLabel: string;
   onSuccessMessage: string;
   confirmMessage?: string;
+  triggerLabel?: string;
+  drawerTitle?: string;
+  drawerDescription?: string;
+  defaultOpen?: boolean;
 };
 
 async function readErrorMessage(response: Response) {
@@ -33,7 +38,7 @@ async function readErrorMessage(response: Response) {
   return getAdminErrorMessage(error, `Request failed (${response.status})`);
 }
 
-export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, onSuccessMessage, confirmMessage }: Props) {
+function SimpleAdminFormInner({ endpoint, fields = [], sections, submitLabel, onSuccessMessage, confirmMessage }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState<string>("");
@@ -145,5 +150,26 @@ export function SimpleAdminForm({ endpoint, fields = [], sections, submitLabel, 
         </div>
       </div>
     </form>
+  );
+}
+
+export function SimpleAdminForm(props: Props) {
+  if (!props.triggerLabel) {
+    return <SimpleAdminFormInner {...props} />;
+  }
+
+  return (
+    <AdminDrawer
+      trigger={
+        <button type="button" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-sm">
+          {props.triggerLabel}
+        </button>
+      }
+      title={props.drawerTitle ?? props.submitLabel}
+      description={props.drawerDescription}
+      defaultOpen={props.defaultOpen}
+    >
+      <SimpleAdminFormInner {...props} />
+    </AdminDrawer>
   );
 }

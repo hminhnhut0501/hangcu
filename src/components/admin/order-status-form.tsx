@@ -3,6 +3,7 @@
 import { Alert, Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { AdminDrawer } from "@/components/admin/admin-drawer";
 
 type Props = {
   orderNumber: string;
@@ -10,9 +11,12 @@ type Props = {
   currentPaymentStatus: string;
   currentFulfillmentStatus: string;
   currentNotes: string | null;
+  triggerLabel?: string;
+  drawerTitle?: string;
+  drawerDescription?: string;
 };
 
-export function OrderStatusForm({
+function OrderStatusFormInner({
   orderNumber,
   currentStatus,
   currentPaymentStatus,
@@ -151,5 +155,25 @@ export function OrderStatusForm({
         </Box>
       </Box>
     </form>
+  );
+}
+
+export function OrderStatusForm(props: Props) {
+  if (!props.triggerLabel) {
+    return <OrderStatusFormInner {...props} />;
+  }
+
+  return (
+    <AdminDrawer
+      trigger={
+        <button type="button" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-sm">
+          {props.triggerLabel}
+        </button>
+      }
+      title={props.drawerTitle ?? props.triggerLabel}
+      description={props.drawerDescription}
+    >
+      <OrderStatusFormInner {...props} />
+    </AdminDrawer>
   );
 }

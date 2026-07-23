@@ -171,6 +171,9 @@ export default async function AdminOrderDetailPage({
             currentPaymentStatus={order.paymentStatus}
             currentFulfillmentStatus={order.fulfillmentStatus}
             currentNotes={order.notes}
+            triggerLabel="Chỉnh trạng thái"
+            drawerTitle="Chỉnh trạng thái đơn"
+            drawerDescription="Mở drawer để cập nhật trạng thái đơn hàng và ghi chú nội bộ."
           />
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
             Trang này tối ưu cho hỗ trợ và fulfillment. Các phase sau có thể thêm hoàn tiền, gửi lại email, fulfillment

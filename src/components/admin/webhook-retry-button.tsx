@@ -3,13 +3,17 @@
 import { Button, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AdminDrawer } from "@/components/admin/admin-drawer";
 
 type Props = {
   provider: string;
   providerEventId: string;
+  triggerLabel?: string;
+  drawerTitle?: string;
+  drawerDescription?: string;
 };
 
-export function WebhookRetryButton({ provider, providerEventId }: Props) {
+function WebhookRetryButtonInner({ provider, providerEventId }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -91,5 +95,25 @@ export function WebhookRetryButton({ provider, providerEventId }: Props) {
         </Typography>
       ) : null}
     </div>
+  );
+}
+
+export function WebhookRetryButton(props: Props) {
+  if (!props.triggerLabel) {
+    return <WebhookRetryButtonInner {...props} />;
+  }
+
+  return (
+    <AdminDrawer
+      trigger={
+        <button type="button" className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">
+          {props.triggerLabel}
+        </button>
+      }
+      title={props.drawerTitle ?? props.triggerLabel}
+      description={props.drawerDescription}
+    >
+      <WebhookRetryButtonInner {...props} />
+    </AdminDrawer>
   );
 }

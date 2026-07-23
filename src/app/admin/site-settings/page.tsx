@@ -107,6 +107,9 @@ export default async function AdminSiteSettingsPage({
           submitLabel="Lưu nội dung"
           onSuccessMessage="Đã cập nhật nội dung website."
           sections={isAdvanced ? advancedSections : basicSections}
+          triggerLabel="Mở form chỉnh nội dung"
+          drawerTitle="Chỉnh nội dung website"
+          drawerDescription="Mở drawer để chỉnh nhanh storefront content mà không chiếm diện tích trang."
         />
         <div className="space-y-6">
           <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

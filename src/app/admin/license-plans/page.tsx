@@ -2,12 +2,11 @@ import { listLicensePlans } from "@/modules/license-plans/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { LicensePlanActions } from "@/components/admin/license-plan-actions";
 import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
+import { LicensePlanEditDrawer } from "@/components/admin/license-plan-edit-drawer";
 
-export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ edit?: string; mode?: string }> }) {
+export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ mode?: string }> }) {
   const plans = await listLicensePlans();
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const editPlan = resolvedSearchParams.edit ? plans.find((plan) => plan.id === resolvedSearchParams.edit) ?? null : null;
-  const defaults = editPlan ?? plans[0] ?? null;
   const mode = typeof resolvedSearchParams.mode === "string" ? resolvedSearchParams.mode : "payment-only";
   const isAdvanced = mode === "advanced";
 
@@ -30,38 +29,40 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
       />
       <SimpleAdminForm
         endpoint="/api/admin/license-plans"
-        submitLabel={editPlan ? "Cập nhật gói" : "Lưu gói"}
-        onSuccessMessage={editPlan ? "Đã cập nhật license plan." : "Đã lưu license plan."}
-        confirmMessage={editPlan ? "Lưu thay đổi cho plan này?" : undefined}
+        submitLabel="Lưu gói"
+        onSuccessMessage="Đã lưu license plan."
+        triggerLabel="Thêm gói"
+        drawerTitle="Thêm license plan"
+        drawerDescription="Nhập dữ liệu plan mới trong drawer cho gọn."
         fields={
           isAdvanced
             ? [
-                { name: "id", label: "ID", defaultValue: defaults?.id ?? "lp_new" },
-                { name: "code", label: "Code", defaultValue: defaults?.code ?? "HCV_NEW" },
-                { name: "name", label: "Tên", defaultValue: defaults?.name ?? "New License Plan" },
-                { name: "nameVi", label: "Tên VI", defaultValue: defaults?.nameVi ?? "Gói license mới" },
-                { name: "nameEn", label: "Tên EN", defaultValue: defaults?.nameEn ?? "New License Plan" },
-                { name: "slug", label: "Slug", defaultValue: defaults?.slug ?? "new-license-plan" },
-                { name: "description", label: "Mô tả", defaultValue: defaults?.description ?? "Description" },
-                { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: String(defaults?.currencyPrices?.VND ?? 199000) },
-                { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: String(defaults?.currencyPrices?.USD ?? 9.99) },
-                { name: "planType", label: "Loại gói", defaultValue: defaults?.planType ?? "regular" },
-                { name: "durationDays", label: "Số ngày", type: "number", defaultValue: String(defaults?.durationDays ?? 30) },
-                { name: "isLifetime", label: "Trọn đời", type: "checkbox", defaultValue: defaults?.isLifetime ? "true" : "" },
-                { name: "status", label: "Trạng thái", defaultValue: defaults?.status ?? "active" },
-                { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(defaults?.sortOrder ?? 1) },
-                { name: "entitlementTags", label: "Entitlement tags", defaultValue: defaults?.entitlementTags?.join(",") ?? "app_access,vip_group_access" }
+                { name: "id", label: "ID", defaultValue: "lp_new" },
+                { name: "code", label: "Code", defaultValue: "HCV_NEW" },
+                { name: "name", label: "Tên", defaultValue: "New License Plan" },
+                { name: "nameVi", label: "Tên VI", defaultValue: "Gói license mới" },
+                { name: "nameEn", label: "Tên EN", defaultValue: "New License Plan" },
+                { name: "slug", label: "Slug", defaultValue: "new-license-plan" },
+                { name: "description", label: "Mô tả", defaultValue: "Description" },
+                { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: "199000" },
+                { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: "9.99" },
+                { name: "planType", label: "Loại gói", defaultValue: "regular" },
+                { name: "durationDays", label: "Số ngày", type: "number", defaultValue: "30" },
+                { name: "isLifetime", label: "Trọn đời", type: "checkbox", defaultValue: "" },
+                { name: "status", label: "Trạng thái", defaultValue: "active" },
+                { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: "1" },
+                { name: "entitlementTags", label: "Entitlement tags", defaultValue: "app_access,vip_group_access" }
               ]
             : [
-                { name: "id", label: "ID", defaultValue: defaults?.id ?? "lp_new" },
-                { name: "code", label: "Code", defaultValue: defaults?.code ?? "HCV_NEW" },
-                { name: "name", label: "Tên", defaultValue: defaults?.name ?? "New License Plan" },
-                { name: "nameVi", label: "Tên VI", defaultValue: defaults?.nameVi ?? "Gói license mới" },
-                { name: "nameEn", label: "Tên EN", defaultValue: defaults?.nameEn ?? "New License Plan" },
-                { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: String(defaults?.currencyPrices?.VND ?? 199000) },
-                { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: String(defaults?.currencyPrices?.USD ?? 9.99) },
-                { name: "status", label: "Trạng thái", defaultValue: defaults?.status ?? "active" },
-                { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(defaults?.sortOrder ?? 1) }
+                { name: "id", label: "ID", defaultValue: "lp_new" },
+                { name: "code", label: "Code", defaultValue: "HCV_NEW" },
+                { name: "name", label: "Tên", defaultValue: "New License Plan" },
+                { name: "nameVi", label: "Tên VI", defaultValue: "Gói license mới" },
+                { name: "nameEn", label: "Tên EN", defaultValue: "New License Plan" },
+                { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: "199000" },
+                { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: "9.99" },
+                { name: "status", label: "Trạng thái", defaultValue: "active" },
+                { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: "1" }
               ]
         }
       />
@@ -84,7 +85,10 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
                 <td className="px-6 py-4">{plan.currencyPrices.VND ? `${plan.currencyPrices.VND.toLocaleString("vi-VN")}đ` : "-"} / {plan.currencyPrices.USD ? `${plan.currencyPrices.USD} USD` : "-"}</td>
                 <td className="px-6 py-4">{plan.status}</td>
                 <td className="px-6 py-4">
-                  <LicensePlanActions id={plan.id} />
+                  <div className="flex items-center gap-3">
+                    <LicensePlanEditDrawer plan={plan} isAdvanced={isAdvanced} />
+                    <LicensePlanActions id={plan.id} />
+                  </div>
                 </td>
               </tr>
             ))}

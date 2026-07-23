@@ -56,7 +56,13 @@ export default async function AdminPaymentDetailPage({
             {typeof payload.orderNumber === "string" ? payload.orderNumber : "Unknown"}
           </p>
           <div className="mt-3">
-            <PaymentRetryButton provider={event.provider} providerEventId={event.providerEventId} />
+            <PaymentRetryButton
+              provider={event.provider}
+              providerEventId={event.providerEventId}
+              triggerLabel="Thử lại payment"
+              drawerTitle="Retry payment event"
+              drawerDescription="Mở drawer để xác nhận thử lại event payment này."
+            />
           </div>
         </div>
       </div>

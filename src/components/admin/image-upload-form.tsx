@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
 import { AdminPanel } from "@/components/admin/admin-shell";
+import { AdminDrawer } from "@/components/admin/admin-drawer";
 
 type Props = {
   title: string;
@@ -17,9 +18,10 @@ type Props = {
     placeholder?: string;
     defaultValue?: string;
   }>;
+  triggerLabel?: string;
 };
 
-export function ImageUploadForm({ title, endpoint, folder, assetKey, description, extraFields = [] }: Props) {
+function ImageUploadFormInner({ title, endpoint, folder, assetKey, description, extraFields = [] }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [url, setUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -98,5 +100,25 @@ export function ImageUploadForm({ title, endpoint, folder, assetKey, description
         {status === "error" ? <AdminBanner tone="error" message={message} /> : null}
       </div>
     </form>
+  );
+}
+
+export function ImageUploadForm(props: Props) {
+  if (!props.triggerLabel) {
+    return <ImageUploadFormInner {...props} />;
+  }
+
+  return (
+    <AdminDrawer
+      trigger={
+        <button type="button" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-sm">
+          {props.triggerLabel}
+        </button>
+      }
+      title={props.title}
+      description={props.description}
+    >
+      <ImageUploadFormInner {...props} />
+    </AdminDrawer>
   );
 }
