@@ -46,6 +46,11 @@ export async function POST(request: Request) {
   try {
     const rawBody = await readJsonBody(request);
     const body = JSON.parse(rawBody) as Record<string, unknown>;
+    // Bot payment is currency-driven; locale is derived instead of being a
+    // required transport field. Keep a safe default for older deployments.
+    if (body.locale !== "vi" && body.locale !== "en") {
+      body.locale = body.currency === "USD" ? "en" : "vi";
+    }
     const parsed = checkoutRequestSchema.safeParse(body);
     if (!parsed.success) {
       console.info(
