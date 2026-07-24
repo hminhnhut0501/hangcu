@@ -6,6 +6,31 @@ import { getOrderByMetadataKey } from "@/modules/orders/service";
 
 const provider = new PayOSPaymentProvider();
 
+const WEBHOOK_ORDER_SNAPSHOT_PREFIX = "[payos-webhook] order_snapshot ";
+
+function buildOrderSnapshotLog(order: {
+  orderNumber?: string | null;
+  id?: string | null;
+  metadata?: Record<string, unknown> | null;
+  currency?: string | null;
+  totalMinor?: number | null;
+} | null) {
+  return (
+    `${WEBHOOK_ORDER_SNAPSHOT_PREFIX}` +
+    `orderNumber=${order?.orderNumber || "n/a"} ` +
+    `orderId=${order?.id || "n/a"} ` +
+    `planCode=${String(order?.metadata?.planCode ?? "n/a")} ` +
+    `requestedPlanCode=${String(order?.metadata?.requestedPlanCode ?? "n/a")} ` +
+    `checkoutKind=${String(order?.metadata?.checkoutKind ?? "n/a")} ` +
+    `paymentSessionId=${String(order?.metadata?.paymentSessionId ?? "n/a")} ` +
+    `paymentProvider=${String(order?.metadata?.paymentProvider ?? "n/a")} ` +
+    `source=${String(order?.metadata?.source ?? "n/a")} ` +
+    `integrationSource=${String(order?.metadata?.integrationSource ?? "n/a")} ` +
+    `currency=${String(order?.currency ?? "n/a")} ` +
+    `orderAmount=${String(order?.totalMinor ?? "n/a")}`
+  );
+}
+
 export async function POST(request: Request) {
   const rawBody = await request.clone().text().catch(() => "");
   console.info(`[payos-webhook] received raw_bytes=${rawBody.length}`);
@@ -36,9 +61,7 @@ export async function POST(request: Request) {
   console.info(
     `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"} duplicate=${existingEvent ? "yes" : "no"}`
   );
-  console.info(
-    `[payos-webhook] order_snapshot orderNumber=${linkedOrder?.orderNumber || "n/a"} orderId=${linkedOrder?.id || "n/a"} planCode=${String(linkedOrder?.metadata?.planCode ?? "n/a")} requestedPlanCode=${String(linkedOrder?.metadata?.requestedPlanCode ?? "n/a")} checkoutKind=${String(linkedOrder?.metadata?.checkoutKind ?? "n/a")} paymentSessionId=${String(linkedOrder?.metadata?.paymentSessionId ?? "n/a")} paymentProvider=${String(linkedOrder?.metadata?.paymentProvider ?? "n/a")} source=${String(linkedOrder?.metadata?.source ?? "n/a")} integrationSource=${String(linkedOrder?.metadata?.integrationSource ?? "n/a")} currency=${String(linkedOrder?.currency ?? "n/a")} orderAmount=${String(linkedOrder?.totalMinor ?? "n/a")}`
-  );
+  console.info(buildOrderSnapshotLog(linkedOrder));
 
   if (existingEvent?.processingStatus === "processed") {
     console.info(
