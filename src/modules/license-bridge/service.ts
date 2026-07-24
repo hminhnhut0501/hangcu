@@ -86,16 +86,21 @@ function buildBotActivationUrl(licenseCode: string) {
 }
 
 function buildBotCallbackUrl() {
-  const callbackUrl =
-    process.env.LICENSE_BOT_CALLBACK_URL?.replace(/\/$/, "") ||
-    process.env.BOT_LICENSE_CALLBACK_URL?.replace(/\/$/, "") ||
+  const rawCallbackUrl =
+    process.env.LICENSE_BOT_CALLBACK_URL?.trim() ||
+    process.env.BOT_LICENSE_CALLBACK_URL?.trim() ||
     "";
-  if (!callbackUrl) {
+  if (!rawCallbackUrl) {
     console.info(
       `[license-delivery] callback_url_missing LICENSE_BOT_CALLBACK_URL=${process.env.LICENSE_BOT_CALLBACK_URL ? "set" : "missing"} BOT_LICENSE_CALLBACK_URL=${process.env.BOT_LICENSE_CALLBACK_URL ? "set" : "missing"}`
     );
+    return "";
   }
-  return callbackUrl;
+  const normalized = rawCallbackUrl.replace(/\/$/, "");
+  if (normalized.endsWith("/license-delivery")) {
+    return normalized;
+  }
+  return `${normalized}/license-delivery`;
 }
 
 function signBotCallbackPayload(payload: Record<string, unknown>) {
@@ -165,7 +170,7 @@ async function notifyBotLicenseIssued(input: {
   let lastError: unknown = null;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      const response = await fetch(`${baseUrl}/license-delivery`, {
+      const response = await fetch(baseUrl, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: requestBody
