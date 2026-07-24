@@ -539,6 +539,9 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
   console.info(
     `[license-issue] plan_resolve orderNumber=${order.orderNumber} orderAmount=${order.totalMinor} currency=${order.currency} source=${planSource} resolvedPlanCode=${resolvedPlanCode || "n/a"} candidates=${planCodeCandidates.join(",") || "none"}`
   );
+  console.info(
+    `[license-issue] metadata_snapshot orderNumber=${order.orderNumber} planCode=${String(order.metadata?.planCode ?? "n/a")} requestedPlanCode=${String(order.metadata?.requestedPlanCode ?? "n/a")} checkoutKind=${String(order.metadata?.checkoutKind ?? "n/a")} paymentSessionId=${String(order.metadata?.paymentSessionId ?? "n/a")} paymentProvider=${String(order.metadata?.paymentProvider ?? "n/a")} source=${String(order.metadata?.source ?? "n/a")} integrationSource=${String(order.metadata?.integrationSource ?? "n/a")}`
+  );
   if (!plan) {
     console.info(
       `[license-issue] stop orderNumber=${order.orderNumber} reason=plan_code_missing orderAmount=${order.totalMinor} currency=${order.currency} candidates=${planCodeCandidates.join(",") || "none"}`
