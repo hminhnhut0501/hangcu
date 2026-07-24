@@ -28,27 +28,27 @@ function formatMoney(amountMinor: number, currency: string, locale: Locale) {
   return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
 }
 
-const featureBlocks = {
+  const featureBlocks = {
   vi: [
     {
       icon: ShieldCheck,
-      title: "License sạch",
-      text: "Cấp key tự động, có trạng thái, revoke và audit."
+      title: "Cấp key tự động",
+      text: "Hệ thống tự cấp, theo dõi trạng thái và ghi nhận lịch sử xử lý."
     },
     {
       icon: Languages,
       title: "VI / EN",
-      text: "Trang chủ và hành trình mua hàng song ngữ."
+      text: "Giao diện song ngữ cho trang chủ, mua hàng và thanh toán."
     },
     {
       icon: Zap,
       title: "Mua nhanh",
-      text: "Chọn gói xong là đi thẳng sang checkout."
+      text: "Chọn gói rồi đi thẳng sang checkout, không cần qua nhiều bước."
     },
     {
       icon: Download,
       title: "Giao ngay",
-      text: "Sau thanh toán, hệ thống trả license key ngay."
+      text: "Thanh toán xong là nhận license key qua email hoặc bot."
     }
   ],
   en: [
@@ -90,10 +90,10 @@ export default async function HomePage() {
 
   const heroCopy = {
     vi: {
-      eyebrow: "Bản quyền phần mềm",
+      eyebrow: "License phần mềm",
       title: "Hang Cú video",
       lead: "Mở bán license 30 ngày và trọn đời.",
-      sub: "Gọn, sạch, sang. Dùng cho vài chục đơn mỗi tháng vẫn đủ nhẹ, nhưng đủ chuẩn để scale sau này.",
+      sub: "Gọn, rõ ràng và dễ dùng. Phù hợp cho cửa hàng nhỏ nhưng vẫn đủ đường để mở rộng sau này.",
       primary: "Xem gói license",
       secondary: "Đi tới checkout",
       badge: "Mua nhanh"
@@ -112,7 +112,7 @@ export default async function HomePage() {
   const quickBuyLabel = locale === "vi" ? "Chọn gói" : "Choose a plan";
   const featureBlocksForLocale = featureBlocks[locale];
   const trustPoints = locale === "vi"
-    ? ["Cấp license tự động", "Tối ưu cho vài chục đơn/tháng", "Giao diện VI / EN"]
+    ? ["Giao key tự động", "Phù hợp lượng đơn nhỏ", "Giao diện VI / EN"]
     : ["Auto license delivery", "Built for a few dozen orders/month", "VI / EN interface"];
   const comparisonRows = [
     {
@@ -252,8 +252,8 @@ export default async function HomePage() {
                     <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),transparent_36%)]" />
                     <div className="relative flex items-center justify-between">
                       <div className="space-y-2">
-                        <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">{locale === "vi" ? "Ảnh thật của app" : "Real app preview"}</p>
-                        <p className="text-lg font-semibold text-slate-950">{locale === "vi" ? "Giao diện gọn, sáng, dễ nhìn" : "Clean, bright, and focused"}</p>
+                        <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">{locale === "vi" ? "Ảnh ứng dụng" : "App preview"}</p>
+                        <p className="text-lg font-semibold text-slate-950">{locale === "vi" ? "Giao diện thật của Hang Cú video" : "The actual Hang Cú video app"}</p>
                       </div>
                       <span className="rounded-full border border-white/70 bg-white/90 px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
                         {locale === "vi" ? "Apple style" : "Apple style"}
@@ -278,11 +278,11 @@ export default async function HomePage() {
                       </div>
                       <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
                         <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Motion" : "Motion"}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Float nhẹ" : "Gentle float"}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chuyển động nhẹ" : "Gentle motion"}</p>
                       </div>
                       <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
                         <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Focus" : "Focus"}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Không phân tâm" : "No distractions"}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Không rườm rà" : "No clutter"}</p>
                       </div>
                     </div>
                   </div>
@@ -398,10 +398,10 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-6 pb-16">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {[
-              locale === "vi" ? "License key tự động" : "Auto license key",
-              locale === "vi" ? "Cấp quyền / revoke / status" : "Grant / revoke / status",
-              locale === "vi" ? "Thanh toán PayOS, PayPal, Lemon Squeezy" : "PayOS, PayPal, Lemon Squeezy",
-              locale === "vi" ? "Admin CP tiếng Việt 100%" : "100% Vietnamese admin"
+              locale === "vi" ? "Tự động cấp key" : "Auto-issued license keys",
+              locale === "vi" ? "Quản lý trạng thái" : "Status management",
+              locale === "vi" ? "PayOS, PayPal, Lemon Squeezy" : "PayOS, PayPal, Lemon Squeezy",
+              locale === "vi" ? "Admin giao diện tiếng Việt" : "Vietnamese admin UI"
             ].map((item, index) => {
               const Icon = [Sparkles, CheckCircle2, ShieldCheck, Languages][index];
               return (
