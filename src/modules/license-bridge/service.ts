@@ -284,7 +284,7 @@ export async function createLicenseCheckout(input: unknown) {
   const parsed = licenseCheckoutSchema.parse(input);
   verifyLegacyCheckoutSignature(parsed);
 
-  const requestedPlanCode = String(parsed.planCode || "").trim().toUpperCase();
+  const requestedPlanCode = String(parsed.vipPlanCode || parsed.planCode || "").trim().toUpperCase();
   const canonicalPlanCode = resolveCheckoutPlanCode(requestedPlanCode);
   const dbPlan = await getLicensePlanByCode(canonicalPlanCode);
   const seedPlan = findSeedPlanByCode(canonicalPlanCode);
@@ -326,7 +326,7 @@ export async function createLicenseCheckout(input: unknown) {
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
       planCode: plan.code,
-      vipPlanCode: requestedPlanCode,
+      vipPlanCode: String(parsed.vipPlanCode || requestedPlanCode),
       requestedPlanCode,
       locale: parsed.locale,
       currency: parsed.currency,

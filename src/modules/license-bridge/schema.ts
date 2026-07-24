@@ -18,6 +18,7 @@ export const licenseCheckoutSchema = integrationBaseSchema.extend({
   telegramUserId: z.string().min(1).optional(),
   customerRef: z.string().min(1).optional(),
   planCode: z.string().min(1),
+  vipPlanCode: z.string().min(1).optional(),
   locale: z.enum(["vi", "en"]),
   currency: z.enum(["VND", "USD"]),
   activationCode: z.string().min(1).optional(),
