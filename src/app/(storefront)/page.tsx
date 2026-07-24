@@ -28,7 +28,7 @@ function formatMoney(amountMinor: number, currency: string, locale: Locale) {
   return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
 }
 
-  const featureBlocks = {
+const featureBlocks = {
   vi: [
     {
       icon: ShieldCheck,
@@ -111,6 +111,21 @@ export default async function HomePage() {
 
   const quickBuyLabel = locale === "vi" ? "Chọn gói" : "Choose a plan";
   const featureBlocksForLocale = featureBlocks[locale];
+  const featureMenu = locale === "vi"
+    ? [
+        { label: "Giới thiệu", href: "#hero" },
+        { label: "Tính năng", href: "#features" },
+        { label: "Ảnh app", href: "#showcase" },
+        { label: "Chọn gói", href: "#plans" },
+        { label: "So sánh", href: "#compare" }
+      ]
+    : [
+        { label: "Intro", href: "#hero" },
+        { label: "Features", href: "#features" },
+        { label: "App shots", href: "#showcase" },
+        { label: "Plans", href: "#plans" },
+        { label: "Compare", href: "#compare" }
+      ];
   const trustPoints = locale === "vi"
     ? ["Giao key tự động", "Phù hợp lượng đơn nhỏ", "Giao diện VI / EN"]
     : ["Auto license delivery", "Built for a few dozen orders/month", "VI / EN interface"];
@@ -149,25 +164,37 @@ export default async function HomePage() {
 
   return (
     <main className="overflow-hidden bg-[#f6f8fc] text-slate-950">
-      <section className="relative">
+      <section id="hero" className="relative">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,_rgba(96,165,250,0.18),_transparent_40%),radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_30%),linear-gradient(to_bottom,_#f8fbff,_#f6f8fc_55%,_#eef3fb)]" />
         <div className="absolute left-1/2 top-0 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-300/20 blur-3xl motion-safe:animate-[pulse_8s_ease-in-out_infinite]" />
 
         <div className="mx-auto grid max-w-7xl gap-12 px-6 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-24">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 shadow-sm backdrop-blur">
+            <div className="flex flex-wrap gap-2">
+              {featureMenu.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-950"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               {heroCopy.eyebrow}
             </div>
 
             <div className="space-y-5">
-              <p className="text-sm font-medium uppercase tracking-[0.34em] text-blue-600">
+              <p className="text-sm font-medium text-blue-600">
                 {getLocalizedText(locale, { vi: settings.heroEyebrowVi, en: settings.heroEyebrowEn })}
               </p>
-              <h1 className="max-w-2xl text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+              <h1 className="max-w-2xl text-5xl font-semibold text-slate-950 sm:text-6xl lg:text-7xl">
                 {heroCopy.title}
               </h1>
-              <p className="max-w-2xl text-2xl font-medium tracking-tight text-slate-900 sm:text-[2rem]">
+              <p className="max-w-2xl text-2xl font-medium text-slate-900 sm:text-[2rem]">
                 {heroCopy.lead}
               </p>
               <p className="max-w-2xl text-lg leading-8 text-slate-600">
@@ -234,7 +261,7 @@ export default async function HomePage() {
               <div className="relative overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/80 p-3 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
                 <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_45%),linear-gradient(180deg,#fbfcff,#eef4ff)]">
                   <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),transparent_42%)]" />
-                  <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 shadow-sm">
+                  <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-[11px] font-semibold text-slate-500 shadow-sm">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     {heroCopy.badge}
                   </div>
@@ -258,13 +285,95 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-10">
+      <section id="features" className="mx-auto max-w-7xl px-6 pb-10 pt-4">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">
+              {locale === "vi" ? "Tính năng nổi bật" : "Key features"}
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+              {locale === "vi" ? "Mỗi tính năng có một màn hình riêng" : "Each feature gets its own screen"}
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-slate-600">
+              {locale === "vi"
+                ? "Landing page nên cho khách thấy app thật, hành trình mua thật, và cảm giác sản phẩm đã sẵn sàng để bán."
+                : "The landing page should show the real app, the real buying flow, and a product that feels ready to sell."}
+            </p>
+
+            <div className="mt-6 space-y-3">
+              {featureBlocksForLocale.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.title} className="flex items-start gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">{item.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{item.text}</p>
+                    </div>
+                    <span className="ml-auto text-xs font-medium text-slate-400">0{index + 1}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div id="showcase" className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                {locale === "vi" ? "Ảnh app thật" : "Real app shot"}
+              </p>
+              <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-[#091221]">
+                <Image
+                  src="/brand/hangcu-hero-mockup.png"
+                  alt={locale === "vi" ? "Ảnh chụp ứng dụng Hang Cú video" : "Hang Cú video app screenshot"}
+                  width={1200}
+                  height={900}
+                  className="h-auto w-full"
+                />
+              </div>
+            </div>
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                {locale === "vi" ? "Video demo" : "Demo video"}
+              </p>
+              <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-950">
+                <video
+                  src="/brand/hangcu-demo.mp4"
+                  controls
+                  playsInline
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+            </div>
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] md:col-span-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
+                {locale === "vi" ? "Menu tính năng" : "Feature menu"}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {featureMenu.slice(1).map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-slate-950"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="plans" className="mx-auto max-w-7xl px-6 pb-10">
         <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-blue-600">
-                {quickBuyLabel}
-              </p>
+                <p className="text-xs font-semibold text-blue-600">
+                  {quickBuyLabel}
+                </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight">
                 {locale === "vi" ? "Chọn gói để đi thẳng sang thanh toán" : "Choose a plan and jump straight to checkout"}
               </h2>
@@ -287,12 +396,12 @@ export default async function HomePage() {
                   <div className={`absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 ${isPrimary ? "bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_35%)]" : "bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.08),transparent_35%)]"}`} />
                   <div className="relative flex items-start justify-between gap-4">
                     <div className="space-y-3">
-                      <p className={`text-xs font-semibold uppercase tracking-[0.28em] ${isPrimary ? "text-slate-300" : "text-slate-500"}`}>{product.sku}</p>
+                      <p className={`text-xs font-semibold ${isPrimary ? "text-slate-300" : "text-slate-500"}`}>{product.sku}</p>
                       <h3 className="text-2xl font-semibold tracking-tight">{product.name}</h3>
                       <p className={`max-w-xl text-sm leading-6 ${isPrimary ? "text-slate-300" : "text-slate-600"}`}>{product.shortDescription}</p>
                     </div>
                     <div className={`rounded-2xl px-3 py-2 text-right ${isPrimary ? "bg-white/10" : "bg-slate-50"}`}>
-                      <p className={`text-[11px] uppercase tracking-[0.3em] ${isPrimary ? "text-slate-300" : "text-slate-500"}`}>
+                      <p className={`text-[11px] ${isPrimary ? "text-slate-300" : "text-slate-500"}`}>
                         {locale === "vi" ? "Từ" : "From"}
                       </p>
                       <p className="mt-1 text-lg font-semibold">{formatMoney(price.amountMinor, price.currency, locale)}</p>
@@ -360,7 +469,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-16">
+      <section id="compare" className="mx-auto max-w-7xl px-6 pb-16">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {[
               locale === "vi" ? "Tự động cấp key" : "Auto-issued license keys",
