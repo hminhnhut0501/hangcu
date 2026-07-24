@@ -212,6 +212,137 @@ describe("integration api service", () => {
     }
   });
 
+  it("sends bot callbacks to a full license-delivery endpoint without duplicating the path", async () => {
+    const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const previousSecret = process.env.APP_HMAC_SECRET;
+    const previousWebhookSecret = process.env.BOT_WEB_HMAC_SECRET;
+    const previousBotCallbackUrl = process.env.BOT_LICENSE_CALLBACK_URL;
+    process.env.NEXT_PUBLIC_APP_URL = "https://hangcu.vercel.app";
+    process.env.APP_HMAC_SECRET = "test-secret";
+    process.env.BOT_WEB_HMAC_SECRET = "test-secret";
+    process.env.BOT_LICENSE_CALLBACK_URL = "https://bot.example/license-delivery";
+
+    const originalFetch = global.fetch;
+    const botCalls: Array<{ url: string; body: unknown }> = [];
+
+    vi.spyOn(PayOSPaymentProvider.prototype, "verifyWebhook").mockImplementation(async (request: Request) => {
+      const rawPayload = await request.text();
+      const parsed = JSON.parse(rawPayload) as { orderCode?: string | number };
+      const orderCode = String(parsed.orderCode ?? "");
+      return {
+        providerEventId: `evt_${orderCode}`,
+        eventType: "paymentLink.paid",
+        providerPaymentId: orderCode,
+        amountMinor: 59000,
+        currency: "VND",
+        rawPayload
+      };
+    });
+
+    global.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/v2/payment-requests")) {
+        const body = init?.body ? JSON.parse(String(init.body)) as { orderCode?: number } : {};
+        return new Response(
+          JSON.stringify({
+            code: "00",
+            data: {
+              checkoutUrl: "https://payos.example/checkout/abc123",
+              paymentLinkId: "plink_abc123",
+              orderCode: body.orderCode
+            }
+          }),
+          { status: 200, headers: { "content-type": "application/json" } }
+        );
+      }
+
+      if (url === "https://bot.example/license-delivery") {
+        botCalls.push({
+          url,
+          body: init?.body ? JSON.parse(String(init.body)) : null
+        });
+        return new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        });
+      }
+
+      return new Response("unexpected fetch", { status: 500 });
+    }) as typeof fetch;
+
+    try {
+      const plan = await getLicensePlanByCode("HCV_30D");
+      const order = await createOrder({
+        customerEmail: "buyer@example.com",
+        currency: "VND",
+        source: "bot_checkout",
+        notes: null,
+        metadata: {
+          source: "prive_bot",
+          integrationSource: "bot_checkout",
+          orderNumber: "ORD-END2END-2",
+          planCode: "HCV_30D",
+          planName: "VIP 30 Ngày - Prime",
+          amountLabel: "59.000đ",
+          amountMinor: 59000,
+          currency: "VND",
+          customerRef: "customer-1",
+          checkoutId: "checkout_2"
+        },
+        items: [
+          {
+            productId: plan!.id,
+            sku: plan!.code,
+            productName: "VIP 30 Ngày - Prime",
+            quantity: 1,
+            unitAmountMinor: 59000,
+            totalAmountMinor: 59000,
+            productSnapshot: {
+              name: "VIP 30 Ngày - Prime",
+              slug: plan!.slug,
+              shortDescription: plan!.description,
+              status: "active",
+              downloadLimit: 0,
+              downloadExpiryDays: plan!.durationDays
+            }
+          }
+        ]
+      });
+
+      await updateOrder(order.orderNumber, {
+        metadata: {
+          ...order.metadata,
+          payosOrderCode: "700000002"
+        }
+      });
+
+      const response = await payosWebhookPost(
+        new Request("https://hangcu.vercel.app/api/payments/payos/webhook", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            orderCode: "700000002",
+            data: {
+              orderCode: "700000002",
+              amount: 59000,
+              currency: "VND"
+            }
+          })
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(botCalls).toHaveLength(1);
+      expect(botCalls[0]?.url).toBe("https://bot.example/license-delivery");
+    } finally {
+      global.fetch = originalFetch;
+      process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
+      process.env.APP_HMAC_SECRET = previousSecret;
+      process.env.BOT_WEB_HMAC_SECRET = previousWebhookSecret;
+      process.env.BOT_LICENSE_CALLBACK_URL = previousBotCallbackUrl;
+    }
+  });
+
   it("skips duplicate payos webhook events after the first processed delivery", async () => {
     const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
     const previousSecret = process.env.APP_HMAC_SECRET;
