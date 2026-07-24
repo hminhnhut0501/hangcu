@@ -20,12 +20,13 @@ export const licenseCheckoutSchema = integrationBaseSchema.extend({
   planCode: z.string().min(1).optional(),
   vipPlanCode: z.string().min(1).optional(),
   amountMinor: z.coerce.number().int().positive().optional(),
-  locale: z.enum(["vi", "en"]),
+  locale: z.enum(["vi", "en"]).optional(),
   currency: z.enum(["VND", "USD"]),
   activationCode: z.string().min(1).optional(),
   returnUrl: optionalUrlSchema,
   cancelUrl: optionalUrlSchema,
-  source: z.string().min(1).optional()
+  source: z.string().min(1).optional(),
+  paymentSessionId: z.string().min(1).optional()
 });
 
 export const licenseVerifySchema = integrationBaseSchema.extend({
