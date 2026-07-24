@@ -270,4 +270,27 @@ describe("integration api service", () => {
       vi.restoreAllMocks();
     }
   });
+
+  it("returns 200 for webhook validation probes even when PayOS cannot verify the payload", async () => {
+    const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    process.env.NEXT_PUBLIC_APP_URL = "https://hangcu.vercel.app";
+
+    vi.spyOn(PayOSPaymentProvider.prototype, "verifyWebhook").mockRejectedValue(new Error("Invalid PayOS signature"));
+
+    try {
+      const response = await payosWebhookPost(
+        new Request("https://hangcu.vercel.app/api/payments/payos/webhook", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ ping: true })
+        })
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ success: true, ignored: true });
+    } finally {
+      process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
+      vi.restoreAllMocks();
+    }
+  });
 });

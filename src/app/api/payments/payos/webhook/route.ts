@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     event = await provider.verifyWebhook(request);
   } catch (error) {
     console.error(`[payos-webhook] verify_failed error=${error instanceof Error ? error.message : String(error)} rawBody=${rawBody || "empty"}`);
-    throw error;
+    return Response.json({ success: true, ignored: true }, { status: 200 });
   }
 
   const payload = JSON.parse(event.rawPayload) as {
@@ -75,4 +75,8 @@ export async function POST(request: Request) {
   });
 
   return Response.json({ success: true });
+}
+
+export async function GET() {
+  return Response.json({ success: true, health: "ok" });
 }
