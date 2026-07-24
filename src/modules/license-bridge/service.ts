@@ -1,5 +1,5 @@
 import { generateRandomToken } from "@/lib/crypto/hash";
-import { hmacSha256 } from "@/lib/crypto/hash";
+import { hashToken, hmacSha256 } from "@/lib/crypto/hash";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { getAdminMutationContext } from "@/modules/admin-auth/context";
 import { createOrder, getOrderByOrderNumber, listAllOrders, updateOrder } from "@/modules/orders/service";
@@ -123,7 +123,12 @@ function buildBotCallbackUrl() {
 }
 
 function signBotCallbackPayload(payload: Record<string, unknown>) {
-  const secret = process.env.WEB_PAYMENT_SECRET?.trim() || process.env.BOT_WEB_HMAC_SECRET?.trim() || "";
+  const secret =
+    process.env.LICENSE_BOT_CALLBACK_SECRET?.trim() ||
+    process.env.BOT_LICENSE_CALLBACK_SECRET?.trim() ||
+    process.env.WEB_PAYMENT_SECRET?.trim() ||
+    process.env.BOT_WEB_HMAC_SECRET?.trim() ||
+    "";
   if (!secret) {
     return "";
   }
@@ -134,6 +139,16 @@ function signBotCallbackPayload(payload: Record<string, unknown>) {
     String(payload.nonce ?? "")
   ].join("|");
   return hmacSha256(secret, message);
+}
+
+function botCallbackSecretFingerprint() {
+  const secret =
+    process.env.LICENSE_BOT_CALLBACK_SECRET?.trim() ||
+    process.env.BOT_LICENSE_CALLBACK_SECRET?.trim() ||
+    process.env.WEB_PAYMENT_SECRET?.trim() ||
+    process.env.BOT_WEB_HMAC_SECRET?.trim() ||
+    "";
+  return secret ? hashToken(secret).slice(0, 8) : "missing";
 }
 
 async function notifyBotLicenseIssued(input: {
@@ -193,7 +208,7 @@ async function notifyBotLicenseIssued(input: {
   }
 
   console.info(
-    `[license-delivery] sending bot callback orderNumber=${input.orderNumber} orderId=${input.orderId} telegramUserId=${input.telegramUserId || "none"} baseUrl=${baseUrl}`
+    `[license-delivery] sending bot callback orderNumber=${input.orderNumber} orderId=${input.orderId} telegramUserId=${input.telegramUserId || "none"} baseUrl=${baseUrl} secretFingerprint=${botCallbackSecretFingerprint()}`
   );
   const requestBody = JSON.stringify({ ...payload, signature });
   let lastError: unknown = null;
