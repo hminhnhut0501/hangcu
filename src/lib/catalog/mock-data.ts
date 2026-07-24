@@ -38,17 +38,17 @@ export type CatalogProduct = {
 export const catalogCollections: CatalogCollection[] = [
   {
     id: "col_aurora",
-    name: "Aurora Series",
+    name: "License Plans",
     slug: "aurora-series",
-    description: "Soft gradients and quiet light studies.",
+    description: "Time-based and lifetime license plans.",
     status: "active",
     sortOrder: 1
   },
   {
     id: "col_minimal",
-    name: "Minimal Lines",
+    name: "Bonus Packages",
     slug: "minimal-lines",
-    description: "Calm compositions with restrained form.",
+    description: "Donate packages with bonus license keys.",
     status: "active",
     sortOrder: 2
   }
@@ -57,28 +57,27 @@ export const catalogCollections: CatalogCollection[] = [
 export const catalogProducts: CatalogProduct[] = [
   {
     id: "prd_skyline",
-    sku: "ART-SKY-001",
-    name: "Hang Cú Video License - 30 Days",
+    sku: "HCV-LIC-30",
+    name: "Hang Cú video - License 30 days",
     slug: "skyline-after-rain",
-    shortDescription: "A transitional license product placeholder for the 30-day plan.",
-    description:
-      "A transitional demo entry that will be replaced by Hang Cú video license product data in the next phase.",
+    shortDescription: "One-month access license for Hang Cú video.",
+    description: "Best for short-term users who want to activate the software for 30 days.",
     status: "active",
     collectionId: "col_aurora",
     featured: true,
-    downloadLimit: 3,
+    downloadLimit: 1,
     downloadExpiryDays: 30,
     currency: "USD",
-    amountMinor: 4900,
-    compareAtAmountMinor: 6900,
+    amountMinor: 9900,
+    compareAtAmountMinor: 12900,
     media: [
       {
         id: "med_skyline_preview",
         type: "preview",
         bucketName: "product-media",
-        storagePath: "products/skyline-after-rain/preview.jpg",
+        storagePath: "products/hangcu-license-30/preview.jpg",
         publicUrl: null,
-        altText: "Preview of Skyline After Rain",
+        altText: "Hang Cú video license 30 days preview",
         sortOrder: 1,
         width: 1600,
         height: 2000
@@ -87,28 +86,27 @@ export const catalogProducts: CatalogProduct[] = [
   },
   {
     id: "prd_calm",
-    sku: "ART-LIN-002",
-    name: "Hang Cú Video License - Lifetime",
+    sku: "HCV-LIC-LIFE",
+    name: "Hang Cú video - Lifetime license",
     slug: "quiet-horizon",
-    shortDescription: "A transitional license product placeholder for the lifetime plan.",
-    description:
-      "A transitional demo entry that will be replaced by Hang Cú video license product data in the next phase.",
+    shortDescription: "Permanent access license for Hang Cú video.",
+    description: "Best for long-term users who want a one-time payment and lifetime activation.",
     status: "active",
     collectionId: "col_minimal",
     featured: false,
-    downloadLimit: 3,
-    downloadExpiryDays: 30,
+    downloadLimit: 1,
+    downloadExpiryDays: 36500,
     currency: "USD",
-    amountMinor: 3600,
-    compareAtAmountMinor: null,
+    amountMinor: 29900,
+    compareAtAmountMinor: 39900,
     media: [
       {
         id: "med_calm_preview",
         type: "preview",
         bucketName: "product-media",
-        storagePath: "products/quiet-horizon/preview.jpg",
+        storagePath: "products/hangcu-license-lifetime/preview.jpg",
         publicUrl: null,
-        altText: "Preview of Quiet Horizon",
+        altText: "Hang Cú video lifetime license preview",
         sortOrder: 1,
         width: 1600,
         height: 2000

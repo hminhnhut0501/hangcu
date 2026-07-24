@@ -542,9 +542,11 @@ describe("integration api service", () => {
       const snapshotLine = infoSpy.mock.calls
         .map((call) => String(call[0] ?? ""))
         .find((line) => line.startsWith("[payos-webhook] order_snapshot "));
-      expect(snapshotLine).toContain(`orderNumber=${orderNumber}`);
-      expect(snapshotLine).toContain("orderId=");
-      expect(snapshotLine).toContain("requestedPlanCode=HCV_30D");
+      expect(snapshotLine).toBeDefined();
+      const snapshot = snapshotLine ?? "";
+      expect(snapshot).toContain(`orderNumber=${orderNumber}`);
+      expect(snapshot).toContain("orderId=");
+      expect(snapshot).toContain("requestedPlanCode=HCV_30D");
       const fieldOrder = [
         "planCode=HCV_30D",
         "checkoutKind=bot",
@@ -557,11 +559,11 @@ describe("integration api service", () => {
       ];
       let lastIndex = -1;
       for (const field of fieldOrder) {
-        const index = snapshotLine.indexOf(field);
+        const index = snapshot.indexOf(field);
         expect(index).toBeGreaterThan(lastIndex);
         lastIndex = index;
       }
-      expect(snapshotLine).toContain("orderAmount=59000");
+      expect(snapshot).toContain("orderAmount=59000");
     } finally {
       process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
       process.env.APP_HMAC_SECRET = previousSecret;
