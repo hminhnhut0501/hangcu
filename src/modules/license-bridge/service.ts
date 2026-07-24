@@ -625,7 +625,12 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
   }
 
   const integrationSource = String(order.metadata?.integrationSource ?? "").trim();
-  const botOrderId = String(order.metadata?.orderId ?? order.metadata?.botOrderId ?? "").trim();
+  const botOrderId = String(
+    order.metadata?.orderId ??
+      order.metadata?.botOrderId ??
+      order.metadata?.paymentSessionId ??
+      ""
+  ).trim();
   const isBotCheckout =
     integrationSource === "prive_bot" ||
     integrationSource.startsWith("prive_bot_") ||
