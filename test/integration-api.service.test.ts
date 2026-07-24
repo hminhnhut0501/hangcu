@@ -293,4 +293,141 @@ describe("integration api service", () => {
       vi.restoreAllMocks();
     }
   });
+
+  it("logs a compact order snapshot for webhook processing", async () => {
+    const previousAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const previousSecret = process.env.APP_HMAC_SECRET;
+    process.env.NEXT_PUBLIC_APP_URL = "https://hangcu.vercel.app";
+    process.env.APP_HMAC_SECRET = "test-secret";
+
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    const getWebhookSpy = vi.spyOn(webhookService, "getWebhookEvent").mockResolvedValue(null);
+    const recordSpy = vi.spyOn(webhookService, "recordWebhookEvent").mockResolvedValue({
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      provider: "payos",
+      providerEventId: "8f4769b1a527495ea1c06c59c60c70fc",
+      eventType: "paymentLink.paid",
+      payload: { orderCode: "784863217249488" },
+      signatureValid: true,
+      processingStatus: "processed",
+      errorMessage: null,
+      processedAt: new Date()
+    });
+    const issueSpy = vi.spyOn(licenseBridgeService, "issueLicenseFromPaidOrder").mockResolvedValue(null);
+    vi.spyOn(PayOSPaymentProvider.prototype, "verifyWebhook").mockResolvedValue({
+      providerEventId: "8f4769b1a527495ea1c06c59c60c70fc",
+      eventType: "paymentLink.paid",
+      providerPaymentId: "784863217249488",
+      amountMinor: 59000,
+      currency: "VND",
+      rawPayload: JSON.stringify({
+        orderCode: "784863217249488",
+        data: {
+          orderCode: "784863217249488",
+          paymentLinkId: "8f4769b1a527495ea1c06c59c60c70fc",
+          amount: 59000,
+          currency: "VND"
+        }
+      })
+    });
+
+    const plan = await getLicensePlanByCode("HCV_30D");
+    expect(plan).toBeTruthy();
+
+    const order = await createOrder({
+      customerEmail: "buyer@example.com",
+      currency: "VND",
+      source: "bot_checkout",
+      notes: null,
+      metadata: {
+        source: "prive_bot",
+        integrationSource: "bot_checkout",
+        orderNumber: "ORD-LOG01",
+        planCode: "HCV_30D",
+        requestedPlanCode: "HCV_30D",
+        checkoutKind: "bot",
+        paymentSessionId: "ps_ORDER_LOG01_123",
+        paymentProvider: "payos",
+        planName: "VIP 30 Ngày - Prime",
+        amountLabel: "59.000đ",
+        amountMinor: 59000,
+        currency: "VND",
+        customerRef: "customer-1",
+        checkoutId: "checkout_1"
+      },
+      items: [
+        {
+          productId: plan!.id,
+          sku: plan!.code,
+          productName: "VIP 30 Ngày - Prime",
+          quantity: 1,
+          unitAmountMinor: 59000,
+          totalAmountMinor: 59000,
+          productSnapshot: {
+            name: "VIP 30 Ngày - Prime",
+            slug: plan!.slug,
+            shortDescription: plan!.description,
+            status: "active",
+            downloadLimit: 0,
+            downloadExpiryDays: plan!.durationDays
+          }
+        }
+      ]
+    });
+
+    const orderNumber = order.orderNumber;
+
+    await updateOrder(orderNumber, {
+      metadata: {
+        ...order.metadata,
+        payosOrderCode: "784863217249488"
+      }
+    });
+
+    try {
+      const response = await payosWebhookPost(
+        new Request("https://hangcu.vercel.app/api/payments/payos/webhook", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            orderCode: "784863217249488",
+            data: {
+              orderCode: "784863217249488",
+              paymentLinkId: "8f4769b1a527495ea1c06c59c60c70fc",
+              amount: 59000,
+              currency: "VND"
+            }
+          })
+        })
+      );
+
+      expect(response.status).toBe(200);
+      expect(getWebhookSpy).toHaveBeenCalled();
+      expect(recordSpy).toHaveBeenCalled();
+      expect(issueSpy).toHaveBeenCalledWith(orderNumber);
+
+      const snapshotLine = infoSpy.mock.calls
+        .map((call) => String(call[0] ?? ""))
+        .find((line) => line.startsWith("[payos-webhook] order_snapshot "));
+      expect(snapshotLine).toContain(`orderNumber=${orderNumber}`);
+      expect(snapshotLine).toContain("orderId=");
+      expect(snapshotLine).toContain("planCode=HCV_30D");
+      expect(snapshotLine).toContain("requestedPlanCode=HCV_30D");
+      expect(snapshotLine).toContain("checkoutKind=bot");
+      expect(snapshotLine).toContain("paymentSessionId=ps_ORDER_LOG01_123");
+      expect(snapshotLine).toContain("paymentProvider=payos");
+      expect(snapshotLine).toContain("source=prive_bot");
+      expect(snapshotLine).toContain("integrationSource=bot_checkout");
+      expect(snapshotLine).toContain("currency=VND");
+      expect(snapshotLine).toContain("orderAmount=59000");
+    } finally {
+      process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
+      process.env.APP_HMAC_SECRET = previousSecret;
+      vi.restoreAllMocks();
+      infoSpy.mockRestore();
+      errorSpy.mockRestore();
+    }
+  });
 });
