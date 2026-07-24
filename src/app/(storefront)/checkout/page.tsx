@@ -176,6 +176,7 @@ export default async function CheckoutPage({
             orderSummary={{
               orderNumber,
               checkoutId,
+              planCode: planCode ?? (order?.metadata?.planCode as string | undefined) ?? null,
               planLabel: summaryPlan,
               amountLabel: summaryAmount,
               customerRef: resolvedCustomerRef,

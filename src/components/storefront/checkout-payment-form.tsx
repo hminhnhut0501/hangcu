@@ -16,6 +16,7 @@ type Props = {
   orderSummary: {
     orderNumber?: string | null;
     checkoutId?: string | null;
+    planCode?: string | null;
     planLabel?: string | null;
     amountLabel?: string | null;
     customerRef?: string | null;
@@ -39,6 +40,7 @@ export function CheckoutPaymentForm({ locale, options, orderSummary }: Props) {
     };
     if (orderSummary.orderNumber) payload.orderNumber = orderSummary.orderNumber;
     if (orderSummary.checkoutId) payload.checkoutId = orderSummary.checkoutId;
+    if (orderSummary.planCode) payload.planCode = orderSummary.planCode;
     if (orderSummary.planLabel) payload.plan = orderSummary.planLabel;
     if (orderSummary.amountLabel) payload.amountLabel = orderSummary.amountLabel;
     if (orderSummary.customerRef) payload.customerRef = orderSummary.customerRef;

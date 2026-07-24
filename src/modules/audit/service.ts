@@ -1,4 +1,3 @@
-import { generateRandomToken } from "@/lib/crypto/hash";
 import { SupabaseAuditRepository } from "./repository";
 import type { CreateAuditLogInput } from "./types";
 
@@ -6,7 +5,7 @@ const auditRepository = new SupabaseAuditRepository();
 
 export async function writeAuditLog(input: CreateAuditLogInput) {
   return auditRepository.create({
-    id: `audit_${generateRandomToken(8)}`,
+    id: crypto.randomUUID(),
     adminId: input.adminId ?? null,
     actorType: input.actorType,
     action: input.action,

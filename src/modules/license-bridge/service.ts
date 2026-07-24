@@ -5,7 +5,7 @@ import { getAdminMutationContext } from "@/modules/admin-auth/context";
 import { createOrder, getOrderByOrderNumber, listAllOrders, updateOrder } from "@/modules/orders/service";
 import { licensePlansSeed } from "@/lib/license/mock-data";
 import { createPaymentCheckout } from "@/modules/payments/service";
-import { getLicensePlanByCode, getLicensePlanById } from "@/modules/license-plans/service";
+import { getLicensePlanByCode, getLicensePlanById, listLicensePlans } from "@/modules/license-plans/service";
 import {
   createLicenseKey,
   getLicenseKeyEntitlements,
@@ -500,15 +500,37 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     return null;
   }
 
-  const planCode = String(order.metadata?.planCode ?? "");
-  if (!planCode) {
-    console.info(`[license-issue] stop orderNumber=${order.orderNumber} reason=plan_code_missing`);
-    return null;
+  const planCodeCandidates = [
+    String(order.metadata?.planCode ?? ""),
+    String(order.metadata?.requestedPlanCode ?? ""),
+    String(order.items[0]?.sku ?? ""),
+    String(order.items[0]?.productId ?? "")
+  ]
+    .map((value) => value.trim().toUpperCase())
+    .filter(Boolean);
+  let plan = null;
+  let resolvedPlanCode = "";
+  for (const candidate of planCodeCandidates) {
+    const found = await getLicensePlanByCode(candidate);
+    if (found) {
+      plan = found;
+      resolvedPlanCode = candidate;
+      break;
+    }
   }
-
-  const plan = await getLicensePlanByCode(planCode);
   if (!plan) {
-    console.info(`[license-issue] stop orderNumber=${order.orderNumber} reason=plan_not_found planCode=${planCode}`);
+    const plans = await listLicensePlans();
+    const currencyKey = order.currency === "USD" ? "USD" : "VND";
+    const amountMatch = plans.find((entry) => entry.currencyPrices?.[currencyKey] === order.totalMinor);
+    if (amountMatch) {
+      plan = amountMatch;
+      resolvedPlanCode = amountMatch.code;
+    }
+  }
+  if (!plan) {
+    console.info(
+      `[license-issue] stop orderNumber=${order.orderNumber} reason=plan_code_missing orderAmount=${order.totalMinor} currency=${order.currency} candidates=${planCodeCandidates.join(",") || "none"}`
+    );
     return null;
   }
 
