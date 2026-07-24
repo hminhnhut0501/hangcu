@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const parsed = checkoutRequestSchema.safeParse(body);
     if (!parsed.success) {
       console.info(
-        `[license-checkout] invalid_request stage=schema orderId=${String(body.orderId ?? body.order_id ?? "n/a")} planCode=${String(body.planCode ?? "n/a")} currency=${String(body.currency ?? "n/a")} secret=${getIntegrationSecret() ? "set" : "missing"}`
+        `[license-checkout] invalid_request stage=schema orderId=${String(body.orderId ?? body.order_id ?? "n/a")} planCode=${String(body.planCode ?? "n/a")} currency=${String(body.currency ?? "n/a")} keys=${Object.keys(body).sort().join(",")} issues=${JSON.stringify(parsed.error.issues)} secret=${getIntegrationSecret() ? "set" : "missing"}`
       );
       return jsonResponse({ success: false, error: { code: integrationErrors.invalidRequest.code, message: integrationErrors.invalidRequest.message } }, { status: 400 });
     }
