@@ -1,34 +1,60 @@
 import Image from "next/image";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
+import { StaticPage } from "@/components/storefront/static-page";
 
 export default async function DownloadPage() {
   const locale = await getStorefrontLocale();
+  const vi = locale === "vi";
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
-      <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-        <section className="space-y-5">
-          <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">{locale === "vi" ? "Tải xuống" : "Download"}</p>
-          <h1 className="text-4xl font-semibold tracking-tight">{locale === "vi" ? "Bản macOS Hang Cú video" : "Hang Cú video for macOS"}</h1>
-          <p className="text-slate-600">{locale === "vi" ? "Tải bản dùng thử hoặc xem bản cài đặt hiện tại của ứng dụng." : "Download the trial build or review the current app release."}</p>
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">{locale === "vi" ? "Phiên bản hiện tại" : "Current version"}</p>
-            <p className="mt-1 text-2xl font-semibold">1.0</p>
-            <p className="mt-3 text-sm text-slate-500">{locale === "vi" ? "Dung lượng app: khoảng 20-30 MB tùy bản build." : "App size: about 20-30 MB depending on the build."}</p>
-            <ul className="mt-4 space-y-2 text-sm text-slate-600">
-              <li>{locale === "vi" ? "Hỗ trợ Apple Silicon và Intel" : "Supports Apple Silicon and Intel"}</li>
-              <li>{locale === "vi" ? "Yêu cầu macOS 14+" : "Requires macOS 14+"}</li>
-              <li>{locale === "vi" ? "SHA-256 checksum sẽ được công bố cùng file tải xuống" : "SHA-256 checksum will be published with the download file"}</li>
-            </ul>
-            <p className="mt-4 text-sm text-slate-500">{locale === "vi" ? "Cách mở app: kéo vào Applications rồi mở trực tiếp. Nếu Gatekeeper cảnh báo, hãy mở từ menu chuột phải > Open." : "Open by dragging to Applications, then launch directly. If Gatekeeper warns, use right-click > Open."}</p>
-            <p className="mt-3 text-sm text-slate-500">{locale === "vi" ? "Không cần tắt bảo mật toàn hệ thống." : "No need to disable system security."}</p>
-          </div>
-        </section>
-        <div className="rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-950 to-slate-800 p-6 text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-          <div className="rounded-[1.5rem] bg-white/5 p-4">
-            <Image src="/brand/hangcu-hero-mockup.png" alt="Hang Cú video preview" width={1400} height={900} className="rounded-[1.25rem]" />
+    <StaticPage
+      eyebrow={vi ? "Tải xuống" : "Download"}
+      title={vi ? "Bản macOS Hang Cú video" : "Hang Cú video for macOS"}
+      intro={vi ? "Tải bản dùng thử hoặc xem bản cài đặt hiện tại của ứng dụng." : "Download the trial build or review the current app release."}
+      sections={[
+        {
+          title: vi ? "Phiên bản hiện tại" : "Current version",
+          list: vi
+            ? [
+                "Phiên bản 1.0.",
+                "Dung lượng app khoảng 20-30 MB tùy bản build.",
+                "Hỗ trợ Apple Silicon và Intel.",
+                "Yêu cầu macOS 14+.",
+                "SHA-256 checksum sẽ được công bố cùng file tải xuống."
+              ]
+            : [
+                "Version 1.0.",
+                "App size is about 20-30 MB depending on the build.",
+                "Supports Apple Silicon and Intel.",
+                "Requires macOS 14+.",
+                "The SHA-256 checksum will be published with the download file."
+              ]
+        },
+        {
+          title: vi ? "Cách cài đặt" : "How to install",
+          body: vi
+            ? "Kéo ứng dụng vào Applications rồi mở trực tiếp. Nếu Gatekeeper cảnh báo, hãy bấm chuột phải > Open. Không cần tắt bảo mật toàn hệ thống."
+            : "Drag the app into Applications and launch it directly. If Gatekeeper warns, use right-click > Open. You do not need to disable system security."
+        }
+      ]}
+      footer={
+        <div className="space-y-4">
+          <a
+            href="/downloads/hangcuvideo.dmg"
+            download
+            className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+          >
+            {vi ? "Tải app .dmg" : "Download .dmg app"}
+          </a>
+          <p className="text-center text-sm text-slate-500">
+            {vi
+              ? "Link này đang tải trực tiếp file cài đặt chính thức."
+              : "This link downloads the official installer directly."}
+          </p>
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm">
+            <Image src="/brand/hangcu-hero-mockup.png" alt={vi ? "Ảnh ứng dụng Hang Cú video" : "Hang Cú video app preview"} width={1400} height={900} className="rounded-[1.25rem]" />
           </div>
         </div>
-      </div>
-    </main>
+      }
+    />
   );
 }
