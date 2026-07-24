@@ -226,97 +226,63 @@ export default async function HomePage() {
           </div>
 
           <div className="relative">
-            <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-blue-500/15 blur-2xl motion-safe:animate-[pulse_10s_ease-in-out_infinite]" />
-            <div className="absolute -bottom-10 -left-8 h-32 w-32 rounded-full bg-emerald-400/15 blur-2xl motion-safe:animate-[pulse_12s_ease-in-out_infinite]" />
+            <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl motion-safe:animate-[pulse_10s_ease-in-out_infinite]" />
+            <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl motion-safe:animate-[pulse_12s_ease-in-out_infinite]" />
 
-            <div className="relative rounded-[2.4rem] border border-white/80 bg-white/85 p-4 shadow-[0_30px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-              <div className="absolute inset-0 rounded-[2.4rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(255,255,255,0.6))]" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3">
+            <div className="relative rounded-[2.5rem] border border-white/80 bg-white/85 p-4 shadow-[0_30px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+              <div className="absolute inset-0 rounded-[2.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(255,255,255,0.58))]" />
+              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[#f4f7fd] p-4">
                 <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(59,130,246,0.12),transparent)]" />
-                <div className="relative overflow-hidden rounded-[1.7rem] bg-slate-950 p-4 text-white shadow-[0_24px_80px_rgba(15,23,42,0.2)]">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(96,165,250,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.18),transparent_28%)]" />
-                  <div className="relative flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.34em] text-slate-300">{heroCopy.badge}</p>
-                      <p className="mt-2 text-2xl font-semibold">Hang Cú video</p>
-                    </div>
-                    <div className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-slate-100">
-                      macOS native
-                    </div>
+                <div className="absolute -left-10 top-16 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
+                <div className="absolute -right-12 bottom-12 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl" />
+
+                <div className="relative flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.34em] text-slate-400">{heroCopy.badge}</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-950">Hang Cú video</p>
                   </div>
+                  <div className="rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+                    macOS native
+                  </div>
+                </div>
 
-                  <div className="mt-4 grid gap-4 md:grid-cols-[1.05fr_0.95fr]">
-                    <div className="relative overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/6 p-4">
-                      <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),transparent_40%)]" />
-                      <div className="relative flex h-full min-h-[360px] items-center justify-center rounded-[1.25rem] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%),linear-gradient(180deg,rgba(15,23,42,0.65),rgba(15,23,42,0.92))] p-6">
-                        <Image
-                          src={heroImageSrc}
-                          alt="Hang Cú video hero mockup"
-                          width={1400}
-                          height={900}
-                          priority
-                          className="h-auto w-full max-w-[520px] drop-shadow-[0_26px_50px_rgba(15,23,42,0.28)] motion-safe:animate-[float_7s_ease-in-out_infinite]"
-                        />
+                <div className="relative mt-4 overflow-hidden rounded-[2rem] border border-white/70 bg-white p-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+                  <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(59,130,246,0.08),transparent)]" />
+                  <div className="relative overflow-hidden rounded-[1.7rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),_transparent_42%),linear-gradient(180deg,#f8fbff,#eef4ff)] p-4">
+                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),transparent_36%)]" />
+                    <div className="relative flex items-center justify-between">
+                      <div className="space-y-2">
+                        <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">{locale === "vi" ? "Ảnh thật của app" : "Real app preview"}</p>
+                        <p className="text-lg font-semibold text-slate-950">{locale === "vi" ? "Giao diện gọn, sáng, dễ nhìn" : "Clean, bright, and focused"}</p>
                       </div>
+                      <span className="rounded-full border border-white/70 bg-white/90 px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+                        {locale === "vi" ? "Apple style" : "Apple style"}
+                      </span>
                     </div>
 
-                    <div className="grid gap-3">
-                      <div className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Video demo" : "Demo video"}</p>
-                        <div className="mt-3 overflow-hidden rounded-[1.15rem] border border-white/10 bg-slate-900">
-                          <video
-                            className="h-[180px] w-full object-cover"
-                            poster="/brand/hangcu-hero-mockup.png"
-                            src="/brand/hangcu-demo.mp4"
-                            controls
-                            muted
-                            playsInline
-                          />
-                        </div>
-                        <p className="mt-2 text-sm text-slate-300">
-                          {locale === "vi" ? "Demo ngắn cho reviewer và khách xem nhanh." : "Short demo for reviewers and quick buyers."}
-                        </p>
+                    <div className="relative mt-4 flex min-h-[520px] items-center justify-center rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0.5))] p-4">
+                      <Image
+                        src={heroImageSrc}
+                        alt="Hang Cú video app preview"
+                        width={1400}
+                        height={1200}
+                        priority
+                        className="h-auto w-full max-w-[620px] drop-shadow-[0_34px_70px_rgba(15,23,42,0.18)] motion-safe:animate-[float_8s_ease-in-out_infinite]"
+                      />
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Preview" : "Preview"}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Ảnh app thật" : "Real app image"}</p>
                       </div>
-                      <div className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Gói 30 ngày" : "30-day plan"}</p>
-                        <div className="mt-2 flex items-end justify-between gap-4">
-                          <div>
-                            <p className="text-xl font-semibold">{locale === "vi" ? "One-time payment" : "One-time payment"}</p>
-                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Hết hạn sau 30 ngày kể từ lúc kích hoạt." : "Expires 30 days after activation."}</p>
-                          </div>
-                          <div className="rounded-2xl bg-white/10 px-3 py-2 text-right">
-                            <p className="text-xs text-slate-300">From</p>
-                            <p className="text-lg font-semibold">$9.99</p>
-                          </div>
-                        </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Motion" : "Motion"}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Float nhẹ" : "Gentle float"}</p>
                       </div>
-                      <div className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Gói trọn đời" : "Lifetime plan"}</p>
-                        <div className="mt-2 flex items-end justify-between gap-4">
-                          <div>
-                            <p className="text-xl font-semibold">{locale === "vi" ? "Không thu phí định kỳ" : "No recurring fee"}</p>
-                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Dùng theo chính sách cập nhật công bố." : "Usage follows the published update policy."}</p>
-                          </div>
-                          <div className="rounded-2xl bg-emerald-400/10 px-3 py-2 text-right">
-                            <p className="text-xs text-emerald-200">From</p>
-                            <p className="text-lg font-semibold">$29.99</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-[1.35rem] border border-emerald-400/20 bg-emerald-400/10 p-4">
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-[11px] uppercase tracking-[0.28em] text-emerald-200">{locale === "vi" ? "Hệ thống" : "System"}</p>
-                            <p className="mt-2 text-xl font-semibold">{locale === "vi" ? "Tự động cấp key" : "Auto-issued key"}</p>
-                          </div>
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-400/20 text-emerald-100">
-                            <CheckCircle2 className="h-5 w-5" />
-                          </div>
-                        </div>
-                        <div className="mt-4 flex items-center gap-2 text-sm text-slate-200">
-                          <Clock3 className="h-4 w-4 text-emerald-200" />
-                          <span>{locale === "vi" ? "Giao sau thanh toán vài giây" : "Delivered within seconds after payment"}</span>
-                        </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Focus" : "Focus"}</p>
+                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Không phân tâm" : "No distractions"}</p>
                       </div>
                     </div>
                   </div>
