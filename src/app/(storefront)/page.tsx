@@ -229,62 +229,27 @@ export default async function HomePage() {
             <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl motion-safe:animate-[pulse_10s_ease-in-out_infinite]" />
             <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl motion-safe:animate-[pulse_12s_ease-in-out_infinite]" />
 
-            <div className="relative rounded-[2.5rem] border border-white/80 bg-white/85 p-4 shadow-[0_30px_100px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-              <div className="absolute inset-0 rounded-[2.5rem] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(255,255,255,0.58))]" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[#f4f7fd] p-4">
-                <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(59,130,246,0.12),transparent)]" />
-                <div className="absolute -left-10 top-16 h-40 w-40 rounded-full bg-blue-400/10 blur-3xl" />
-                <div className="absolute -right-12 bottom-12 h-44 w-44 rounded-full bg-emerald-400/10 blur-3xl" />
-
-                <div className="relative flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.34em] text-slate-400">{heroCopy.badge}</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-950">Hang Cú video</p>
+            <div className="relative mx-auto max-w-[620px]">
+              <div className="absolute -inset-6 rounded-[3rem] bg-white/40 blur-2xl" />
+              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/80 p-3 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+                <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_45%),linear-gradient(180deg,#fbfcff,#eef4ff)]">
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),transparent_42%)]" />
+                  <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500 shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    {heroCopy.badge}
                   </div>
-                  <div className="rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
+                  <div className="absolute right-6 top-6 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
                     macOS native
                   </div>
-                </div>
-
-                <div className="relative mt-4 overflow-hidden rounded-[2rem] border border-white/70 bg-white p-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
-                  <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(59,130,246,0.08),transparent)]" />
-                  <div className="relative overflow-hidden rounded-[1.7rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),_transparent_42%),linear-gradient(180deg,#f8fbff,#eef4ff)] p-4">
-                    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.55),transparent_36%)]" />
-                    <div className="relative flex items-center justify-between">
-                      <div className="space-y-2">
-                        <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">{locale === "vi" ? "Ảnh ứng dụng" : "App preview"}</p>
-                        <p className="text-lg font-semibold text-slate-950">{locale === "vi" ? "Giao diện thật của Hang Cú video" : "The actual Hang Cú video app"}</p>
-                      </div>
-                      <span className="rounded-full border border-white/70 bg-white/90 px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
-                        {locale === "vi" ? "Apple style" : "Apple style"}
-                      </span>
-                    </div>
-
-                    <div className="relative mt-4 flex min-h-[520px] items-center justify-center rounded-[1.9rem] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.8),rgba(255,255,255,0.5))] p-4">
-                      <Image
-                        src={heroImageSrc}
-                        alt="Hang Cú video app preview"
-                        width={1400}
-                        height={1200}
-                        priority
-                        className="h-auto w-full max-w-[620px] drop-shadow-[0_34px_70px_rgba(15,23,42,0.18)] motion-safe:animate-[float_8s_ease-in-out_infinite]"
-                      />
-                    </div>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Preview" : "Preview"}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Ảnh app thật" : "Real app image"}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Motion" : "Motion"}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chuyển động nhẹ" : "Gentle motion"}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Focus" : "Focus"}</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-950">{locale === "vi" ? "Không rườm rà" : "No clutter"}</p>
-                      </div>
-                    </div>
+                  <div className="relative flex min-h-[760px] items-center justify-center p-6 sm:p-8">
+                    <Image
+                      src={heroImageSrc}
+                      alt="Hang Cú video app preview"
+                      width={1400}
+                      height={1200}
+                      priority
+                      className="h-auto w-full max-w-[560px] drop-shadow-[0_32px_60px_rgba(15,23,42,0.18)] motion-safe:animate-[float_8s_ease-in-out_infinite]"
+                    />
                   </div>
                 </div>
               </div>
