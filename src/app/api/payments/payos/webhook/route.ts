@@ -36,6 +36,9 @@ export async function POST(request: Request) {
   console.info(
     `[payos-webhook] eventId=${event.providerEventId} orderCode=${orderCode || "n/a"} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"} duplicate=${existingEvent ? "yes" : "no"}`
   );
+  console.info(
+    `[payos-webhook] order_snapshot orderNumber=${linkedOrder?.orderNumber || "n/a"} orderId=${linkedOrder?.id || "n/a"} planCode=${String(linkedOrder?.metadata?.planCode ?? "n/a")} requestedPlanCode=${String(linkedOrder?.metadata?.requestedPlanCode ?? "n/a")} checkoutKind=${String(linkedOrder?.metadata?.checkoutKind ?? "n/a")} paymentSessionId=${String(linkedOrder?.metadata?.paymentSessionId ?? "n/a")} paymentProvider=${String(linkedOrder?.metadata?.paymentProvider ?? "n/a")} source=${String(linkedOrder?.metadata?.source ?? "n/a")} integrationSource=${String(linkedOrder?.metadata?.integrationSource ?? "n/a")} currency=${String(linkedOrder?.currency ?? "n/a")} orderAmount=${String(linkedOrder?.totalMinor ?? "n/a")}`
+  );
 
   if (existingEvent?.processingStatus === "processed") {
     console.info(
