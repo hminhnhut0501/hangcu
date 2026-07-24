@@ -7,6 +7,16 @@ import { getOrderByMetadataKey } from "@/modules/orders/service";
 const provider = new PayOSPaymentProvider();
 
 const WEBHOOK_ORDER_SNAPSHOT_PREFIX = "[payos-webhook] order_snapshot ";
+const WEBHOOK_ORDER_SNAPSHOT_FIELDS = [
+  "planCode",
+  "checkoutKind",
+  "paymentSessionId",
+  "paymentProvider",
+  "locale",
+  "currency",
+  "source",
+  "integrationSource"
+] as const;
 
 function buildOrderSnapshotLog(order: {
   orderNumber?: string | null;
@@ -19,14 +29,17 @@ function buildOrderSnapshotLog(order: {
     `${WEBHOOK_ORDER_SNAPSHOT_PREFIX}` +
     `orderNumber=${order?.orderNumber || "n/a"} ` +
     `orderId=${order?.id || "n/a"} ` +
-    `planCode=${String(order?.metadata?.planCode ?? "n/a")} ` +
     `requestedPlanCode=${String(order?.metadata?.requestedPlanCode ?? "n/a")} ` +
-    `checkoutKind=${String(order?.metadata?.checkoutKind ?? "n/a")} ` +
-    `paymentSessionId=${String(order?.metadata?.paymentSessionId ?? "n/a")} ` +
-    `paymentProvider=${String(order?.metadata?.paymentProvider ?? "n/a")} ` +
-    `source=${String(order?.metadata?.source ?? "n/a")} ` +
-    `integrationSource=${String(order?.metadata?.integrationSource ?? "n/a")} ` +
-    `currency=${String(order?.currency ?? "n/a")} ` +
+    WEBHOOK_ORDER_SNAPSHOT_FIELDS.map((field) => {
+      const value =
+        field === "locale"
+          ? String(order?.metadata?.[field] ?? "n/a")
+          : field === "currency"
+            ? String(order?.currency ?? "n/a")
+            : String(order?.metadata?.[field] ?? "n/a");
+      return `${field}=${value}`;
+    }).join(" ") +
+    " " +
     `orderAmount=${String(order?.totalMinor ?? "n/a")}`
   );
 }
