@@ -85,6 +85,25 @@ function buildBotActivationUrl(licenseCode: string) {
   return `https://t.me/?start=lic_${encodeURIComponent(normalized)}`;
 }
 
+function resolveTelegramUserId(order: {
+  metadata?: Record<string, unknown> | null;
+  customerEmail?: string | null;
+  notes?: string | null;
+}) {
+  const candidates = [
+    order.metadata?.telegramUserId,
+    order.metadata?.telegram_user_id,
+    order.metadata?.customerRef,
+    order.customerEmail?.split("@", 1)[0],
+    order.notes?.replace(/^telegram:/i, "")
+  ];
+  for (const candidate of candidates) {
+    const value = String(candidate ?? "").trim().replace(/^tg:/i, "");
+    if (/^\d{5,20}$/.test(value)) return value;
+  }
+  return null;
+}
+
 function buildBotCallbackUrl() {
   const rawCallbackUrl =
     process.env.LICENSE_BOT_CALLBACK_URL?.trim() ||
@@ -567,6 +586,10 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
   }
 
   const activationCode = String(order.metadata?.activationCode ?? buildLicenseCode());
+  const telegramUserId = resolveTelegramUserId(order);
+  console.info(
+    `[license-issue] telegram_resolve orderNumber=${order.orderNumber} telegramUserId=${telegramUserId ?? "n/a"} source=${order.metadata?.telegramUserId ? "metadata.telegramUserId" : order.metadata?.customerRef ? "metadata.customerRef" : order.customerEmail ? "customerEmail" : order.notes ? "notes" : "none"}`
+  );
   const existing = await listLicenseKeys();
   const alreadyIssued = existing.find((entry) => entry.orderId === order.id && entry.licensePlanId === plan.id);
   if (alreadyIssued) {
@@ -579,14 +602,14 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     orderId: order.id,
     orderItemId: order.items[0]?.productId ?? `${order.id}_item`,
     customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
-    externalUserId: order.metadata?.telegramUserId ? String(order.metadata.telegramUserId) : null,
+    externalUserId: telegramUserId,
     code: activationCode,
     expiresAt: plan.isLifetime ? null : new Date(Date.now() + plan.durationDays * 86400000),
-    bindingType: order.metadata?.telegramUserId ? "telegram_user_id" : null,
+    bindingType: telegramUserId ? "telegram_user_id" : null,
     entitlementSnapshot: plan.entitlementTags,
     metadata: {
       source: order.metadata?.source ?? "prive_bot",
-      telegram_user_id: order.metadata?.telegramUserId ?? null,
+      telegram_user_id: telegramUserId,
       plan_code: plan.code,
       locale: order.metadata?.locale ?? null,
       currency: order.currency,
@@ -627,7 +650,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     await notifyBotLicenseIssued({
       orderId: order.id,
       orderNumber: order.orderNumber,
-      telegramUserId: order.metadata?.telegramUserId ? String(order.metadata.telegramUserId) : null,
+      telegramUserId,
       customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
       planCode: plan.code,
       planName,
@@ -653,7 +676,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     orderNumber: order.orderNumber,
     planCode: plan.code,
     planName: String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code),
-    telegramUserId: order.metadata?.telegramUserId ? String(order.metadata.telegramUserId) : null,
+    telegramUserId,
     customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
     activationUrl,
     licenseCode: activationCode,
