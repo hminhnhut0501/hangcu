@@ -1,13 +1,13 @@
 export type AdminMutationContext = {
   actorType: "admin";
-  adminId: string;
+  adminId: string | null;
   ipAddress: string | null;
 };
 
 export function getAdminMutationContext(): AdminMutationContext {
   return {
     actorType: "admin",
-    adminId: "admin_local",
+    adminId: null,
     ipAddress: null
   };
 }
