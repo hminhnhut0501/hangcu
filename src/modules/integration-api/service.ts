@@ -166,6 +166,9 @@ export async function revokeLicenseKeyViaIntegration(input: LicenseKeyRevokeInpu
 
 export async function createCheckoutViaIntegration(input: CheckoutRequestInput) {
   const parsed = checkoutRequestSchema.parse(input);
+  if (!parsed.planCode) {
+    throw integrationErrors.invalidRequest;
+  }
   const plan = await getLicensePlanByCode(parsed.planCode);
   if (!plan) {
     throw integrationErrors.planNotFound;

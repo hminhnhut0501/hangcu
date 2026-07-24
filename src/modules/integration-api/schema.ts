@@ -26,13 +26,16 @@ export const checkoutRequestSchema = integrationBaseSchema.extend({
   orderId: z.string().min(1),
   telegramUserId: z.string().min(1).optional(),
   customerRef: z.string().min(1).optional(),
-  planCode: z.string().min(1),
+  planCode: z.string().min(1).optional(),
   vipPlanCode: z.string().min(1).optional(),
+  amountMinor: z.coerce.number().int().positive().optional(),
   locale: z.enum(["vi", "en"]),
   currency: z.enum(["VND", "USD"]),
   activationCode: z.string().min(1).optional(),
   returnUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional()
+  ,source: z.string().min(1).optional()
+  ,paymentSessionId: z.string().min(1).optional()
 });
 
 export type RedeemLicenseKeyInput = z.infer<typeof redeemLicenseKeyRequestSchema>;
