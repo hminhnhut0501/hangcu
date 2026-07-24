@@ -510,11 +510,19 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     .filter(Boolean);
   let plan = null;
   let resolvedPlanCode = "";
+  let planSource = "none";
   for (const candidate of planCodeCandidates) {
     const found = await getLicensePlanByCode(candidate);
     if (found) {
       plan = found;
       resolvedPlanCode = candidate;
+      planSource = candidate === String(order.metadata?.planCode ?? "").trim().toUpperCase()
+        ? "metadata.planCode"
+        : candidate === String(order.metadata?.requestedPlanCode ?? "").trim().toUpperCase()
+          ? "metadata.requestedPlanCode"
+          : candidate === String(order.items[0]?.sku ?? "").trim().toUpperCase()
+            ? "item.sku"
+            : "item.productId";
       break;
     }
   }
@@ -525,8 +533,12 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     if (amountMatch) {
       plan = amountMatch;
       resolvedPlanCode = amountMatch.code;
+      planSource = `amount_match.${currencyKey}`;
     }
   }
+  console.info(
+    `[license-issue] plan_resolve orderNumber=${order.orderNumber} orderAmount=${order.totalMinor} currency=${order.currency} source=${planSource} resolvedPlanCode=${resolvedPlanCode || "n/a"} candidates=${planCodeCandidates.join(",") || "none"}`
+  );
   if (!plan) {
     console.info(
       `[license-issue] stop orderNumber=${order.orderNumber} reason=plan_code_missing orderAmount=${order.totalMinor} currency=${order.currency} candidates=${planCodeCandidates.join(",") || "none"}`

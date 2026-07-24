@@ -56,12 +56,16 @@ export async function POST(request: Request) {
         integrationSource: "bot_checkout",
         orderNumber: parsed.data.orderNumber ?? null,
         planCode: parsed.data.planCode ?? null,
+        requestedPlanCode: parsed.data.planCode ?? null,
         planName,
         amountLabel: parsed.data.amountLabel ?? null,
         amountMinor,
         currency,
         customerRef: parsed.data.customerRef ?? null,
-        checkoutId: parsed.data.checkoutId ?? null
+        checkoutId: parsed.data.checkoutId ?? null,
+        paymentSessionId: parsed.data.checkoutId ?? null,
+        checkoutProvider: parsed.data.provider,
+        checkoutKind: "bot"
       },
       items: [
         {
@@ -95,7 +99,9 @@ export async function POST(request: Request) {
       notes: parsed.data.notes ?? null,
       metadata: {
         source: "storefront_checkout",
-        productSlug: product.slug
+        productSlug: product.slug,
+        checkoutKind: "storefront",
+        checkoutProvider: parsed.data.provider
       },
       items: [
         {
@@ -172,7 +178,9 @@ export async function POST(request: Request) {
       paymentProvider: parsed.data.provider,
       paymentCheckoutUrl: checkout.checkoutUrl,
       providerCheckoutId: checkout.providerCheckoutId,
-      payosOrderCode: payosOrderCode ?? checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null
+      payosOrderCode: payosOrderCode ?? checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null,
+      checkoutKind: order.metadata?.checkoutKind ?? (parsed.data.orderNumber || parsed.data.planCode ? "bot" : "storefront"),
+      checkoutProvider: parsed.data.provider
     }
   });
 
