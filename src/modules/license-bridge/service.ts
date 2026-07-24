@@ -334,11 +334,25 @@ export async function createLicenseCheckout(input: unknown) {
   const parsed = licenseCheckoutSchema.parse(input);
   verifyLegacyCheckoutSignature(parsed);
 
+  const integrationSource = String(parsed.source ?? "").trim().toLowerCase();
+  const botPayment = integrationSource === "bot_checkout" || integrationSource.startsWith("bot_") || integrationSource === "prive_bot" || integrationSource.startsWith("prive_bot_");
   const requestedPlanCode = String(parsed.vipPlanCode || parsed.planCode || "").trim().toUpperCase();
   const canonicalPlanCode = resolveCheckoutPlanCode(requestedPlanCode);
-  const dbPlan = await getLicensePlanByCode(canonicalPlanCode);
-  const seedPlan = findSeedPlanByCode(canonicalPlanCode);
-  const plan = dbPlan ?? seedPlan;
+  const dbPlan = botPayment ? null : await getLicensePlanByCode(canonicalPlanCode);
+  const seedPlan = botPayment ? null : findSeedPlanByCode(canonicalPlanCode);
+  const plan = botPayment ? {
+    id: `bot-payment-${parsed.orderId}`,
+    code: "BOT_PAYMENT",
+    nameVi: "Thanh toán Telegram",
+    nameEn: "Telegram payment",
+    slug: "bot-payment",
+    description: "Payment delegated to Telegram bot",
+    durationDays: 0,
+    isLifetime: false,
+    entitlementTags: [],
+    currencyPrices: { [parsed.currency]: Number(parsed.amountMinor ?? 0) },
+    metadata: {}
+  } : (dbPlan ?? seedPlan);
   if (!plan) {
     console.info(
       `[license-checkout] plan_missing requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} currency=${parsed.currency} dbPlan=${dbPlan ? "yes" : "no"} seedPlan=${seedPlan ? "yes" : "no"}`
@@ -346,7 +360,7 @@ export async function createLicenseCheckout(input: unknown) {
     throw integrationErrors.planNotFound;
   }
 
-  const price = plan.currencyPrices[parsed.currency];
+  const price = botPayment ? parsed.amountMinor : plan?.currencyPrices[parsed.currency];
   if (price == null) {
     console.info(
       `[license-checkout] price_missing requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} currency=${parsed.currency} source=${dbPlan ? "db" : "seed"}`
@@ -357,11 +371,11 @@ export async function createLicenseCheckout(input: unknown) {
     }
     plan.currencyPrices[parsed.currency] = fallbackPrice;
   }
-  const resolvedPrice = plan.currencyPrices[parsed.currency];
+  const resolvedPrice = botPayment ? Number(parsed.amountMinor ?? 0) : plan?.currencyPrices[parsed.currency];
   if (resolvedPrice == null) {
     throw integrationErrors.internalError;
   }
-  const licenseCode = String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
+  const licenseCode = botPayment ? "" : String(parsed.activationCode ?? buildLicenseCode()).trim().toUpperCase();
   const paymentSessionId = buildPaymentSessionId(parsed.orderId, parsed.orderId);
   console.info(
     `[license-checkout] creating_order requestedPlanCode=${requestedPlanCode} canonicalPlanCode=${canonicalPlanCode} price=${resolvedPrice} currency=${parsed.currency} locale=${parsed.locale} telegramUserId=${parsed.telegramUserId || "n/a"} customerRef=${parsed.customerRef || "n/a"}`
@@ -375,18 +389,15 @@ export async function createLicenseCheckout(input: unknown) {
     metadata: {
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
-      planCode: plan.code,
-      vipPlanCode: String(parsed.vipPlanCode || requestedPlanCode),
-      requestedPlanCode,
+      ...(botPayment ? {} : { planCode: plan.code, vipPlanCode: String(parsed.vipPlanCode || requestedPlanCode), requestedPlanCode }),
       locale: parsed.locale,
       currency: parsed.currency,
-      activationCode: licenseCode,
-      licenseCode,
+      ...(botPayment ? {} : { activationCode: licenseCode, licenseCode }),
       paymentSessionId,
       checkoutKind: "bot",
       paymentProvider: parsed.currency === "VND" ? "payos" : "sandbox",
-      source: "prive_bot",
-      integrationSource: parsed.source ?? "prive_bot_web_payment",
+      source: botPayment ? "bot_payment" : "prive_bot",
+      integrationSource: parsed.source ?? "direct_license",
       orderId: parsed.orderId
       ,botOrderId: parsed.orderId
       ,correlationId: `bot:${parsed.orderId}`
@@ -394,18 +405,18 @@ export async function createLicenseCheckout(input: unknown) {
     items: [
       {
         productId: plan.id,
-        sku: plan.code,
-        productName: parsed.locale === "vi" ? plan.nameVi : plan.nameEn,
+          sku: botPayment ? "BOT_PAYMENT" : plan.code,
+          productName: botPayment ? "Telegram payment" : (parsed.locale === "vi" ? plan.nameVi : plan.nameEn),
         quantity: 1,
         unitAmountMinor: resolvedPrice,
         totalAmountMinor: resolvedPrice,
-        productSnapshot: {
-          name: parsed.locale === "vi" ? plan.nameVi : plan.nameEn,
-          slug: plan.slug,
-          shortDescription: plan.description,
+          productSnapshot: {
+          name: botPayment ? "Telegram payment" : (parsed.locale === "vi" ? plan.nameVi : plan.nameEn),
+          slug: botPayment ? "bot-payment" : plan.slug,
+          shortDescription: botPayment ? "Telegram payment" : plan.description,
           status: "active",
           downloadLimit: 0,
-          downloadExpiryDays: plan.durationDays
+          downloadExpiryDays: botPayment ? 0 : plan.durationDays
         }
       }
     ]
@@ -415,7 +426,7 @@ export async function createLicenseCheckout(input: unknown) {
     );
     throw error;
   });
-  console.info(`[license-checkout] order_created orderNumber=${order.orderNumber} orderId=${order.id} planCode=${plan.code} price=${resolvedPrice}`);
+  console.info(`[license-checkout] order_created orderNumber=${order.orderNumber} orderId=${order.id} mode=${botPayment ? "BOT_PAYMENT" : "DIRECT_LICENSE"} price=${resolvedPrice}`);
   const returnUrl = buildReturnUrl({ orderNumber: order.orderNumber, returnUrl: parsed.returnUrl });
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
   const provider = parsed.currency === "VND" ? "payos" : "sandbox";
@@ -459,11 +470,10 @@ export async function createLicenseCheckout(input: unknown) {
       providerCheckoutId: checkout.providerCheckoutId,
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
-      planCode: parsed.planCode,
+      ...(botPayment ? {} : { planCode: parsed.planCode }),
       locale: parsed.locale,
       currency: parsed.currency,
-      activationCode: licenseCode,
-      licenseCode,
+      ...(botPayment ? {} : { activationCode: licenseCode, licenseCode }),
       paymentSessionId,
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment"
@@ -477,14 +487,10 @@ export async function createLicenseCheckout(input: unknown) {
     order_id: order.id,
     orderNumber: order.orderNumber,
     order_number: order.orderNumber,
-    planCode: plan.code,
-    plan_code: plan.code,
+    ...(botPayment ? {} : { planCode: plan.code, plan_code: plan.code }),
     locale: parsed.locale,
     currency: parsed.currency,
-    activationCode: licenseCode,
-    activation_code: licenseCode,
-    licenseCode,
-    license_code: licenseCode,
+    ...(botPayment ? {} : { activationCode: licenseCode, activation_code: licenseCode, licenseCode, license_code: licenseCode }),
     paymentSessionId,
     payment_session_id: paymentSessionId,
     paymentProvider: provider,
