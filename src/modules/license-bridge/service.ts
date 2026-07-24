@@ -163,6 +163,7 @@ async function notifyBotLicenseIssued(input: {
   planName: string;
   currency: string;
   amountMinor: number;
+  expiresAt?: string | null;
   licenseCode: string;
   activationUrl: string;
   groupIds: string[];
@@ -194,6 +195,7 @@ async function notifyBotLicenseIssued(input: {
     planName: input.planName,
     currency: input.currency,
     amountMinor: input.amountMinor,
+    expiresAt: input.expiresAt ?? "",
     licenseCode: input.licenseCode,
     activationUrl: input.activationUrl,
     groupIds: input.groupIds,
@@ -684,6 +686,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       planName,
       currency: order.currency,
       amountMinor: order.totalMinor,
+      expiresAt: issued.expiresAt?.toISOString() ?? null,
       licenseCode: activationCode,
       activationUrl,
       groupIds,
