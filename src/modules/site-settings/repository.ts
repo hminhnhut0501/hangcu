@@ -10,8 +10,8 @@ const defaultSettings: SiteContentSettings = {
   heroEyebrowEn: "License storefront for Hang Cú video",
   heroTitleVi: "Bán license phần mềm theo gói 30 ngày và trọn đời.",
   heroTitleEn: "Sell software licenses with 30-day and lifetime plans.",
-  heroDescriptionVi: "Cửa hàng hỗ trợ tiếng Việt và tiếng Anh, kèm donate package và mã license tặng thêm.",
-  heroDescriptionEn: "The store supports Vietnamese and English, with donate packages and bonus license keys.",
+  heroDescriptionVi: "Cửa hàng hỗ trợ tiếng Việt và tiếng Anh, với license key cấp tự động và tùy chọn ủng hộ tách biệt.",
+  heroDescriptionEn: "The store supports Vietnamese and English, with auto-issued license keys and a separate optional support package.",
   heroSecondaryTextVi: "Phù hợp cho vài chục đơn mỗi tháng và có thể mở rộng dần.",
   heroSecondaryTextEn: "Suitable for a few dozen orders per month and easy to scale later.",
   heroPrimaryCtaLabelVi: "Xem gói license",
@@ -31,13 +31,14 @@ const defaultSettings: SiteContentSettings = {
   showFaqSection: true,
   navigation: [
     { label: "Plans", href: "/products", visible: true },
-    { label: "Collections", href: "/collections", visible: true },
+    { label: "Pricing", href: "/pricing", visible: true },
+    { label: "Download", href: "/download", visible: true },
     { label: "Checkout", href: "/checkout", visible: true },
     { label: "Orders", href: "/orders", visible: true },
     { label: "Admin", href: "/admin", visible: true }
   ],
-  footerNoteVi: "Bản storefront song ngữ cho Hang Cú video.",
-  footerNoteEn: "Bilingual storefront for Hang Cú video.",
+  footerNoteVi: "Bản storefront song ngữ cho Hang Cú video, chỉ bán license phần mềm.",
+  footerNoteEn: "Bilingual storefront for Hang Cú video, selling software licenses only.",
   faqItems: [
     {
       questionVi: "License 30 ngày là gì?",

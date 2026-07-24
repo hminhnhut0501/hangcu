@@ -17,8 +17,8 @@ export default async function ProductsPage() {
         </h1>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Duyệt các gói license 30 ngày, trọn đời, và các gói donate có tặng kèm license key."
-            : "Browse the 30-day license, lifetime license, and donate packages that include bonus license keys."}
+            ? "Duyệt license 30 ngày, license trọn đời và gói hỗ trợ tách biệt."
+            : "Browse the 30-day license, lifetime license, and the separate support package."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

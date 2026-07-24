@@ -37,7 +37,7 @@ export default async function AdminSiteSettingsPage({
         { name: "heroSecondaryCtaHref", label: "Link CTA phụ", defaultValue: settings.heroSecondaryCtaHref },
         { name: "announcementVisible", label: "Hiện announcement", type: "checkbox", defaultValue: String(settings.announcementVisible) },
         { name: "showFeaturedPlansSection", label: "Hiện gói nổi bật", type: "checkbox", defaultValue: String(settings.showFeaturedPlansSection) },
-        { name: "showDonateSection", label: "Hiện donate", type: "checkbox", defaultValue: String(settings.showDonateSection) },
+        { name: "showDonateSection", label: "Hiện support package", type: "checkbox", defaultValue: String(settings.showDonateSection) },
         { name: "showFaqSection", label: "Hiện FAQ", type: "checkbox", defaultValue: String(settings.showFaqSection) }
       ]
     }
@@ -132,7 +132,7 @@ export default async function AdminSiteSettingsPage({
                 <p>Announcement: {settings.announcementVisible ? "Hiện" : "Ẩn"}</p>
                 <p>FAQ: {settings.showFaqSection ? "Hiện" : "Ẩn"}</p>
                 <p>Plans: {settings.showFeaturedPlansSection ? "Hiện" : "Ẩn"}</p>
-                <p>Donate: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
+                <p>Support package: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
               </div>
             </div>
           </article>

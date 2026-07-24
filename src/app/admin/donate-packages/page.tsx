@@ -7,19 +7,19 @@ export default async function AdminDonatePackagesPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium text-blue-600">Donate packages</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý donate packages</h2>
+        <p className="text-sm font-medium text-blue-600">Support packages</p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý support packages</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Quản lý các gói donate để tạo bonus license và tặng thêm mã 30 ngày hoặc trọn đời.
+          Quản lý các gói support tách biệt khỏi license, dùng để ghi nhận khoản ủng hộ tự nguyện.
         </p>
       </div>
       <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
-        onSuccessMessage="Đã lưu donate package."
-        triggerLabel="Thêm donate package"
-        drawerTitle="Thêm donate package"
-        drawerDescription="Nhập thông tin gói donate trong drawer để màn hình gọn hơn."
+        onSuccessMessage="Đã lưu support package."
+        triggerLabel="Thêm support package"
+        drawerTitle="Thêm support package"
+        drawerDescription="Nhập thông tin gói support trong drawer để màn hình gọn hơn."
         fields={[
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "DONATE_NEW" },

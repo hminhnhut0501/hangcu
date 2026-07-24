@@ -12,7 +12,7 @@ export default function MerchantReadinessPage() {
       </p>
 
       <h2>What we sell</h2>
-      <p>We sell 30-day and lifetime software licenses, plus optional donation packages that may include bonus license keys.</p>
+      <p>We sell 30-day and lifetime software licenses. We also offer an optional support package that is clearly separated from the license purchase.</p>
 
       <h2>Fulfillment</h2>
       <p>Orders are fulfilled automatically by email, dashboard, and bot-based delivery. No physical shipping is involved.</p>
@@ -21,7 +21,7 @@ export default function MerchantReadinessPage() {
       <p>Customer support is available for billing, delivery, refunds, and license issues at support@hangcu.com.</p>
 
       <h2>Refunds and disputes</h2>
-      <p>Refunds are limited to billing errors, duplicate charges, or delivery failures. License issuance, redemption, or abuse may void refund eligibility.</p>
+      <p>Refunds are limited to the cases described in the Refund Policy. License issuance, redemption, or abuse may void refund eligibility.</p>
 
       <h2>Trust signals</h2>
       <p>We provide clear legal pages, bilingual storefront content, defined refund rules, and an admin audit trail for support review.</p>

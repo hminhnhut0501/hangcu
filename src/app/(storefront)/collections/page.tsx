@@ -17,8 +17,8 @@ export default async function CollectionsPage() {
         </h1>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Nhóm các gói license theo series sản phẩm và các gói donate."
-            : "Browse license plans organized by product series and donate packages."}
+            ? "Nhóm các gói license theo series sản phẩm và gói hỗ trợ tách biệt."
+            : "Browse license plans organized by product series and a separate support package."}
         </p>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2">

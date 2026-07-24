@@ -114,6 +114,38 @@ export default async function HomePage() {
   const trustPoints = locale === "vi"
     ? ["Cấp license tự động", "Tối ưu cho vài chục đơn/tháng", "Giao diện VI / EN"]
     : ["Auto license delivery", "Built for a few dozen orders/month", "VI / EN interface"];
+  const comparisonRows = [
+    {
+      label: locale === "vi" ? "Thanh toán" : "Payment",
+      a: locale === "vi" ? "Một lần" : "One-time",
+      b: locale === "vi" ? "Một lần" : "One-time",
+      c: locale === "vi" ? "Tự nguyện" : "Optional support"
+    },
+    {
+      label: locale === "vi" ? "Thời hạn" : "Duration",
+      a: locale === "vi" ? "30 ngày từ lúc kích hoạt" : "30 days after activation",
+      b: locale === "vi" ? "Không hết hạn" : "No expiry",
+      c: locale === "vi" ? "Không phải license" : "Not a license"
+    },
+    {
+      label: locale === "vi" ? "Tự động gia hạn" : "Auto-renew",
+      a: locale === "vi" ? "Không" : "No",
+      b: locale === "vi" ? "Không" : "No",
+      c: locale === "vi" ? "Không" : "No"
+    },
+    {
+      label: locale === "vi" ? "Số thiết bị" : "Devices",
+      a: "1-2",
+      b: "1-2",
+      c: locale === "vi" ? "Không áp dụng" : "N/A"
+    },
+    {
+      label: locale === "vi" ? "Cập nhật" : "Updates",
+      a: locale === "vi" ? "Trong thời hạn license" : "While active",
+      b: locale === "vi" ? "Theo chính sách công bố" : "Per published policy",
+      c: locale === "vi" ? "Không có quyền lợi license" : "No license benefit"
+    }
+  ];
 
   return (
     <main className="overflow-hidden bg-[#f6f8fc] text-slate-950">
@@ -230,11 +262,27 @@ export default async function HomePage() {
 
                     <div className="grid gap-3">
                       <div className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Video demo" : "Demo video"}</p>
+                        <div className="mt-3 overflow-hidden rounded-[1.15rem] border border-white/10 bg-slate-900">
+                          <video
+                            className="h-[180px] w-full object-cover"
+                            poster="/brand/hangcu-hero-mockup.png"
+                            src="/brand/hangcu-demo.mp4"
+                            controls
+                            muted
+                            playsInline
+                          />
+                        </div>
+                        <p className="mt-2 text-sm text-slate-300">
+                          {locale === "vi" ? "Demo ngắn cho reviewer và khách xem nhanh." : "Short demo for reviewers and quick buyers."}
+                        </p>
+                      </div>
+                      <div className="rounded-[1.35rem] border border-white/10 bg-white/6 p-4">
                         <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Gói 30 ngày" : "30-day plan"}</p>
                         <div className="mt-2 flex items-end justify-between gap-4">
                           <div>
-                            <p className="text-xl font-semibold">{locale === "vi" ? "Bán nhanh" : "Fast sell"}</p>
-                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Phù hợp test thị trường." : "Perfect for market testing."}</p>
+                            <p className="text-xl font-semibold">{locale === "vi" ? "One-time payment" : "One-time payment"}</p>
+                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Hết hạn sau 30 ngày kể từ lúc kích hoạt." : "Expires 30 days after activation."}</p>
                           </div>
                           <div className="rounded-2xl bg-white/10 px-3 py-2 text-right">
                             <p className="text-xs text-slate-300">From</p>
@@ -246,8 +294,8 @@ export default async function HomePage() {
                         <p className="text-[11px] uppercase tracking-[0.28em] text-slate-300">{locale === "vi" ? "Gói trọn đời" : "Lifetime plan"}</p>
                         <div className="mt-2 flex items-end justify-between gap-4">
                           <div>
-                            <p className="text-xl font-semibold">{locale === "vi" ? "1 lần mua" : "One-time"}</p>
-                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Dùng lâu dài." : "Long-term use."}</p>
+                            <p className="text-xl font-semibold">{locale === "vi" ? "Không thu phí định kỳ" : "No recurring fee"}</p>
+                            <p className="mt-1 text-sm text-slate-300">{locale === "vi" ? "Dùng theo chính sách cập nhật công bố." : "Usage follows the published update policy."}</p>
                           </div>
                           <div className="rounded-2xl bg-emerald-400/10 px-3 py-2 text-right">
                             <p className="text-xs text-emerald-200">From</p>
@@ -353,6 +401,30 @@ export default async function HomePage() {
                 </article>
               );
             })}
+          </div>
+          <div className="mt-6 overflow-hidden rounded-[1.75rem] border border-slate-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500">
+                  <tr>
+                    <th className="px-5 py-4 font-medium">{locale === "vi" ? "So sánh" : "Compare"}</th>
+                    <th className="px-5 py-4 font-medium">30-Day License</th>
+                    <th className="px-5 py-4 font-medium">Lifetime License</th>
+                    <th className="px-5 py-4 font-medium">{locale === "vi" ? "Support package" : "Support package"}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 bg-white">
+                  {comparisonRows.map((row) => (
+                    <tr key={row.label}>
+                      <td className="px-5 py-4 font-medium text-slate-900">{row.label}</td>
+                      <td className="px-5 py-4 text-slate-600">{row.a}</td>
+                      <td className="px-5 py-4 text-slate-600">{row.b}</td>
+                      <td className="px-5 py-4 text-slate-600">{row.c}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>

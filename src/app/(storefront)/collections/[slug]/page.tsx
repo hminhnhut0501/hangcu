@@ -29,8 +29,8 @@ export default async function CollectionDetailPage({
         </p>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Đây là khu vực hiển thị các gói license và donate package liên quan."
-            : "This area shows related license plans and donate packages."}
+            ? "Đây là khu vực hiển thị các gói license và gói hỗ trợ liên quan."
+            : "This area shows related license plans and the support package."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

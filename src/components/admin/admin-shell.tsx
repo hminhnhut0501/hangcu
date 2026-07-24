@@ -114,7 +114,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     {
       title: "Cấu hình",
       items: [
-        { label: "Donate packages", href: "/admin/donate-packages" },
+        { label: "Support packages", href: "/admin/donate-packages" },
         { label: "Coupons", href: "/admin/coupons" },
         { label: "Media", href: "/admin/media" },
         { label: "Site settings", href: "/admin/site-settings" },
