@@ -117,7 +117,8 @@ export async function POST(request: Request) {
         customer_ref: record.customerRef,
         external_user_id: record.externalUserId,
         entitlements,
-        group_ids: vipGroupIds
+        group_ids: vipGroupIds,
+        vip_plan_code: String(record.metadata?.vipPlanCode ?? record.metadata?.requestedPlanCode ?? "")
       }
     });
   } catch (error) {

@@ -157,6 +157,7 @@ async function notifyBotLicenseIssued(input: {
   telegramUserId?: string | null;
   customerRef?: string | null;
   planCode: string;
+  vipPlanCode?: string | null;
   planName: string;
   currency: string;
   amountMinor: number;
@@ -185,6 +186,7 @@ async function notifyBotLicenseIssued(input: {
     telegramUserId: input.telegramUserId ?? "",
     customerRef: input.customerRef ?? "",
     planCode: input.planCode,
+    vipPlanCode: input.vipPlanCode ?? "",
     planName: input.planName,
     currency: input.currency,
     amountMinor: input.amountMinor,
@@ -318,6 +320,7 @@ export async function createLicenseCheckout(input: unknown) {
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
       planCode: plan.code,
+      vipPlanCode: requestedPlanCode,
       requestedPlanCode,
       locale: parsed.locale,
       currency: parsed.currency,
@@ -629,6 +632,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       locale: order.metadata?.locale ?? null,
       currency: order.currency,
       activation_code: order.metadata?.activationCode ?? activationCode
+      ,vipPlanCode: order.metadata?.requestedPlanCode ?? order.metadata?.vipPlanCode ?? null
     }
   });
 
@@ -668,6 +672,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       telegramUserId,
       customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
       planCode: plan.code,
+      vipPlanCode: String(order.metadata?.requestedPlanCode ?? order.metadata?.vipPlanCode ?? ""),
       planName,
       currency: order.currency,
       amountMinor: order.totalMinor,
