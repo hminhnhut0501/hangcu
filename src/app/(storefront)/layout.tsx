@@ -12,6 +12,22 @@ export default async function StorefrontLayout({
 }>) {
   const settings = await getSiteContentSettings();
   const locale = await getStorefrontLocale();
+  const preferredOrder = ["/products", "/collections", "/pricing", "/download", "/checkout", "/orders", "/contact"];
+  const visibleNavigation = settings.navigation
+    .filter((item) => item.visible || item.href === "/download")
+    .map((item) => {
+      if (item.href === "/download") {
+        return { ...item, label: locale === "vi" ? "Tải xuống" : "Download" };
+      }
+      return item;
+    })
+    .sort((a, b) => {
+      const aIndex = preferredOrder.indexOf(a.href);
+      const bIndex = preferredOrder.indexOf(b.href);
+      const normalizedA = aIndex === -1 ? preferredOrder.length : aIndex;
+      const normalizedB = bIndex === -1 ? preferredOrder.length : bIndex;
+      return normalizedA - normalizedB;
+    });
 
   return (
     <div className="min-h-screen bg-white text-slate-950">
@@ -22,7 +38,7 @@ export default async function StorefrontLayout({
           </Link>
           <div className="flex items-center gap-3">
             <nav className="hidden items-center gap-2 md:flex">
-              {settings.navigation.filter((item) => item.visible).map((item, index) => (
+              {visibleNavigation.map((item, index) => (
                 <Link
                   key={item.href}
                   href={item.href as any}

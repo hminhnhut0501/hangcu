@@ -32,6 +32,7 @@ const defaultSettings: SiteContentSettings = {
   navigation: [
     { label: "Gói license", href: "/products", visible: true },
     { label: "Bảng giá", href: "/pricing", visible: true },
+    { label: "Supporter packages", href: "/collections", visible: true },
     { label: "Tải xuống", href: "/download", visible: true },
     { label: "Thanh toán", href: "/checkout", visible: true },
     { label: "Đơn hàng", href: "/orders", visible: true },

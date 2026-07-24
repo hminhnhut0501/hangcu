@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
+import { getSupporterPackageBySlug, supporterPackages } from "@/lib/supporter-packages";
 type CheckoutSearchParams = {
   order?: string | string[];
   planCode?: string | string[];
@@ -15,6 +16,7 @@ type CheckoutSearchParams = {
   status?: string | string[];
   orderCode?: string | string[];
   code?: string | string[];
+  package?: string | string[];
 };
 
 function firstValue(value: string | string[] | undefined) {
@@ -87,6 +89,24 @@ export default async function CheckoutPage({
   const resolvedPlanCode = planLabel ?? (order?.metadata?.planCode as string | undefined) ?? null;
   const summaryAmount = amountLabel ?? resolvedAmountLabel;
   const summaryPlan = planLabel ?? resolvedOrderLabel ?? resolvedPlanCode;
+  const selectedPackageSlug = firstValue(resolvedSearchParams.package);
+  const selectedPackage = selectedPackageSlug ? getSupporterPackageBySlug(selectedPackageSlug) : null;
+  const packageOptions = supporterPackages.map((item) => ({
+    slug: item.slug,
+    name: locale === "vi" ? item.nameVi : item.nameEn,
+    description: locale === "vi" ? item.descriptionVi : item.descriptionEn,
+    amountMinor: item.amountMinor,
+    currency: item.currency
+  }));
+  const initialPackage = selectedPackage
+    ? {
+        slug: selectedPackage.slug,
+        name: locale === "vi" ? selectedPackage.nameVi : selectedPackage.nameEn,
+        description: locale === "vi" ? selectedPackage.descriptionVi : selectedPackage.descriptionEn,
+        amountMinor: selectedPackage.amountMinor,
+        currency: selectedPackage.currency
+      }
+    : packageOptions[0] ?? null;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -97,12 +117,12 @@ export default async function CheckoutPage({
               {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-              {locale === "vi" ? "Thanh toán license" : "Pay for your license"}
+              {locale === "vi" ? "Thanh toán gói ủng hộ" : "Pay for your support package"}
             </h1>
             <p className="mt-4 text-lg leading-8 text-slate-600">
               {locale === "vi"
-                ? "Chọn gói license và phương thức thanh toán, hiện đã có PayOS cho thanh toán chuyển khoản/QR."
-                : "Choose a license plan and payment method. PayOS is now available for bank transfer and QR checkout."}
+                ? "Chọn gói, nhập email, chọn cổng thanh toán rồi mới sang bước thanh toán."
+                : "Pick a package, enter your email, choose a gateway, then continue to payment."}
             </p>
           </div>
 
@@ -172,7 +192,9 @@ export default async function CheckoutPage({
 
           <CheckoutPaymentForm
             locale={locale}
-            options={[]}
+            options={packageOptions}
+            initialSelectedSlug={initialPackage?.slug ?? ""}
+            initialEmail=""
             orderSummary={{
               orderNumber,
               checkoutId,
