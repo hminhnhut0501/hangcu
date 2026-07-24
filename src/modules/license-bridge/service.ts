@@ -141,6 +141,56 @@ function signBotCallbackPayload(payload: Record<string, unknown>) {
   return hmacSha256(secret, message);
 }
 
+async function notifyBotPaymentStatus(input: {
+  orderId: string;
+  orderNumber: string;
+  botOrderId: string;
+  telegramUserId?: string | null;
+  currency: string;
+  amountMinor: number;
+  paymentProvider?: string | null;
+  paymentSessionId?: string | null;
+}) {
+  const baseUrl = buildBotCallbackUrl();
+  if (!baseUrl) return null;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const nonce = generateRandomToken(16);
+  const payload = {
+    orderId: input.orderId,
+    botOrderId: input.botOrderId,
+    orderNumber: input.orderNumber,
+    telegramUserId: input.telegramUserId ?? "",
+    status: "PAID",
+    currency: input.currency,
+    amountMinor: input.amountMinor,
+    paymentProvider: input.paymentProvider ?? "",
+    paymentSessionId: input.paymentSessionId ?? "",
+    timestamp,
+    nonce
+  };
+  const signature = signBotCallbackPayload(payload);
+  if (!signature) return null;
+  const body = JSON.stringify({ ...payload, signature });
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(baseUrl, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body
+      });
+      if (!response.ok) throw new Error(`Bot payment callback failed: ${response.status} ${await response.text().catch(() => "")}`);
+      console.info(`[payment-callback] delivered botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt}`);
+      return response.json().catch(() => null);
+    } catch (error) {
+      lastError = error;
+      console.error(`[payment-callback] retry botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt} error=${error instanceof Error ? error.message : String(error)}`);
+      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Bot payment callback failed"));
+}
+
 function botCallbackSecretFingerprint() {
   const secret =
     process.env.LICENSE_BOT_CALLBACK_SECRET?.trim() ||
@@ -560,6 +610,32 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
   if (!order) {
     console.info(`[license-issue] stop orderNumber=${orderNumber} reason=order_not_found`);
     return null;
+  }
+
+  const integrationSource = String(order.metadata?.integrationSource ?? "").trim();
+  const botOrderId = String(order.metadata?.orderId ?? order.metadata?.botOrderId ?? "").trim();
+  if ((integrationSource === "prive_bot" || integrationSource.startsWith("prive_bot_")) && botOrderId) {
+    console.info(`[license-issue] bot_authoritative orderNumber=${order.orderNumber} botOrderId=${botOrderId} action=callback_status_only`);
+    await updateOrder(order.orderNumber, {
+      status: "paid",
+      paymentStatus: "paid",
+      metadata: { ...order.metadata, paidAt: new Date().toISOString(), botCallbackMode: "status_only" }
+    });
+    try {
+      await notifyBotPaymentStatus({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        botOrderId,
+        telegramUserId: resolveTelegramUserId(order),
+        currency: order.currency,
+        amountMinor: order.totalMinor,
+        paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? "payos"),
+        paymentSessionId: String(order.metadata?.paymentSessionId ?? "")
+      });
+    } catch (error) {
+      console.error(`[payment-callback] failed botOrderId=${botOrderId} orderNumber=${order.orderNumber} error=${error instanceof Error ? error.message : String(error)}`);
+    }
+    return { orderNumber: order.orderNumber, botOrderId, status: "paid", callbackMode: "status_only" };
   }
 
   const planCodeCandidates = [
