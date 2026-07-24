@@ -153,6 +153,7 @@ function botCallbackSecretFingerprint() {
 
 async function notifyBotLicenseIssued(input: {
   orderId: string;
+  botOrderId?: string | null;
   orderNumber: string;
   telegramUserId?: string | null;
   customerRef?: string | null;
@@ -182,6 +183,7 @@ async function notifyBotLicenseIssued(input: {
   const nonce = generateRandomToken(16);
   const payload = {
     orderId: input.orderId,
+    botOrderId: input.botOrderId ?? "",
     orderNumber: input.orderNumber,
     telegramUserId: input.telegramUserId ?? "",
     customerRef: input.customerRef ?? "",
@@ -668,6 +670,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     const planName = String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code);
     await notifyBotLicenseIssued({
       orderId: order.id,
+      botOrderId: String(order.metadata?.orderId ?? ""),
       orderNumber: order.orderNumber,
       telegramUserId,
       customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
