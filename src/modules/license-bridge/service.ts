@@ -614,7 +614,12 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
 
   const integrationSource = String(order.metadata?.integrationSource ?? "").trim();
   const botOrderId = String(order.metadata?.orderId ?? order.metadata?.botOrderId ?? "").trim();
-  if ((integrationSource === "prive_bot" || integrationSource.startsWith("prive_bot_")) && botOrderId) {
+  const isBotCheckout =
+    integrationSource === "prive_bot" ||
+    integrationSource.startsWith("prive_bot_") ||
+    integrationSource === "bot_checkout" ||
+    integrationSource.startsWith("bot_");
+  if (isBotCheckout && botOrderId) {
     console.info(`[license-issue] bot_authoritative orderNumber=${order.orderNumber} botOrderId=${botOrderId} action=callback_status_only`);
     await updateOrder(order.orderNumber, {
       status: "paid",
