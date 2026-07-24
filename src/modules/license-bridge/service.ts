@@ -131,6 +131,11 @@ async function notifyBotLicenseIssued(input: {
   groupIds: string[];
   entitlements: string[];
   locale: "vi" | "en";
+  checkoutKind?: string | null;
+  paymentSessionId?: string | null;
+  paymentProvider?: string | null;
+  source?: string | null;
+  integrationSource?: string | null;
 }) {
   const baseUrl = buildBotCallbackUrl();
   if (!baseUrl) {
@@ -154,6 +159,11 @@ async function notifyBotLicenseIssued(input: {
     groupIds: input.groupIds,
     entitlements: input.entitlements,
     locale: input.locale,
+    checkoutKind: input.checkoutKind ?? "license",
+    paymentSessionId: input.paymentSessionId ?? "",
+    paymentProvider: input.paymentProvider ?? "",
+    source: input.source ?? "",
+    integrationSource: input.integrationSource ?? "",
     timestamp,
     nonce
   };
@@ -280,6 +290,8 @@ export async function createLicenseCheckout(input: unknown) {
       activationCode: licenseCode,
       licenseCode,
       paymentSessionId,
+      checkoutKind: "bot",
+      paymentProvider: parsed.currency === "VND" ? "payos" : "sandbox",
       source: "prive_bot",
       integrationSource: parsed.source ?? "prive_bot_web_payment",
       orderId: parsed.orderId
@@ -625,7 +637,12 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       activationUrl,
       groupIds,
       entitlements: plan.entitlementTags,
-      locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi"
+      locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi",
+      checkoutKind: String(order.metadata?.checkoutKind ?? "license"),
+      paymentSessionId: String(order.metadata?.paymentSessionId ?? ""),
+      paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? ""),
+      source: String(order.metadata?.source ?? order.source ?? ""),
+      integrationSource: String(order.metadata?.integrationSource ?? "")
     });
   } catch (error) {
     console.log(`⚠️ Bot callback failed for order ${order.orderNumber}: ${error instanceof Error ? error.message : String(error)}`);
