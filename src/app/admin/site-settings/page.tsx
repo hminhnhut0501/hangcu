@@ -131,8 +131,8 @@ export default async function AdminSiteSettingsPage({
               <div className="grid gap-2 text-xs text-slate-500 sm:grid-cols-2">
                 <p>Announcement: {settings.announcementVisible ? "Hiện" : "Ẩn"}</p>
                 <p>FAQ: {settings.showFaqSection ? "Hiện" : "Ẩn"}</p>
-                <p>Plans: {settings.showFeaturedPlansSection ? "Hiện" : "Ẩn"}</p>
-                <p>Support package: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
+                <p>Gói license: {settings.showFeaturedPlansSection ? "Hiện" : "Ẩn"}</p>
+                <p>Gói hỗ trợ: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
               </div>
             </div>
           </article>

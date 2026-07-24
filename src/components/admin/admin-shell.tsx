@@ -107,22 +107,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
         { label: "Tổng quan", href: "/admin" },
         { label: "Đơn hàng", href: "/admin/orders" },
         { label: "Thanh toán", href: "/admin/payments" },
-        { label: "License plans", href: "/admin/license-plans" },
+        { label: "Gói license", href: "/admin/license-plans" },
         { label: "License keys", href: "/admin/license-keys" }
       ]
     },
     {
       title: "Cấu hình",
       items: [
-        { label: "Support packages", href: "/admin/donate-packages" },
+        { label: "Gói hỗ trợ", href: "/admin/donate-packages" },
         { label: "Coupons", href: "/admin/coupons" },
         { label: "Media", href: "/admin/media" },
-        { label: "Site settings", href: "/admin/site-settings" },
+        { label: "Cài đặt site", href: "/admin/site-settings" },
         { label: "Webhooks", href: "/admin/webhooks" },
-        { label: "Audit", href: "/admin/audit" },
+        { label: "Nhật ký", href: "/admin/audit" },
         { label: "Thống kê", href: "/admin/analytics" },
-        { label: "Compliance", href: "/admin/compliance" },
-        { label: "Hardening", href: "/admin/hardening" }
+        { label: "Tuân thủ", href: "/admin/compliance" },
+        { label: "Gia cố", href: "/admin/hardening" }
       ]
     }
   ];
@@ -186,7 +186,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               <div className="flex items-center justify-between gap-3">
                 <div className={collapsed ? "lg:hidden" : ""}>
                   <p className="text-xs font-semibold text-slate-400">Hang Cú VIP</p>
-                  <p className="mt-2 text-lg font-semibold text-white">Admin menu</p>
+                  <p className="mt-2 text-lg font-semibold text-white">Menu admin</p>
                 </div>
                 <button
                   type="button"

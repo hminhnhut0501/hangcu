@@ -13,7 +13,7 @@ export default async function AdminDonatePackagesPage() {
           Quản lý các gói support tách biệt khỏi license, dùng để ghi nhận khoản ủng hộ tự nguyện.
         </p>
       </div>
-      <SimpleAdminForm
+        <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
         onSuccessMessage="Đã lưu support package."
@@ -22,8 +22,8 @@ export default async function AdminDonatePackagesPage() {
         drawerDescription="Nhập thông tin gói support trong drawer để màn hình gọn hơn."
         fields={[
           { name: "id", label: "ID", defaultValue: "dp_new" },
-          { name: "code", label: "Code", defaultValue: "DONATE_NEW" },
-          { name: "name", label: "Tên", defaultValue: "New Donate Package" },
+          { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
+          { name: "name", label: "Tên", defaultValue: "Gói hỗ trợ mới" },
           { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "2000" },
           { name: "currency", label: "Tiền tệ", defaultValue: "USD" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
