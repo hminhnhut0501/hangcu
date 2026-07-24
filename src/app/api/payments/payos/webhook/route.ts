@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   }
 
   await recordWebhookEvent({
-    id: `evt_${event.providerEventId}`,
+    id: crypto.randomUUID(),
     provider: "payos",
     providerEventId: event.providerEventId,
     eventType: event.eventType,
