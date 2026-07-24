@@ -16,7 +16,7 @@ const schema = checkoutFormSchema.extend({
   currency: z.enum(["VND", "USD"]).optional(),
   customerRef: z.string().min(1).optional(),
   checkoutId: z.string().min(1).optional(),
-  provider: z.enum(["payos", "sandbox", "manual"])
+  provider: z.enum(["payos", "paypal", "lemonsqueezy", "sandbox", "manual"])
 });
 
 function generatePayosOrderCode() {
@@ -124,6 +124,12 @@ export async function POST(request: Request) {
     });
   }
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
+  if (["paypal", "lemonsqueezy"].includes(parsed.data.provider) && order.currency !== "USD") {
+    return Response.json({
+      success: false,
+      error: { code: "INVALID_CURRENCY", message: "PayPal và Lemon Squeezy chỉ hỗ trợ thanh toán USD." }
+    }, { status: 400 });
+  }
   const returnUrl = `${appBaseUrl}/checkout?status=success&order=${encodeURIComponent(order.orderNumber)}`;
   const cancelUrl = `${appBaseUrl}/checkout?status=cancelled&order=${encodeURIComponent(order.orderNumber)}`;
 

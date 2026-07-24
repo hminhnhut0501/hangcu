@@ -26,7 +26,7 @@ type Props = {
 };
 
 export function CheckoutPaymentForm({ locale, options, orderSummary }: Props) {
-  const [provider, setProvider] = useState<"payos" | "sandbox" | "manual">("payos");
+  const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual">("payos");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -74,10 +74,12 @@ export function CheckoutPaymentForm({ locale, options, orderSummary }: Props) {
           <span className="text-sm font-medium text-slate-700">{locale === "vi" ? "Phương thức thanh toán" : "Payment method"}</span>
           <select
             value={provider}
-            onChange={(event) => setProvider(event.target.value as "payos" | "sandbox" | "manual")}
+            onChange={(event) => setProvider(event.target.value as "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual")}
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
           >
             <option value="payos">PayOS</option>
+            <option value="paypal" disabled={Boolean(orderSummary.currency) && orderSummary.currency?.toUpperCase() !== "USD"}>PayPal (USD)</option>
+            <option value="lemonsqueezy" disabled={Boolean(orderSummary.currency) && orderSummary.currency?.toUpperCase() !== "USD"}>Lemon Squeezy (USD)</option>
             <option value="sandbox">Sandbox</option>
             <option value="manual">Manual</option>
           </select>

@@ -4,6 +4,6 @@ export type PaymentIntentDraft = {
   amountMinor: number;
   currency: string;
   customerEmail?: string;
-  provider: "manual" | "sandbox" | "stripe" | "paypal" | "payos";
+  provider: "manual" | "sandbox" | "stripe" | "paypal" | "lemonsqueezy" | "payos";
   metadata?: Record<string, unknown>;
 };

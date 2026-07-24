@@ -2,6 +2,7 @@ import { ManualPaymentProvider } from "@/providers/payments/manual";
 import { PayOSPaymentProvider } from "@/providers/payments/payos";
 import { SandboxPaymentProvider } from "@/providers/payments/sandbox";
 import { PayPalPaymentProvider } from "@/providers/payments/paypal";
+import { LemonSqueezyPaymentProvider } from "@/providers/payments/lemonsqueezy";
 import { StripePaymentProvider } from "@/providers/payments/stripe";
 import type { CreateCheckoutResult, PaymentProvider } from "@/providers/payments/base";
 import { PaymentProviderNotConfiguredError } from "./errors";
@@ -12,6 +13,7 @@ const providers: Record<PaymentIntentDraft["provider"], PaymentProvider> = {
   sandbox: new SandboxPaymentProvider(),
   stripe: new StripePaymentProvider(),
   paypal: new PayPalPaymentProvider(),
+  lemonsqueezy: new LemonSqueezyPaymentProvider(),
   payos: new PayOSPaymentProvider()
 };
 
@@ -21,7 +23,7 @@ export function getPaymentProvider(name: PaymentIntentDraft["provider"]) {
 
 export async function createPaymentCheckout(input: PaymentIntentDraft & { returnUrl: string; cancelUrl: string }): Promise<CreateCheckoutResult> {
   const provider = getPaymentProvider(input.provider);
-  if (provider instanceof StripePaymentProvider || provider instanceof PayPalPaymentProvider) {
+  if (provider instanceof StripePaymentProvider) {
     throw new PaymentProviderNotConfiguredError();
   }
 
