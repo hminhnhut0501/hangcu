@@ -413,14 +413,23 @@ describe("integration api service", () => {
         .find((line) => line.startsWith("[payos-webhook] order_snapshot "));
       expect(snapshotLine).toContain(`orderNumber=${orderNumber}`);
       expect(snapshotLine).toContain("orderId=");
-      expect(snapshotLine).toContain("planCode=HCV_30D");
       expect(snapshotLine).toContain("requestedPlanCode=HCV_30D");
-      expect(snapshotLine).toContain("checkoutKind=bot");
-      expect(snapshotLine).toContain("paymentSessionId=ps_ORDER_LOG01_123");
-      expect(snapshotLine).toContain("paymentProvider=payos");
-      expect(snapshotLine).toContain("source=prive_bot");
-      expect(snapshotLine).toContain("integrationSource=bot_checkout");
-      expect(snapshotLine).toContain("currency=VND");
+      const fieldOrder = [
+        "planCode=HCV_30D",
+        "checkoutKind=bot",
+        "paymentSessionId=ps_ORDER_LOG01_123",
+        "paymentProvider=payos",
+        "locale=n/a",
+        "currency=VND",
+        "source=prive_bot",
+        "integrationSource=bot_checkout"
+      ];
+      let lastIndex = -1;
+      for (const field of fieldOrder) {
+        const index = snapshotLine.indexOf(field);
+        expect(index).toBeGreaterThan(lastIndex);
+        lastIndex = index;
+      }
       expect(snapshotLine).toContain("orderAmount=59000");
     } finally {
       process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;

@@ -18,28 +18,29 @@ const WEBHOOK_ORDER_SNAPSHOT_FIELDS = [
   "integrationSource"
 ] as const;
 
-function buildOrderSnapshotLog(order: {
+type WebhookSnapshotOrder = {
   orderNumber?: string | null;
   id?: string | null;
   metadata?: Record<string, unknown> | null;
   currency?: string | null;
   totalMinor?: number | null;
-} | null) {
+};
+
+function formatWebhookSnapshotField(order: WebhookSnapshotOrder | null, field: (typeof WEBHOOK_ORDER_SNAPSHOT_FIELDS)[number]) {
+  if (!order) return `${field}=n/a`;
+  if (field === "currency") return `${field}=${String(order.currency ?? "n/a")}`;
+  if (field === "locale") return `${field}=${String(order.metadata?.locale ?? "n/a")}`;
+  return `${field}=${String(order.metadata?.[field] ?? "n/a")}`;
+}
+
+function buildOrderSnapshotLog(order: WebhookSnapshotOrder | null) {
+  const orderedFields = WEBHOOK_ORDER_SNAPSHOT_FIELDS.map((field) => formatWebhookSnapshotField(order, field)).join(" ");
   return (
     `${WEBHOOK_ORDER_SNAPSHOT_PREFIX}` +
     `orderNumber=${order?.orderNumber || "n/a"} ` +
     `orderId=${order?.id || "n/a"} ` +
     `requestedPlanCode=${String(order?.metadata?.requestedPlanCode ?? "n/a")} ` +
-    WEBHOOK_ORDER_SNAPSHOT_FIELDS.map((field) => {
-      const value =
-        field === "locale"
-          ? String(order?.metadata?.[field] ?? "n/a")
-          : field === "currency"
-            ? String(order?.currency ?? "n/a")
-            : String(order?.metadata?.[field] ?? "n/a");
-      return `${field}=${value}`;
-    }).join(" ") +
-    " " +
+    `${orderedFields} ` +
     `orderAmount=${String(order?.totalMinor ?? "n/a")}`
   );
 }
