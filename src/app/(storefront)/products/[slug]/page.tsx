@@ -32,7 +32,7 @@ export default async function ProductDetailPage({
         </div>
         <section className="space-y-6">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
+            <p className="text-sm font-medium text-blue-600">
               {product.sku}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
@@ -54,7 +54,7 @@ export default async function ProductDetailPage({
                   <Laptop className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Version</p>
+                  <p className="text-xs text-slate-500">Version</p>
                   <p className="text-sm font-semibold text-slate-950">v1.0</p>
                 </div>
               </div>
@@ -65,7 +65,7 @@ export default async function ProductDetailPage({
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">macOS</p>
+                  <p className="text-xs text-slate-500">macOS</p>
                   <p className="text-sm font-semibold text-slate-950">14.0+</p>
                 </div>
               </div>
@@ -76,7 +76,7 @@ export default async function ProductDetailPage({
                   <KeyRound className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Architecture</p>
+                  <p className="text-xs text-slate-500">Architecture</p>
                   <p className="text-sm font-semibold text-slate-950">Apple Silicon + Intel</p>
                 </div>
               </div>
@@ -87,7 +87,7 @@ export default async function ProductDetailPage({
                   <Download className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Checksum</p>
+                  <p className="text-xs text-slate-500">Checksum</p>
                   <p className="text-sm font-semibold text-slate-950">SHA-256 published at download</p>
                 </div>
               </div>

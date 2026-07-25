@@ -1,75 +1,73 @@
-export default function PrivacyPage() {
+import { getStorefrontLocale } from "@/modules/i18n/storefront";
+import { StaticPage } from "@/components/storefront/static-page";
+
+export default async function PrivacyPage() {
+  const locale = await getStorefrontLocale();
+  const vi = locale === "vi";
+
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16">
-      <div className="space-y-8">
-        <header className="space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
-            Privacy Policy / Chính sách bảo mật
-          </p>
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-950">
-            Chúng tôi chỉ thu thập dữ liệu cần thiết để xử lý đơn hàng và giao license.
-          </h1>
-          <p className="text-lg leading-8 text-slate-600">
-            This policy explains what we collect, why we collect it, and how we use it to
-            deliver software licenses, support customers, and operate the store safely.
-          </p>
-        </header>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">1. Thông tin chúng tôi thu thập</h2>
-          <ul className="space-y-2 text-slate-600">
-            <li>• Email, tên hiển thị, thông tin đơn hàng, trạng thái thanh toán và lịch sử giao dịch.</li>
-            <li>• Nội dung trao đổi hỗ trợ nếu bạn chủ động liên hệ qua email hoặc biểu mẫu liên hệ.</li>
-            <li>• Dữ liệu kỹ thuật tối thiểu như IP, thiết bị, trình duyệt, log lỗi và sự kiện bảo mật.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">2. Mục đích sử dụng</h2>
-          <ul className="space-y-2 text-slate-600">
-            <li>• Xử lý thanh toán và gửi license/key qua email.</li>
-            <li>• Kích hoạt, xác minh, khôi phục hoặc thu hồi license khi cần.</li>
-            <li>• Hỗ trợ cài đặt, xử lý lỗi, hoàn tiền, chống gian lận và chargeback.</li>
-            <li>• Cải thiện trải nghiệm sản phẩm và tuân thủ nghĩa vụ kế toán, thuế, pháp lý.</li>
-          </ul>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">3. Chia sẻ dữ liệu</h2>
-          <p className="text-slate-600">
-            Chúng tôi chỉ chia sẻ dữ liệu với các bên cần thiết để vận hành dịch vụ, ví dụ nền tảng
-            thanh toán, email delivery, hạ tầng lưu trữ, công cụ chống gian lận và dịch vụ hỗ trợ.
-            Chúng tôi không bán dữ liệu cá nhân.
-          </p>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">4. Lưu trữ và bảo mật</h2>
-          <p className="text-slate-600">
-            Dữ liệu đơn hàng và license có thể được lưu trong thời gian cần thiết để vận hành,
-            hỗ trợ khách hàng, xử lý tranh chấp, hoàn tiền và tuân thủ pháp luật. Chúng tôi áp dụng
-            giới hạn truy cập, ghi log hoạt động quan trọng và các biện pháp bảo vệ hợp lý để giảm
-            rủi ro truy cập trái phép.
-          </p>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">5. Quyền của bạn</h2>
-          <p className="text-slate-600">
-            Bạn có thể yêu cầu xem lại, cập nhật hoặc xóa thông tin cá nhân trong phạm vi pháp luật
-            cho phép. Nếu cần hỗ trợ, hãy liên hệ qua email hỗ trợ hiển thị trên website.
-          </p>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-xl font-semibold text-slate-950">6. Dữ liệu sản phẩm số</h2>
-          <p className="text-slate-600">
-            License key, trạng thái kích hoạt, lịch sử cấp lại và sự kiện bảo mật có thể được lưu
-            để đảm bảo tính hợp lệ của giao dịch và hỗ trợ hậu mãi. Ứng dụng Hang Cú video không
-            cần chúng tôi truy cập vào nội dung cá nhân của bạn để kích hoạt license.
-          </p>
-        </section>
-      </div>
-    </main>
+    <StaticPage
+      eyebrow={vi ? "Chính sách bảo mật" : "Privacy Policy"}
+      title={
+        vi
+          ? "Chúng tôi chỉ thu thập dữ liệu cần thiết để xử lý đơn hàng và giao license."
+          : "We only collect the data needed to process orders and deliver licenses."
+      }
+      intro={
+        vi
+          ? "Trang này giải thích dữ liệu nào được thu thập, vì sao chúng tôi cần dữ liệu đó và cách chúng tôi bảo vệ dữ liệu của bạn."
+          : "This page explains what data we collect, why we need it, and how we protect it."
+      }
+      sections={[
+        {
+          title: vi ? "1. Thông tin chúng tôi thu thập" : "1. Information we collect",
+          list: vi
+            ? [
+                "Email, tên hiển thị, thông tin đơn hàng, trạng thái thanh toán và lịch sử giao dịch.",
+                "Nội dung trao đổi hỗ trợ nếu bạn chủ động liên hệ qua email hoặc biểu mẫu liên hệ.",
+                "Dữ liệu kỹ thuật tối thiểu như IP, thiết bị, trình duyệt, log lỗi và sự kiện bảo mật."
+              ]
+            : [
+                "Email address, display name, order details, payment status, and transaction history.",
+                "Support messages when you contact us by email or through the contact form.",
+                "Minimal technical data such as IP, device, browser, error logs, and security events."
+              ]
+        },
+        {
+          title: vi ? "2. Mục đích sử dụng" : "2. How we use it",
+          list: vi
+            ? [
+                "Xử lý thanh toán và gửi license/key qua email.",
+                "Kích hoạt, xác minh, khôi phục hoặc thu hồi license khi cần.",
+                "Hỗ trợ cài đặt, xử lý lỗi, hoàn tiền, chống gian lận và chargeback.",
+                "Cải thiện trải nghiệm sản phẩm và tuân thủ nghĩa vụ kế toán, thuế, pháp lý."
+              ]
+            : [
+                "Process payments and send license keys by email.",
+                "Activate, verify, restore, or revoke licenses when needed.",
+                "Provide installation help, troubleshoot issues, handle refunds, and prevent fraud or chargebacks.",
+                "Improve the product and meet accounting, tax, and legal obligations."
+              ]
+        },
+        {
+          title: vi ? "3. Chia sẻ dữ liệu" : "3. Data sharing",
+          body: vi
+            ? "Chúng tôi chỉ chia sẻ dữ liệu với các bên cần thiết để vận hành dịch vụ, ví dụ nền tảng thanh toán, email delivery, hạ tầng lưu trữ, công cụ chống gian lận và dịch vụ hỗ trợ. Chúng tôi không bán dữ liệu cá nhân."
+            : "We only share data with service providers necessary to operate the business, such as payment platforms, email delivery, storage infrastructure, fraud tools, and support services. We do not sell personal data."
+        },
+        {
+          title: vi ? "4. Lưu trữ và bảo mật" : "4. Retention and security",
+          body: vi
+            ? "Dữ liệu đơn hàng và license có thể được lưu trong thời gian cần thiết để vận hành, hỗ trợ khách hàng, xử lý tranh chấp, hoàn tiền và tuân thủ pháp luật. Chúng tôi áp dụng giới hạn truy cập, ghi log hoạt động quan trọng và các biện pháp bảo vệ hợp lý để giảm rủi ro truy cập trái phép."
+            : "Order and license data may be retained as long as needed to operate the service, support customers, resolve disputes, process refunds, and comply with law. We use access controls, audit logging, and reasonable safeguards to reduce unauthorized access risks."
+        },
+        {
+          title: vi ? "5. Quyền của bạn" : "5. Your rights",
+          body: vi
+            ? "Bạn có thể yêu cầu xem lại, cập nhật hoặc xóa thông tin cá nhân trong phạm vi pháp luật cho phép. Nếu cần hỗ trợ, hãy liên hệ qua email hỗ trợ hiển thị trên website."
+            : "You may request access, correction, or deletion of your personal information where permitted by law. If you need help, contact us using the support email shown on the website."
+        }
+      ]}
+    />
   );
 }

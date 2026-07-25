@@ -113,7 +113,7 @@ export default async function CheckoutPage({
       <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-6">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
+            <p className="text-sm font-medium text-blue-600">
               {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
@@ -130,7 +130,7 @@ export default async function CheckoutPage({
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-blue-700">
                 <span>{locale === "vi" ? "Thông tin từ bot" : "Bot checkout context"}</span>
-                <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
                   {locale === "vi" ? "Nguồn từ bot" : "From bot"}
                 </span>
                 {orderNumber ? <span className="rounded-full bg-white px-3 py-1 text-blue-700 ring-1 ring-blue-200">#{orderNumber}</span> : null}
@@ -139,19 +139,19 @@ export default async function CheckoutPage({
               <div className="mt-4 grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
                 {summaryPlan ? (
                   <div className="rounded-xl bg-white p-4 ring-1 ring-blue-100">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{locale === "vi" ? "Gói" : "Plan"}</p>
+                    <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Gói" : "Plan"}</p>
                     <p className="mt-1 text-base font-semibold text-slate-900">{summaryPlan}</p>
                   </div>
                 ) : null}
                 {summaryAmount ? (
                   <div className="rounded-xl bg-white p-4 ring-1 ring-blue-100">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{locale === "vi" ? "Số tiền" : "Amount"}</p>
+                    <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Số tiền" : "Amount"}</p>
                     <p className="mt-1 text-base font-semibold text-slate-900">{summaryAmount}</p>
                   </div>
                 ) : null}
                 {resolvedCustomerRef ? (
                   <div className="rounded-xl bg-white p-4 ring-1 ring-blue-100 sm:col-span-2">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{locale === "vi" ? "Mã khách" : "Customer ref"}</p>
+                    <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Mã khách" : "Customer ref"}</p>
                     <p className="mt-1 text-base font-semibold text-slate-900">{resolvedCustomerRef}</p>
                   </div>
                 ) : null}

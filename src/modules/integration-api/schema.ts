@@ -29,7 +29,7 @@ export const checkoutRequestSchema = integrationBaseSchema.extend({
   planCode: z.string().min(1).optional(),
   vipPlanCode: z.string().min(1).optional(),
   amountMinor: z.coerce.number().int().positive().optional(),
-  locale: z.enum(["vi", "en"]),
+  locale: z.enum(["vi", "en"]).optional(),
   currency: z.enum(["VND", "USD"]),
   activationCode: z.string().min(1).optional(),
   returnUrl: z.string().url().optional(),

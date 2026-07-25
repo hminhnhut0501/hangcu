@@ -9,7 +9,7 @@ export default async function CollectionsPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
+        <p className="text-sm font-medium text-blue-600">
           {locale === "vi" ? "Gói ủng hộ" : "Supporter packages"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight">

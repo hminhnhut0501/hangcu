@@ -33,7 +33,7 @@ const featureBlocks = {
     {
       icon: ShieldCheck,
       title: "Cấp key tự động",
-      text: "Hệ thống tự cấp, theo dõi trạng thái và ghi nhận lịch sử xử lý."
+      text: "Cấp key tự động, theo dõi trạng thái và lưu lịch sử xử lý."
     },
     {
       icon: Languages,
@@ -43,19 +43,19 @@ const featureBlocks = {
     {
       icon: Zap,
       title: "Mua nhanh",
-      text: "Chọn gói rồi đi thẳng sang checkout, không cần qua nhiều bước."
+      text: "Chọn gói rồi đi thẳng sang thanh toán, không phải qua nhiều bước."
     },
     {
       icon: Download,
       title: "Giao ngay",
-      text: "Thanh toán xong là nhận license key qua email hoặc bot."
+      text: "Thanh toán xong là nhận key qua email hoặc bot ngay."
     }
   ],
   en: [
     {
       icon: ShieldCheck,
       title: "Clean licenses",
-      text: "Auto-issued keys, status tracking, revoke, and audit."
+      text: "Auto-issued keys, status tracking, revoke, and audit logs."
     },
     {
       icon: Languages,
@@ -70,7 +70,7 @@ const featureBlocks = {
     {
       icon: Download,
       title: "Instant delivery",
-      text: "License keys are returned right after payment."
+      text: "License keys are delivered right after payment."
     }
   ]
 } as const;
@@ -92,31 +92,30 @@ export default async function HomePage() {
     vi: {
       eyebrow: "License phần mềm",
       title: "Hang Cú video",
-      lead: "Mở bán license 30 ngày và trọn đời.",
-      sub: "Gọn, rõ ràng và dễ dùng. Phù hợp cho cửa hàng nhỏ nhưng vẫn đủ đường để mở rộng sau này.",
-      primary: "Xem gói license",
-      secondary: "Đi tới checkout",
+      lead: "Mua license 30 ngày hoặc trọn đời, nhận key ngay sau thanh toán.",
+      sub: "Gọn, rõ, dễ mua. Chạy ổn cho shop nhỏ và vẫn đủ thoáng để mở rộng sau này.",
+      primary: "Xem gói",
+      secondary: "Mua ngay",
       badge: "Mua nhanh"
     },
     en: {
       eyebrow: "Software licensing",
       title: "Hang Cú video",
-      lead: "Selling 30-day and lifetime licenses.",
-      sub: "Minimal, refined, and ready for a few dozen orders a month. Built light today, scalable tomorrow.",
-      primary: "View license plans",
-      secondary: "Go to checkout",
+      lead: "30-day and lifetime licenses, delivered right after payment.",
+      sub: "Minimal, polished, and built for a small store that still wants room to grow.",
+      primary: "View plans",
+      secondary: "Checkout",
       badge: "Quick buy"
     }
   }[locale];
 
-  const quickBuyLabel = locale === "vi" ? "Chọn gói" : "Choose a plan";
   const featureBlocksForLocale = featureBlocks[locale];
   const featureMenu = locale === "vi"
     ? [
         { label: "Giới thiệu", href: "#hero" },
         { label: "Tính năng", href: "#features" },
         { label: "Ảnh app", href: "#showcase" },
-        { label: "Chọn gói", href: "#plans" },
+        { label: "Gói", href: "#plans" },
         { label: "So sánh", href: "#compare" }
       ]
     : [
@@ -127,8 +126,8 @@ export default async function HomePage() {
         { label: "Compare", href: "#compare" }
       ];
   const trustPoints = locale === "vi"
-    ? ["Giao key tự động", "Phù hợp lượng đơn nhỏ", "Giao diện VI / EN"]
-    : ["Auto license delivery", "Built for a few dozen orders/month", "VI / EN interface"];
+    ? ["Cấp key tự động", "VI / EN"]
+    : ["Auto delivery", "VI / EN"];
   const comparisonRows = [
     {
       label: locale === "vi" ? "Thanh toán" : "Payment",
@@ -162,13 +161,13 @@ export default async function HomePage() {
     }
   ];
   const featureBadges = locale === "vi"
-    ? ["Tự động cấp key", "VI / EN"]
-    : ["Auto key delivery", "VI / EN"];
+    ? ["Cấp key tự động", "VI / EN"]
+    : ["Auto delivery", "VI / EN"];
   const highlightRows = locale === "vi"
     ? [
-        { title: "Mua xong dùng ngay", text: "Quy trình gọn: chọn gói, nhập email, chọn cổng, thanh toán." },
-        { title: "Giao diện song ngữ", text: "Khách và chủ shop đều dùng được tiếng Việt hoặc tiếng Anh." },
-        { title: "Phù hợp shop nhỏ", text: "Tối ưu cho vài chục đơn mỗi tháng nhưng vẫn dễ mở rộng." }
+        { title: "Mua xong dùng ngay", text: "Chọn gói, nhập email, chọn cổng thanh toán rồi hoàn tất." },
+        { title: "Song ngữ VI / EN", text: "Khách mua hàng và admin đều dùng được tiếng Việt hoặc tiếng Anh." },
+        { title: "Phù hợp shop nhỏ", text: "Chạy gọn cho nhu cầu hiện tại, vẫn mở rộng được khi cần." }
       ]
     : [
         { title: "Buy and use right away", text: "Choose a plan, enter email, select gateway, and pay." },
@@ -248,12 +247,12 @@ export default async function HomePage() {
             <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl motion-safe:animate-[pulse_12s_ease-in-out_infinite]" />
 
             <div className="relative mx-auto max-w-[620px]">
-              <div className="absolute -inset-6 rounded-[3rem] bg-white/40 blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2.75rem] border border-white/70 bg-white/80 p-3 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-                <div className="absolute inset-x-8 top-8 h-px bg-white/70" />
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-[linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,0.9))]" />
-                <div className="relative overflow-hidden rounded-[2.2rem] border border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),_transparent_45%),linear-gradient(180deg,#fbfcff,#eef4ff)]">
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.65),transparent_38%)]" />
+              <div className="absolute -inset-8 rounded-[3.5rem] bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_50%),radial-gradient(circle_at_bottom,rgba(16,185,129,0.1),transparent_38%)] blur-3xl" />
+              <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/70 p-4 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
+                <div className="absolute inset-x-10 top-9 h-px bg-white/70" />
+                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.7),transparent_25%,transparent_75%,rgba(255,255,255,0.45))] opacity-70" />
+                <div className="relative overflow-hidden rounded-[2.35rem] border border-slate-200/70 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),_transparent_45%),linear-gradient(180deg,#fbfdff,#edf4ff)]">
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.7),transparent_38%)]" />
                   <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-[11px] font-semibold text-slate-500 shadow-sm">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     {heroCopy.badge}
@@ -261,25 +260,26 @@ export default async function HomePage() {
                   <div className="absolute right-6 top-6 rounded-full border border-white/80 bg-white/85 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
                     macOS native
                   </div>
-                  <div className="absolute left-6 bottom-6 rounded-[1.5rem] border border-white/80 bg-white/85 px-4 py-3 shadow-sm backdrop-blur">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  <div className="absolute left-6 bottom-6 rounded-[1.5rem] border border-white/80 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+                    <p className="text-[10px] font-semibold text-slate-400">
                       {locale === "vi" ? "Mua nhanh" : "Quick buy"}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-slate-900">
                       {locale === "vi" ? "Chọn gói, nhập email, thanh toán." : "Pick a plan, enter email, pay."}
                     </p>
                   </div>
-                  <div className="absolute right-6 bottom-6 rounded-[1.5rem] border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  <div className="absolute right-6 bottom-6 rounded-[1.5rem] border border-slate-200 bg-white/92 px-4 py-3 shadow-sm">
+                    <p className="text-[10px] font-semibold text-slate-400">
                       {locale === "vi" ? "Tình trạng" : "Status"}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-slate-900">
-                      {locale === "vi" ? "Giao key tự động" : "Auto delivery"}
+                      {locale === "vi" ? "Key về email ngay" : "Key sent by email"}
                     </p>
                   </div>
                   <div className="relative flex min-h-[640px] items-center justify-center p-6 sm:p-8">
-                    <div className="absolute left-10 top-20 h-24 w-24 rounded-full bg-sky-400/20 blur-2xl" />
-                    <div className="absolute right-12 top-32 h-32 w-32 rounded-full bg-emerald-400/15 blur-2xl" />
+                    <div className="absolute left-10 top-20 h-24 w-24 rounded-full bg-sky-400/25 blur-2xl motion-safe:animate-[pulse_8s_ease-in-out_infinite]" />
+                    <div className="absolute right-12 top-32 h-32 w-32 rounded-full bg-emerald-400/18 blur-2xl motion-safe:animate-[pulse_10s_ease-in-out_infinite]" />
+                    <div className="absolute inset-x-12 top-16 h-56 rounded-[2rem] bg-[radial-gradient(circle_at_center,rgba(96,165,250,0.18),transparent_65%)] blur-2xl" />
                     <Image
                       src={heroImageSrc}
                       alt="Hang Cú video app preview"
@@ -301,7 +301,7 @@ export default async function HomePage() {
         <div className="rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">
+              <p className="text-xs font-semibold text-blue-600">
                 {locale === "vi" ? "Tính năng chính" : "Core benefits"}
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight">
@@ -310,8 +310,8 @@ export default async function HomePage() {
             </div>
             <p className="max-w-2xl text-sm leading-7 text-slate-600">
               {locale === "vi"
-                ? "Khối này chỉ giữ những gì giúp khách ra quyết định: app thật, video thật, và ba lợi ích rõ ràng."
-                : "This section keeps only what helps customers decide: real app, real video, and three clear benefits."}
+                ? "Chỉ giữ những gì giúp khách quyết định nhanh: app thật, video thật, và vài lợi ích gọn."
+                : "This section keeps only what helps customers decide quickly: real app, real video, and a few clear benefits."}
             </p>
           </div>
 
@@ -337,8 +337,8 @@ export default async function HomePage() {
           <div id="showcase" className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white">
               <div className="border-b border-slate-200 px-5 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-                  {locale === "vi" ? "Ảnh app thật" : "Real app shot"}
+                <p className="text-xs font-semibold text-slate-500">
+                  {locale === "vi" ? "Ảnh app thật" : "App screenshot"}
                 </p>
               </div>
               <div className="bg-[#091221] p-4">
@@ -355,8 +355,8 @@ export default async function HomePage() {
             <div className="grid gap-4">
               <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950">
                 <div className="border-b border-white/10 px-5 py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">
-                    {locale === "vi" ? "Video demo" : "Demo video"}
+                  <p className="text-xs font-semibold text-white/60">
+                    {locale === "vi" ? "Video demo" : "Product video"}
                   </p>
                 </div>
                 <video
@@ -368,8 +368,8 @@ export default async function HomePage() {
               </div>
 
               <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">
-                  {locale === "vi" ? "Luồng mua" : "Purchase flow"}
+                <p className="text-xs font-semibold text-slate-500">
+                  {locale === "vi" ? "Cách mua" : "How it works"}
                 </p>
                 <div className="mt-4 space-y-3">
                   {[
@@ -396,15 +396,15 @@ export default async function HomePage() {
         <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-600">
-                {quickBuyLabel}
+              <p className="text-xs font-semibold text-blue-600">
+                {locale === "vi" ? "Gói phù hợp" : "Pick the right plan"}
               </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-                {locale === "vi" ? "Chọn gói rồi đi thẳng sang thanh toán" : "Pick a plan and jump straight to checkout"}
+                {locale === "vi" ? "Chọn gói rồi đi thẳng sang thanh toán" : "Choose a plan, then head straight to checkout"}
               </h2>
             </div>
             <Link href="/products" className="hidden rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white md:inline-flex">
-              {locale === "vi" ? "Xem tất cả" : "View all"}
+              {locale === "vi" ? "Xem tất cả" : "See all"}
             </Link>
           </div>
 
@@ -424,7 +424,7 @@ export default async function HomePage() {
                       <div className="flex items-center gap-2">
                         <p className={`text-xs font-semibold ${isPrimary ? "text-slate-300" : "text-slate-500"}`}>{product.sku}</p>
                         {index === 0 ? (
-                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${isPrimary ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"}`}>
+                          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${isPrimary ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"}`}>
                             {locale === "vi" ? "Nổi bật" : "Featured"}
                           </span>
                         ) : null}
@@ -459,7 +459,7 @@ export default async function HomePage() {
                         isPrimary ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-slate-950 text-white hover:bg-slate-800"
                       }`}
                     >
-                      {locale === "vi" ? "Xem chi tiết" : "View details"}
+                      {locale === "vi" ? "Xem gói" : "View plan"}
                     </Link>
                     <Link
                       href={`/checkout?planCode=${encodeURIComponent(product.sku)}&plan=${encodeURIComponent(product.name)}&amountMinor=${price.amountMinor}&currency=${encodeURIComponent(price.currency)}`}
@@ -473,8 +473,8 @@ export default async function HomePage() {
 
                   <div className="relative mt-5 grid gap-2 text-xs">
                     <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${isPrimary ? "bg-white/10 text-slate-100" : "bg-slate-50 text-slate-700"}`}>
-                      <span>{locale === "vi" ? "Tối ưu cho" : "Best for"}</span>
-                      <span className="font-medium">{locale === "vi" ? "mua nhanh" : "fast buyers"}</span>
+                      <span>{locale === "vi" ? "Hợp với" : "Best for"}</span>
+                      <span className="font-medium">{locale === "vi" ? "người cần mua nhanh" : "fast buyers"}</span>
                     </div>
                   </div>
                 </article>
@@ -484,7 +484,7 @@ export default async function HomePage() {
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {comparisonRows.map((row) => (
               <div key={row.label} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">{row.label}</p>
+                <p className="text-xs font-semibold text-slate-500">{row.label}</p>
                 <div className="mt-3 space-y-2 text-sm">
                   <p className="text-slate-700"><span className="font-medium text-slate-950">30D:</span> {row.a}</p>
                   <p className="text-slate-700"><span className="font-medium text-slate-950">Life:</span> {row.b}</p>

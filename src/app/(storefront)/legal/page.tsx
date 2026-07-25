@@ -15,7 +15,7 @@ export default function LegalHubPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">Legal</p>
+        <p className="text-sm font-medium text-blue-600">Legal</p>
         <h1 className="text-4xl font-semibold tracking-tight">Store policies / Chính sách cửa hàng</h1>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2">

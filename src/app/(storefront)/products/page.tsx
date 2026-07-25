@@ -9,7 +9,7 @@ export default async function ProductsPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-blue-600">
+        <p className="text-sm font-medium text-blue-600">
           {locale === "vi" ? "Gói license" : "License plans"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight">
@@ -30,7 +30,7 @@ export default async function ProductsPage() {
             <div className="aspect-[4/5] bg-slate-100" />
             <div className="space-y-3 p-5">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-slate-500">
+                <p className="text-xs font-medium text-slate-500">
                   {product.sku}
                 </p>
                 <h2 className="mt-2 text-xl font-semibold">{product.name}</h2>

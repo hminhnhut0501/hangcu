@@ -14,10 +14,10 @@ export default async function StorefrontLayout({
   const locale = await getStorefrontLocale();
   const preferredOrder = ["/products", "/collections", "/pricing", "/download", "/checkout", "/orders", "/contact"];
   const visibleNavigation = settings.navigation
-    .filter((item) => item.visible || item.href === "/download")
+    .filter((item) => (item.visible || item.href === "/download") && item.href !== "/admin")
     .map((item) => {
       if (item.href === "/download") {
-        return { ...item, label: locale === "vi" ? "Tải xuống" : "Download" };
+        return { ...item, label: locale === "vi" ? "Tải app" : "Download" };
       }
       return item;
     })
@@ -33,7 +33,7 @@ export default async function StorefrontLayout({
     <div className="min-h-screen bg-white text-slate-950">
       <header className="border-b border-slate-200">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="text-sm font-semibold tracking-wide">
+          <Link href="/" className="text-sm font-semibold">
             {getLocalizedText(locale, { vi: settings.siteNameVi, en: settings.siteNameEn })}
           </Link>
           <div className="flex items-center gap-3">

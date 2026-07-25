@@ -36,8 +36,7 @@ const defaultSettings: SiteContentSettings = {
     { label: "Tải xuống", href: "/download", visible: true },
     { label: "Thanh toán", href: "/checkout", visible: true },
     { label: "Đơn hàng", href: "/orders", visible: true },
-    { label: "Hỗ trợ", href: "/contact", visible: true },
-    { label: "Admin", href: "/admin", visible: false }
+    { label: "Hỗ trợ", href: "/contact", visible: true }
   ],
   footerNoteVi: "Bản storefront song ngữ cho Hang Cú video, chỉ bán license phần mềm.",
   footerNoteEn: "Bilingual storefront for Hang Cú video, selling software licenses only.",
