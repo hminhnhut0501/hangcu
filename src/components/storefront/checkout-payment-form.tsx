@@ -4,6 +4,8 @@ import React, { useState } from "react";
 
 type CheckoutOption = {
   slug: string;
+  code: string;
+  kind: "license" | "support";
   name: string;
   description: string;
   amountMinor: number;
@@ -53,7 +55,7 @@ export function CheckoutPaymentForm({ locale, options, initialSelectedSlug, init
       provider,
       email
     };
-    if (selectedOption?.slug) payload.planCode = selectedOption.slug;
+    if (selectedOption?.code) payload.planCode = selectedOption.code;
     if (selectedOption?.name) payload.plan = selectedOption.name;
     if (selectedOption?.amountMinor) payload.amountMinor = String(selectedOption.amountMinor);
     if (selectedOption?.currency) payload.currency = selectedOption.currency;
@@ -96,7 +98,7 @@ export function CheckoutPaymentForm({ locale, options, initialSelectedSlug, init
           >
             {options.map((option) => (
               <option key={option.slug} value={option.slug}>
-                {option.name} - {option.currency} {(option.amountMinor / 100).toFixed(2)}
+                {option.kind === "license" ? "【License】" : "【Support】"} {option.name} - {option.currency} {(option.amountMinor / 100).toFixed(2)}
               </option>
             ))}
           </select>

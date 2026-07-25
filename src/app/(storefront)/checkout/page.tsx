@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
+import { listProducts } from "@/modules/products/service";
 import { getSupporterPackageBySlug, supporterPackages } from "@/lib/supporter-packages";
 type CheckoutSearchParams = {
   order?: string | string[];
@@ -91,22 +92,44 @@ export default async function CheckoutPage({
   const summaryPlan = planLabel ?? resolvedOrderLabel ?? resolvedPlanCode;
   const selectedPackageSlug = firstValue(resolvedSearchParams.package);
   const selectedPackage = selectedPackageSlug ? getSupporterPackageBySlug(selectedPackageSlug) : null;
-  const packageOptions = supporterPackages.map((item) => ({
+  const catalogProducts = await listProducts();
+  const licenseProducts = catalogProducts
+    .filter((product) => product.sku === "HCV-LIC-30" || product.sku === "HCV-LIC-LIFE")
+    .map((product) => ({
+      slug: product.sku,
+      code: product.sku,
+      kind: "license" as const,
+      name: locale === "vi" ? product.name : product.name,
+      description:
+        locale === "vi"
+          ? product.shortDescription || product.description
+          : product.shortDescription || product.description,
+      amountMinor: product.amountMinor,
+      currency: product.currency
+    }));
+  const supportOptions = supporterPackages.map((item) => ({
     slug: item.slug,
+    code: item.slug,
+    kind: "support" as const,
     name: locale === "vi" ? item.nameVi : item.nameEn,
     description: locale === "vi" ? item.descriptionVi : item.descriptionEn,
     amountMinor: item.amountMinor,
     currency: item.currency
   }));
+  const packageOptions = [...licenseProducts, ...supportOptions];
   const initialPackage = selectedPackage
     ? {
         slug: selectedPackage.slug,
+        code: selectedPackage.slug,
+        kind: "support" as const,
         name: locale === "vi" ? selectedPackage.nameVi : selectedPackage.nameEn,
         description: locale === "vi" ? selectedPackage.descriptionVi : selectedPackage.descriptionEn,
         amountMinor: selectedPackage.amountMinor,
         currency: selectedPackage.currency
       }
-    : packageOptions[0] ?? null;
+    : firstValue(resolvedSearchParams.planCode)
+      ? packageOptions.find((option) => option.slug === firstValue(resolvedSearchParams.planCode)) ?? packageOptions[0] ?? null
+      : packageOptions[0] ?? null;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
