@@ -171,6 +171,27 @@ export default async function HomePage() {
     }
   ];
 
+  const compareHighlights =
+    locale === "vi"
+      ? [
+          { label: "30 ngày", value: "Dùng ngắn hạn, test workflow, đổi máy dễ hơn" },
+          { label: "Trọn đời", value: "Một lần thanh toán, dùng lâu dài" },
+          { label: "Support package", value: "Tách riêng, không trộn với license" }
+        ]
+      : [
+          { label: "30 days", value: "Short-term use and workflow testing" },
+          { label: "Lifetime", value: "One-time payment, long-term use" },
+          { label: "Support package", value: "Separate from the license purchase" }
+        ];
+
+  const supportPackages = supporterPackages.slice(0, 3).map((item) => ({
+    slug: item.slug,
+    name: locale === "vi" ? item.nameVi : item.nameEn,
+    description: locale === "vi" ? item.descriptionVi : item.descriptionEn,
+    badge: locale === "vi" ? item.badgeVi : item.badgeEn,
+    amount: formatMoney(item.amountMinor, item.currency, locale)
+  }));
+
   return (
     <main className="overflow-hidden bg-[#f6f8fc] text-slate-950">
       <section id="hero" className="mx-auto grid max-w-7xl gap-12 px-6 pb-16 pt-16 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:py-24">
@@ -208,34 +229,15 @@ export default async function HomePage() {
         </div>
 
         <div className="relative animate-fade-up [animation-delay:180ms]">
-          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl animate-soft-glow" />
-          <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl animate-soft-glow [animation-delay:2s]" />
-
           <div className="relative mx-auto max-w-[620px]">
-            <div className="absolute -inset-8 rounded-[3.25rem] bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_50%),radial-gradient(circle_at_bottom,rgba(16,185,129,0.1),transparent_38%)] blur-3xl" />
-            <div className="relative overflow-hidden rounded-[3rem] border border-white/80 bg-white/75 p-4 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
-              <div className="relative overflow-hidden rounded-[2.4rem] border border-slate-200/70 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.14),_transparent_45%),linear-gradient(180deg,#fbfdff,#edf4ff)]">
-                <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.75),transparent_38%)]" />
-                <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/88 px-3 py-1.5 text-[11px] font-semibold text-slate-500 shadow-sm">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  {copy.heroBadge}
-                </div>
-                <div className="absolute right-6 top-6 rounded-full border border-white/80 bg-white/88 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
-                  macOS native
-                </div>
-                <div className="relative flex items-center justify-center p-6 sm:p-8">
-                  <Image
-                    src={heroImageSrc}
-                    alt={locale === "vi" ? "Ảnh app Tele video" : "Tele video app screenshot"}
-                    width={1400}
-                    height={1200}
-                    priority
-                    className="h-auto w-full max-w-[540px] drop-shadow-[0_32px_60px_rgba(15,23,42,0.18)] animate-soft-float"
-                  />
-                  <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-white/30" />
-                </div>
-              </div>
-            </div>
+            <Image
+              src={heroImageSrc}
+              alt={locale === "vi" ? "Ảnh app Tele video" : "Tele video app screenshot"}
+              width={1400}
+              height={1200}
+              priority
+              className="h-auto w-full animate-soft-float"
+            />
           </div>
         </div>
       </section>
@@ -328,7 +330,7 @@ export default async function HomePage() {
             <div>
               <p className="text-sm font-medium text-blue-600">{copy.compareLabel}</p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-                {locale === "vi" ? "So sánh license 30 ngày, trọn đời và gói hỗ trợ" : "Compare 30-day, lifetime, and support packages"}
+                {locale === "vi" ? "2 gói bản quyền chính và các gói support riêng" : "Two main licenses plus separate support packages"}
               </h2>
             </div>
             <Link href="/products" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white">
@@ -373,23 +375,24 @@ export default async function HomePage() {
 
                 <div className="mt-5 flex flex-wrap gap-3">
                   <Link
-                    href={index === 0 ? "/checkout" : "/products"}
+                    href={`/checkout?planCode=${encodeURIComponent(index === 0 ? "HCV-LIC-30" : "HCV-LIC-LIFE")}`}
                     className={`inline-flex rounded-full px-4 py-2 text-sm font-medium ${
                       index === 0 ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-slate-950 text-white hover:bg-slate-800"
                     }`}
                   >
                     {index === 0 ? (locale === "vi" ? "Mua license" : "Buy license") : locale === "vi" ? "Xem chi tiết" : "View details"}
                   </Link>
-                  <Link
-                    href="/collections"
-                    className={`inline-flex rounded-full border px-4 py-2 text-sm font-medium ${
-                      index === 0 ? "border-white/20 text-white hover:bg-white/10" : "border-slate-200 text-slate-900 hover:bg-slate-50"
-                    }`}
-                  >
-                    {locale === "vi" ? "Gói hỗ trợ" : "Support package"}
-                  </Link>
                 </div>
               </article>
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {compareHighlights.map((item) => (
+              <div key={item.label} className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
+                <p className="text-sm font-medium text-slate-500">{item.label}</p>
+                <p className="mt-2 text-sm leading-7 text-slate-700">{item.value}</p>
+              </div>
             ))}
           </div>
 
@@ -410,6 +413,40 @@ export default async function HomePage() {
                     </p>
                   </div>
                 </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-lg font-semibold text-slate-950">
+                {locale === "vi" ? "Gói support" : "Support packages"}
+              </h3>
+              <p className="text-sm text-slate-500">
+                {locale === "vi" ? "Ủng hộ thêm, tách riêng khỏi license." : "Optional support, separate from licenses."}
+              </p>
+            </div>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              {supportPackages.map((item) => (
+                <article key={item.slug} className="group rounded-[1.8rem] border border-slate-200 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-slate-500">{item.badge ?? (locale === "vi" ? "Support" : "Support")}</p>
+                      <h4 className="text-xl font-semibold text-slate-950">{item.name}</h4>
+                      <p className="text-sm leading-6 text-slate-600">{item.description}</p>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 px-3 py-2 text-right">
+                      <p className="text-[11px] text-slate-500">{locale === "vi" ? "Từ" : "From"}</p>
+                      <p className="mt-1 text-base font-semibold text-slate-950">{item.amount}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/checkout?package=${encodeURIComponent(item.slug)}`}
+                    className="mt-5 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800"
+                  >
+                    {locale === "vi" ? "Mua support" : "Buy support"}
+                  </Link>
+                </article>
               ))}
             </div>
           </div>
