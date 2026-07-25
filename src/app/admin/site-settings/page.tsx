@@ -26,6 +26,34 @@ export default async function AdminSiteSettingsPage({
       ]
     },
     {
+      title: "Text các block homepage",
+      description: "Đổi nhanh heading và mô tả của từng section trên homepage.",
+      fields: [
+        { name: "featuresSectionLabelVi", label: "Label features VI", defaultValue: settings.featuresSectionLabelVi },
+        { name: "featuresSectionLabelEn", label: "Label features EN", defaultValue: settings.featuresSectionLabelEn },
+        { name: "featuresSectionTitleVi", label: "Title features VI", defaultValue: settings.featuresSectionTitleVi },
+        { name: "featuresSectionTitleEn", label: "Title features EN", defaultValue: settings.featuresSectionTitleEn },
+        { name: "featuresSectionDescriptionVi", label: "Mô tả features VI", defaultValue: settings.featuresSectionDescriptionVi, type: "textarea", rows: 3 },
+        { name: "featuresSectionDescriptionEn", label: "Mô tả features EN", defaultValue: settings.featuresSectionDescriptionEn, type: "textarea", rows: 3 },
+        { name: "demoSectionLabelVi", label: "Label demo VI", defaultValue: settings.demoSectionLabelVi },
+        { name: "demoSectionLabelEn", label: "Label demo EN", defaultValue: settings.demoSectionLabelEn },
+        { name: "demoSectionTitleVi", label: "Title demo VI", defaultValue: settings.demoSectionTitleVi },
+        { name: "demoSectionTitleEn", label: "Title demo EN", defaultValue: settings.demoSectionTitleEn },
+        { name: "demoSectionDescriptionVi", label: "Mô tả demo VI", defaultValue: settings.demoSectionDescriptionVi, type: "textarea", rows: 3 },
+        { name: "demoSectionDescriptionEn", label: "Mô tả demo EN", defaultValue: settings.demoSectionDescriptionEn, type: "textarea", rows: 3 },
+        { name: "plansSectionLabelVi", label: "Label gói VI", defaultValue: settings.plansSectionLabelVi },
+        { name: "plansSectionLabelEn", label: "Label gói EN", defaultValue: settings.plansSectionLabelEn },
+        { name: "plansSectionTitleVi", label: "Title gói VI", defaultValue: settings.plansSectionTitleVi },
+        { name: "plansSectionTitleEn", label: "Title gói EN", defaultValue: settings.plansSectionTitleEn },
+        { name: "plansSectionDescriptionVi", label: "Mô tả gói VI", defaultValue: settings.plansSectionDescriptionVi, type: "textarea", rows: 3 },
+        { name: "plansSectionDescriptionEn", label: "Mô tả gói EN", defaultValue: settings.plansSectionDescriptionEn, type: "textarea", rows: 3 },
+        { name: "faqSectionLabelVi", label: "Label FAQ VI", defaultValue: settings.faqSectionLabelVi },
+        { name: "faqSectionLabelEn", label: "Label FAQ EN", defaultValue: settings.faqSectionLabelEn },
+        { name: "faqSectionTitleVi", label: "Title FAQ VI", defaultValue: settings.faqSectionTitleVi },
+        { name: "faqSectionTitleEn", label: "Title FAQ EN", defaultValue: settings.faqSectionTitleEn }
+      ]
+    },
+    {
       title: "CTA và hiển thị",
       description: "Các nút chính và toggle section thường dùng.",
       fields: [

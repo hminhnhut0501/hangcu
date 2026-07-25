@@ -1,5 +1,6 @@
 import { listDonatePackages } from "@/modules/donate-packages/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
+import { SupportPackageEditDrawer } from "@/components/admin/support-package-edit-drawer";
 
 export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
@@ -13,7 +14,7 @@ export default async function AdminDonatePackagesPage() {
           Quản lý các gói support tách biệt khỏi license, dùng để ghi nhận khoản ủng hộ tự nguyện.
         </p>
       </div>
-        <SimpleAdminForm
+      <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
         onSuccessMessage="Đã lưu support package."
@@ -35,8 +36,10 @@ export default async function AdminDonatePackagesPage() {
             <tr>
               <th className="px-6 py-4 font-medium">Code</th>
               <th className="px-6 py-4 font-medium">Tên</th>
+              <th className="px-6 py-4 font-medium">Slug</th>
               <th className="px-6 py-4 font-medium">Số tiền gợi ý</th>
               <th className="px-6 py-4 font-medium">Trạng thái</th>
+              <th className="px-6 py-4 font-medium">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -44,10 +47,14 @@ export default async function AdminDonatePackagesPage() {
               <tr key={pkg.id}>
                 <td className="px-6 py-4 font-medium">{pkg.code}</td>
                 <td className="px-6 py-4">{pkg.name}</td>
+                <td className="px-6 py-4 text-slate-600">{pkg.slug}</td>
                 <td className="px-6 py-4">
                   {pkg.currency ?? "USD"} {pkg.suggestedAmountMinor ? (pkg.suggestedAmountMinor / 100).toFixed(2) : "-"}
                 </td>
                 <td className="px-6 py-4">{pkg.status}</td>
+                <td className="px-6 py-4">
+                  <SupportPackageEditDrawer packageItem={pkg} />
+                </td>
               </tr>
             ))}
           </tbody>

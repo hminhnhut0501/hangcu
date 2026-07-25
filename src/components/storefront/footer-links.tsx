@@ -6,7 +6,6 @@ export function StorefrontFooterLinks() {
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-8 text-sm text-slate-600 md:flex-row md:items-start md:justify-between">
         <div className="max-w-xl space-y-3">
           <p className="font-medium text-slate-900">Cửa hàng license cho Hang Cú video.</p>
-          <p className="mt-1">Giao key nhanh, hỗ trợ VI / EN, và có đầy đủ trang chính sách.</p>
           <div className="flex flex-wrap gap-4 text-slate-700">
             <a href="mailto:hangcuvip@gmail.com" className="hover:text-slate-950">
               Hỗ trợ: hangcuvip@gmail.com

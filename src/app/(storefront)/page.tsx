@@ -50,11 +50,11 @@ export default async function HomePage() {
         "Tele video gồm Join, Cut, Thumb / Face Find, Watermark, Intro / Outro, Optimize và Encode. Giao diện SwiftUI tối giản, đúng kiểu macOS native.",
       primary: "Xem tính năng",
       secondary: "Chọn gói license",
-      appLabel: "Ảnh app thật",
-      appCaption: "Giao diện gọn, tối ưu cho thao tác kéo thả.",
-      demoLabel: "Video demo",
-      compareLabel: "So sánh license",
-      faqLabel: "FAQ",
+      appLabel: settings.demoSectionLabelVi,
+      appCaption: settings.demoSectionDescriptionVi,
+      demoLabel: settings.demoSectionLabelVi,
+      compareLabel: settings.plansSectionLabelVi,
+      faqLabel: settings.faqSectionLabelVi,
       appCta: "Xem app",
       packagesCta: "Mua license"
     },
@@ -66,11 +66,11 @@ export default async function HomePage() {
         "Tele video includes Join, Cut, Thumb / Face Find, Watermark, Intro / Outro, Optimize, and Encode. The SwiftUI interface stays minimal and native to macOS.",
       primary: "See features",
       secondary: "Choose a license",
-      appLabel: "Real app screenshot",
-      appCaption: "Clean UI optimized for drag-and-drop workflows.",
-      demoLabel: "Product video",
-      compareLabel: "License compare",
-      faqLabel: "FAQ",
+      appLabel: settings.demoSectionLabelEn,
+      appCaption: settings.demoSectionDescriptionEn,
+      demoLabel: settings.demoSectionLabelEn,
+      compareLabel: settings.plansSectionLabelEn,
+      faqLabel: settings.faqSectionLabelEn,
       appCta: "Open app",
       packagesCta: "Buy license"
     }
@@ -246,15 +246,15 @@ export default async function HomePage() {
         <div className="animate-fade-up rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Tính năng của app" : "App features"}</p>
+              <p className="text-sm font-medium text-blue-600">
+                {locale === "vi" ? settings.featuresSectionLabelVi : settings.featuresSectionLabelEn}
+              </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-                {locale === "vi" ? "Tám module chính, làm đúng việc, không thừa" : "Core modules that do one job well"}
+                {locale === "vi" ? settings.featuresSectionTitleVi : settings.featuresSectionTitleEn}
               </h2>
             </div>
             <p className="max-w-2xl text-sm leading-7 text-slate-600">
-              {locale === "vi"
-                ? "Đây là app xử lý video thật, không phải website giới thiệu chung chung."
-                : "This is a real video-processing app, not a vague product landing page."}
+              {locale === "vi" ? settings.featuresSectionDescriptionVi : settings.featuresSectionDescriptionEn}
             </p>
           </div>
 
@@ -280,7 +280,7 @@ export default async function HomePage() {
       </section>
 
       <section id="demo" className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
             <div className="border-b border-slate-200 px-5 py-4">
               <p className="text-sm font-medium text-slate-500">{copy.appLabel}</p>
@@ -300,15 +300,17 @@ export default async function HomePage() {
           </div>
 
           <div className="grid gap-4">
-            <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:180ms]">
-              <div className="border-b border-white/10 px-5 py-4">
-                <p className="text-sm font-medium text-white/60">{copy.demoLabel}</p>
-              </div>
+          <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:180ms]">
+            <div className="border-b border-white/10 px-5 py-4">
+              <p className="text-sm font-medium text-white/60">{copy.demoLabel}</p>
+            </div>
               <video src="/brand/hangcu-demo.mp4" controls playsInline className="aspect-[4/3] w-full object-cover" />
             </div>
 
-            <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:240ms]">
-              <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Workflow" : "Workflow"}</p>
+          <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:240ms]">
+              <p className="text-sm font-medium text-blue-600">
+                {locale === "vi" ? settings.demoSectionTitleVi : settings.demoSectionTitleEn}
+              </p>
               <div className="mt-4 space-y-3">
                 {workflowSteps.map((step, index) => (
                   <div key={step} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
@@ -325,12 +327,14 @@ export default async function HomePage() {
       </section>
 
       <section id="plans" className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
+          <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-medium text-blue-600">{copy.compareLabel}</p>
+              <p className="text-sm font-medium text-blue-600">
+                {locale === "vi" ? settings.plansSectionLabelVi : settings.plansSectionLabelEn}
+              </p>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-                {locale === "vi" ? "2 gói bản quyền chính và các gói support riêng" : "Two main licenses plus separate support packages"}
+                {locale === "vi" ? settings.plansSectionTitleVi : settings.plansSectionTitleEn}
               </h2>
             </div>
             <Link href="/products" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white">
@@ -457,7 +461,7 @@ export default async function HomePage() {
         <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <p className="text-sm font-medium text-blue-600">{copy.faqLabel}</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight">
-            {locale === "vi" ? "Câu hỏi khách hay hỏi trước khi mua" : "Questions customers usually ask before buying"}
+            {locale === "vi" ? settings.faqSectionTitleVi : settings.faqSectionTitleEn}
           </h2>
 
           <div className="mt-6 grid gap-4">
