@@ -152,21 +152,6 @@ export default async function HomePage() {
           }
         ];
 
-  const heroShots = [
-    {
-      title: locale === "vi" ? "UI SwiftUI" : "SwiftUI UI",
-      text: locale === "vi" ? "Tối giản, native, dễ nhìn." : "Minimal, native, and easy to scan."
-    },
-    {
-      title: locale === "vi" ? "Batch workflow" : "Batch workflow",
-      text: locale === "vi" ? "Kéo thả, chỉnh preset, chạy nhanh." : "Drag files, tune presets, run fast."
-    },
-    {
-      title: locale === "vi" ? "Video xuất ra" : "Export output",
-      text: locale === "vi" ? "Sẵn sàng dùng ngay sau khi xử lý." : "Ready to use right after processing."
-    }
-  ];
-
   const comparePlans = [
     {
       name: locale === "vi" ? "30 ngày" : "30-day license",
@@ -238,8 +223,7 @@ export default async function HomePage() {
                 <div className="absolute right-6 top-6 rounded-full border border-white/80 bg-white/88 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm">
                   macOS native
                 </div>
-                <div className="relative flex min-h-[620px] items-center justify-center p-6 sm:p-8">
-                  <div className="absolute inset-x-12 top-16 h-56 rounded-[2rem] bg-[radial-gradient(circle_at_center,rgba(96,165,250,0.18),transparent_65%)] blur-2xl" />
+                <div className="relative flex items-center justify-center p-6 sm:p-8">
                   <Image
                     src={heroImageSrc}
                     alt={locale === "vi" ? "Ảnh app Tele video" : "Tele video app screenshot"}
@@ -250,15 +234,6 @@ export default async function HomePage() {
                   />
                   <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-white/30" />
                 </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                {heroShots.map((shot) => (
-                  <div key={shot.title} className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="text-xs font-medium text-slate-500">{shot.title}</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900">{shot.text}</p>
-                  </div>
-                ))}
               </div>
             </div>
           </div>

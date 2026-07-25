@@ -12,12 +12,21 @@ export default async function StorefrontLayout({
 }>) {
   const settings = await getSiteContentSettings();
   const locale = await getStorefrontLocale();
-  const preferredOrder = ["/products", "/collections", "/pricing", "/download", "/checkout", "/orders", "/contact"];
+  const preferredOrder = ["/products", "/download", "/checkout", "/orders"];
   const visibleNavigation = settings.navigation
-    .filter((item) => (item.visible || item.href === "/download") && item.href !== "/admin")
+    .filter((item) => ["/products", "/download", "/checkout", "/orders"].includes(item.href))
     .map((item) => {
+      if (item.href === "/products") {
+        return { ...item, label: locale === "vi" ? "Các gói bản quyền" : "License plans" };
+      }
       if (item.href === "/download") {
-        return { ...item, label: locale === "vi" ? "Tải app" : "Download" };
+        return { ...item, label: locale === "vi" ? "Download" : "Download" };
+      }
+      if (item.href === "/checkout") {
+        return { ...item, label: locale === "vi" ? "Mua" : "Buy" };
+      }
+      if (item.href === "/orders") {
+        return { ...item, label: locale === "vi" ? "Đơn hàng" : "Orders" };
       }
       return item;
     })
