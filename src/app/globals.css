@@ -25,3 +25,48 @@ body {
   color: hsl(var(--foreground));
   font-family: -apple-system, BlinkMacSystemFont, Inter, system-ui, sans-serif;
 }
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes soft-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fade-up 700ms ease both;
+  }
+
+  .animate-soft-float {
+    animation: soft-float 10s ease-in-out infinite;
+  }
+
+  .animate-soft-glow {
+    animation: soft-glow 12s ease-in-out infinite;
+  }
+}

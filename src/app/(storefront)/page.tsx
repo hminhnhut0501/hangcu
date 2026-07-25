@@ -174,8 +174,8 @@ export default async function HomePage() {
   return (
     <main className="overflow-hidden bg-[#f6f8fc] text-slate-950">
       <section id="hero" className="mx-auto grid max-w-7xl gap-12 px-6 pb-16 pt-16 lg:grid-cols-[0.96fr_1.04fr] lg:items-center lg:py-24">
-        <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
+        <div className="animate-fade-up space-y-8 [animation-delay:80ms]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             {copy.heroBadge}
           </div>
@@ -189,10 +189,10 @@ export default async function HomePage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link href="#features" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-[0_12px_30px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-slate-800">
+            <Link href="#features" className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white shadow-[0_12px_30px_rgba(15,23,42,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-[0_18px_40px_rgba(15,23,42,0.22)]">
               {copy.primary}
             </Link>
-            <Link href="/products" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50">
+            <Link href="/products" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-900 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-md">
               {copy.secondary}
               <MoveRight className="h-4 w-4" />
             </Link>
@@ -200,16 +200,16 @@ export default async function HomePage() {
 
           <div className="flex flex-wrap gap-2">
             {["Join", "Cut", "Thumb / Face Find", "Watermark", "Intro / Outro", "Optimize / Encode"].map((item) => (
-              <span key={item} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm">
+              <span key={item} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
                 {item}
               </span>
             ))}
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl motion-safe:animate-[pulse_10s_ease-in-out_infinite]" />
-          <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl motion-safe:animate-[pulse_12s_ease-in-out_infinite]" />
+        <div className="relative animate-fade-up [animation-delay:180ms]">
+          <div className="absolute -right-8 -top-10 h-32 w-32 rounded-full bg-blue-500/15 blur-3xl animate-soft-glow" />
+          <div className="absolute -bottom-12 left-6 h-36 w-36 rounded-full bg-emerald-400/12 blur-3xl animate-soft-glow [animation-delay:2s]" />
 
           <div className="relative mx-auto max-w-[620px]">
             <div className="absolute -inset-8 rounded-[3.25rem] bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_50%),radial-gradient(circle_at_bottom,rgba(16,185,129,0.1),transparent_38%)] blur-3xl" />
@@ -230,7 +230,7 @@ export default async function HomePage() {
                     width={1400}
                     height={1200}
                     priority
-                    className="h-auto w-full max-w-[540px] drop-shadow-[0_32px_60px_rgba(15,23,42,0.18)] motion-safe:animate-[float_8s_ease-in-out_infinite]"
+                    className="h-auto w-full max-w-[540px] drop-shadow-[0_32px_60px_rgba(15,23,42,0.18)] animate-soft-float"
                   />
                   <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-white/30" />
                 </div>
@@ -241,7 +241,7 @@ export default async function HomePage() {
       </section>
 
       <section id="features" className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+        <div className="animate-fade-up rounded-[2.25rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Tính năng của app" : "App features"}</p>
@@ -260,9 +260,9 @@ export default async function HomePage() {
             {features.map((item) => {
               const Icon = item.icon;
               return (
-                <article key={item.title} className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
+                <article key={item.title} className="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white transition duration-300 group-hover:scale-105 group-hover:rotate-[-2deg]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
@@ -279,7 +279,7 @@ export default async function HomePage() {
 
       <section id="demo" className="mx-auto max-w-7xl px-6 pb-10">
         <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+          <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
             <div className="border-b border-slate-200 px-5 py-4">
               <p className="text-sm font-medium text-slate-500">{copy.appLabel}</p>
             </div>
@@ -298,18 +298,18 @@ export default async function HomePage() {
           </div>
 
           <div className="grid gap-4">
-            <div className="overflow-hidden rounded-[2.2rem] border border-slate-200 bg-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+            <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-slate-950 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:180ms]">
               <div className="border-b border-white/10 px-5 py-4">
                 <p className="text-sm font-medium text-white/60">{copy.demoLabel}</p>
               </div>
               <video src="/brand/hangcu-demo.mp4" controls playsInline className="aspect-[4/3] w-full object-cover" />
             </div>
 
-            <div className="rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+            <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:240ms]">
               <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Workflow" : "Workflow"}</p>
               <div className="mt-4 space-y-3">
                 {workflowSteps.map((step, index) => (
-                  <div key={step} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+                  <div key={step} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
                       {index + 1}
                     </span>
@@ -323,7 +323,7 @@ export default async function HomePage() {
       </section>
 
       <section id="plans" className="mx-auto max-w-7xl px-6 pb-10">
-        <div className="rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+        <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-blue-600">{copy.compareLabel}</p>
@@ -341,7 +341,7 @@ export default async function HomePage() {
             {comparePlans.map((plan, index) => (
               <article
                 key={plan.name}
-                className={`rounded-[1.9rem] border p-6 ${
+                className={`group rounded-[1.9rem] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(15,23,42,0.08)] ${
                   index === 0 ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-950"
                 }`}
               >
@@ -353,7 +353,7 @@ export default async function HomePage() {
                     <h3 className="text-2xl font-semibold">{plan.name}</h3>
                     <p className={`max-w-xl text-sm leading-6 ${index === 0 ? "text-slate-300" : "text-slate-600"}`}>{plan.desc}</p>
                   </div>
-                  <div className={`rounded-2xl px-3 py-2 text-right ${index === 0 ? "bg-white/10" : "bg-slate-50"}`}>
+                  <div className={`rounded-2xl px-3 py-2 text-right transition duration-300 ${index === 0 ? "bg-white/10" : "bg-slate-50 group-hover:bg-slate-100"}`}>
                     <p className={`text-[11px] ${index === 0 ? "text-slate-300" : "text-slate-500"}`}>{locale === "vi" ? "Từ" : "From"}</p>
                     <p className="mt-1 text-lg font-semibold">{plan.price ?? "-"}</p>
                   </div>
@@ -393,10 +393,10 @@ export default async function HomePage() {
             ))}
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[1.8rem] border border-slate-200 bg-slate-50">
+          <div className="mt-6 overflow-hidden rounded-[1.8rem] border border-slate-200 bg-slate-50 transition duration-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
             <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr_0.9fr]">
               {planRows.map((row) => (
-                <div key={row.label} className="border-b border-slate-200 p-4 lg:border-b-0 lg:border-r lg:last:border-r-0">
+                <div key={row.label} className="border-b border-slate-200 p-4 transition duration-300 hover:bg-white lg:border-b-0 lg:border-r lg:last:border-r-0">
                   <p className="text-sm font-medium text-slate-500">{row.label}</p>
                   <div className="mt-3 grid gap-2 text-sm">
                     <p className="text-slate-700">
@@ -417,7 +417,7 @@ export default async function HomePage() {
       </section>
 
       <section id="faq" className="mx-auto max-w-7xl px-6 pb-16">
-        <div className="rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
+        <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <p className="text-sm font-medium text-blue-600">{copy.faqLabel}</p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight">
             {locale === "vi" ? "Câu hỏi khách hay hỏi trước khi mua" : "Questions customers usually ask before buying"}
@@ -425,7 +425,7 @@ export default async function HomePage() {
 
           <div className="mt-6 grid gap-4">
             {faqs.map((item) => (
-              <details key={item.q} className="group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+              <details key={item.q} className="group rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_16px_36px_rgba(15,23,42,0.05)]">
                 <summary className="cursor-pointer list-none text-base font-semibold text-slate-950">
                   {item.q}
                 </summary>
