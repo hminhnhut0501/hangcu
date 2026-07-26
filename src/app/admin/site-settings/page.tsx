@@ -1,115 +1,10 @@
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
-import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
 
 export default async function AdminSiteSettingsPage({
-  searchParams
 }: {
-  searchParams?: Promise<{ mode?: string }>;
 }) {
   const settings = await getSiteContentSettings();
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const mode = typeof resolvedSearchParams.mode === "string" ? resolvedSearchParams.mode : "basic";
-  const isAdvanced = mode === "advanced";
-
-  const basicSections = [
-    {
-      title: "Nền tảng thương hiệu",
-      description: "Tên site và mô tả ngắn gọn cho storefront.",
-      fields: [
-        { name: "siteNameVi", label: "Tên site VI", defaultValue: settings.siteNameVi },
-        { name: "siteNameEn", label: "Tên site EN", defaultValue: settings.siteNameEn },
-        { name: "heroTitleVi", label: "Tiêu đề VI", defaultValue: settings.heroTitleVi },
-        { name: "heroTitleEn", label: "Tiêu đề EN", defaultValue: settings.heroTitleEn },
-        { name: "heroDescriptionVi", label: "Mô tả VI", defaultValue: settings.heroDescriptionVi, type: "textarea", rows: 4 },
-        { name: "heroDescriptionEn", label: "Mô tả EN", defaultValue: settings.heroDescriptionEn, type: "textarea", rows: 4 }
-      ]
-    },
-    {
-      title: "Text các block homepage",
-      description: "Đổi nhanh heading và mô tả của từng section trên homepage.",
-      fields: [
-        { name: "featuresSectionLabelVi", label: "Label features VI", defaultValue: settings.featuresSectionLabelVi },
-        { name: "featuresSectionLabelEn", label: "Label features EN", defaultValue: settings.featuresSectionLabelEn },
-        { name: "featuresSectionTitleVi", label: "Title features VI", defaultValue: settings.featuresSectionTitleVi },
-        { name: "featuresSectionTitleEn", label: "Title features EN", defaultValue: settings.featuresSectionTitleEn },
-        { name: "featuresSectionDescriptionVi", label: "Mô tả features VI", defaultValue: settings.featuresSectionDescriptionVi, type: "textarea", rows: 3 },
-        { name: "featuresSectionDescriptionEn", label: "Mô tả features EN", defaultValue: settings.featuresSectionDescriptionEn, type: "textarea", rows: 3 },
-        { name: "demoSectionLabelVi", label: "Label demo VI", defaultValue: settings.demoSectionLabelVi },
-        { name: "demoSectionLabelEn", label: "Label demo EN", defaultValue: settings.demoSectionLabelEn },
-        { name: "demoSectionTitleVi", label: "Title demo VI", defaultValue: settings.demoSectionTitleVi },
-        { name: "demoSectionTitleEn", label: "Title demo EN", defaultValue: settings.demoSectionTitleEn },
-        { name: "demoSectionDescriptionVi", label: "Mô tả demo VI", defaultValue: settings.demoSectionDescriptionVi, type: "textarea", rows: 3 },
-        { name: "demoSectionDescriptionEn", label: "Mô tả demo EN", defaultValue: settings.demoSectionDescriptionEn, type: "textarea", rows: 3 },
-        { name: "plansSectionLabelVi", label: "Label gói VI", defaultValue: settings.plansSectionLabelVi },
-        { name: "plansSectionLabelEn", label: "Label gói EN", defaultValue: settings.plansSectionLabelEn },
-        { name: "plansSectionTitleVi", label: "Title gói VI", defaultValue: settings.plansSectionTitleVi },
-        { name: "plansSectionTitleEn", label: "Title gói EN", defaultValue: settings.plansSectionTitleEn },
-        { name: "plansSectionDescriptionVi", label: "Mô tả gói VI", defaultValue: settings.plansSectionDescriptionVi, type: "textarea", rows: 3 },
-        { name: "plansSectionDescriptionEn", label: "Mô tả gói EN", defaultValue: settings.plansSectionDescriptionEn, type: "textarea", rows: 3 },
-        { name: "faqSectionLabelVi", label: "Label FAQ VI", defaultValue: settings.faqSectionLabelVi },
-        { name: "faqSectionLabelEn", label: "Label FAQ EN", defaultValue: settings.faqSectionLabelEn },
-        { name: "faqSectionTitleVi", label: "Title FAQ VI", defaultValue: settings.faqSectionTitleVi },
-        { name: "faqSectionTitleEn", label: "Title FAQ EN", defaultValue: settings.faqSectionTitleEn }
-      ]
-    },
-    {
-      title: "CTA và hiển thị",
-      description: "Các nút chính và toggle section thường dùng.",
-      fields: [
-        { name: "heroPrimaryCtaLabelVi", label: "CTA chính VI", defaultValue: settings.heroPrimaryCtaLabelVi },
-        { name: "heroPrimaryCtaLabelEn", label: "CTA chính EN", defaultValue: settings.heroPrimaryCtaLabelEn },
-        { name: "heroPrimaryCtaHref", label: "Link CTA chính", defaultValue: settings.heroPrimaryCtaHref },
-        { name: "heroSecondaryCtaLabelVi", label: "CTA phụ VI", defaultValue: settings.heroSecondaryCtaLabelVi },
-        { name: "heroSecondaryCtaLabelEn", label: "CTA phụ EN", defaultValue: settings.heroSecondaryCtaLabelEn },
-        { name: "heroSecondaryCtaHref", label: "Link CTA phụ", defaultValue: settings.heroSecondaryCtaHref },
-        { name: "announcementVisible", label: "Hiện announcement", type: "checkbox", defaultValue: String(settings.announcementVisible) },
-        { name: "showFeaturedPlansSection", label: "Hiện gói nổi bật", type: "checkbox", defaultValue: String(settings.showFeaturedPlansSection) },
-        { name: "showDonateSection", label: "Hiện support package", type: "checkbox", defaultValue: String(settings.showDonateSection) },
-        { name: "showFaqSection", label: "Hiện FAQ", type: "checkbox", defaultValue: String(settings.showFaqSection) }
-      ]
-    }
-  ];
-
-  const advancedSections = [
-    ...basicSections,
-    {
-      title: "Hero mở rộng",
-      description: "Copy phụ, ảnh hero và ngôn ngữ hiển thị kỹ hơn.",
-      fields: [
-        { name: "heroEyebrowVi", label: "Dòng phụ VI", defaultValue: settings.heroEyebrowVi },
-        { name: "heroEyebrowEn", label: "Dòng phụ EN", defaultValue: settings.heroEyebrowEn },
-        { name: "heroSecondaryTextVi", label: "Dòng phụ 2 VI", defaultValue: settings.heroSecondaryTextVi },
-        { name: "heroSecondaryTextEn", label: "Dòng phụ 2 EN", defaultValue: settings.heroSecondaryTextEn },
-        { name: "heroImagePath", label: "Ảnh hero", defaultValue: settings.heroImagePath ?? "" },
-        { name: "heroImageAltVi", label: "Alt ảnh VI", defaultValue: settings.heroImageAltVi ?? "" },
-        { name: "heroImageAltEn", label: "Alt ảnh EN", defaultValue: settings.heroImageAltEn ?? "" }
-      ]
-    },
-    {
-      title: "Announcement",
-      description: "Thông báo ngắn gọn cho launch, maintenance hoặc campaign.",
-      fields: [
-        { name: "announcementTextVi", label: "Announcement VI", defaultValue: settings.announcementTextVi, type: "textarea", rows: 3 },
-        { name: "announcementTextEn", label: "Announcement EN", defaultValue: settings.announcementTextEn, type: "textarea", rows: 3 }
-      ]
-    },
-    {
-      title: "Navigation",
-      description: "Menu header lấy từ JSON, hỗ trợ bật/tắt từng mục.",
-      fields: [{ name: "navigation", label: "JSON điều hướng", type: "textarea", rows: 8, defaultValue: JSON.stringify(settings.navigation, null, 2) }]
-    },
-    {
-      title: "Footer và FAQ",
-      description: "Bổ sung FAQ song ngữ và note cuối trang.",
-      fields: [
-        { name: "footerNoteVi", label: "Ghi chú footer VI", defaultValue: settings.footerNoteVi },
-        { name: "footerNoteEn", label: "Ghi chú footer EN", defaultValue: settings.footerNoteEn },
-        { name: "faqItems", label: "JSON FAQ", type: "textarea", rows: 10, defaultValue: JSON.stringify(settings.faqItems, null, 2) }
-      ]
-    }
-  ];
-
   return (
     <section className="space-y-8">
       <div>
@@ -118,26 +13,76 @@ export default async function AdminSiteSettingsPage({
         </p>
         <h2 className="mt-3 text-4xl font-semibold tracking-tight">Cài đặt nội dung website</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Quản lý nội dung storefront theo 2 chế độ: basic để chỉnh nhanh, advanced để mở full JSON và hero mở rộng.
+          Một màn để chỉnh toàn bộ nội dung homepage, không cần mở nhiều section.
         </p>
       </div>
-      <ModeSwitchHeader
-        currentMode={isAdvanced ? "advanced" : "basic"}
-        options={[
-          { key: "basic", label: "Basic", href: "/admin/site-settings?mode=basic" },
-          { key: "advanced", label: "Advanced", href: "/admin/site-settings?mode=advanced" }
-        ]}
-        hint={isAdvanced ? "Hiện full cấu hình storefront." : "Chỉ giữ field vận hành thường dùng."}
-      />
-      <div className="grid gap-6 xl:grid-cols-[1fr_0.8fr]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_0.72fr]">
         <SimpleAdminForm
           endpoint="/api/admin/site-settings"
           submitLabel="Lưu nội dung"
           onSuccessMessage="Đã cập nhật nội dung website."
-          sections={isAdvanced ? advancedSections : basicSections}
+          sections={[
+            {
+              title: "Nội dung homepage",
+              description: "Chỉnh toàn bộ chữ đang hiển thị trên homepage trong một form.",
+              fields: [
+                { name: "siteNameVi", label: "Tên site VI", defaultValue: settings.siteNameVi },
+                { name: "siteNameEn", label: "Tên site EN", defaultValue: settings.siteNameEn },
+                { name: "heroEyebrowVi", label: "Dòng phụ VI", defaultValue: settings.heroEyebrowVi },
+                { name: "heroEyebrowEn", label: "Dòng phụ EN", defaultValue: settings.heroEyebrowEn },
+                { name: "heroTitleVi", label: "Tiêu đề VI", defaultValue: settings.heroTitleVi },
+                { name: "heroTitleEn", label: "Tiêu đề EN", defaultValue: settings.heroTitleEn },
+                { name: "heroDescriptionVi", label: "Mô tả VI", defaultValue: settings.heroDescriptionVi, type: "textarea", rows: 3 },
+                { name: "heroDescriptionEn", label: "Mô tả EN", defaultValue: settings.heroDescriptionEn, type: "textarea", rows: 3 },
+                { name: "heroSecondaryTextVi", label: "Dòng phụ 2 VI", defaultValue: settings.heroSecondaryTextVi },
+                { name: "heroSecondaryTextEn", label: "Dòng phụ 2 EN", defaultValue: settings.heroSecondaryTextEn },
+                { name: "featuresSectionLabelVi", label: "Label features VI", defaultValue: settings.featuresSectionLabelVi },
+                { name: "featuresSectionLabelEn", label: "Label features EN", defaultValue: settings.featuresSectionLabelEn },
+                { name: "featuresSectionTitleVi", label: "Title features VI", defaultValue: settings.featuresSectionTitleVi },
+                { name: "featuresSectionTitleEn", label: "Title features EN", defaultValue: settings.featuresSectionTitleEn },
+                { name: "featuresSectionDescriptionVi", label: "Mô tả features VI", defaultValue: settings.featuresSectionDescriptionVi, type: "textarea", rows: 3 },
+                { name: "featuresSectionDescriptionEn", label: "Mô tả features EN", defaultValue: settings.featuresSectionDescriptionEn, type: "textarea", rows: 3 },
+                { name: "demoSectionLabelVi", label: "Label demo VI", defaultValue: settings.demoSectionLabelVi },
+                { name: "demoSectionLabelEn", label: "Label demo EN", defaultValue: settings.demoSectionLabelEn },
+                { name: "demoSectionTitleVi", label: "Title demo VI", defaultValue: settings.demoSectionTitleVi },
+                { name: "demoSectionTitleEn", label: "Title demo EN", defaultValue: settings.demoSectionTitleEn },
+                { name: "demoSectionDescriptionVi", label: "Mô tả demo VI", defaultValue: settings.demoSectionDescriptionVi, type: "textarea", rows: 3 },
+                { name: "demoSectionDescriptionEn", label: "Mô tả demo EN", defaultValue: settings.demoSectionDescriptionEn, type: "textarea", rows: 3 },
+                { name: "plansSectionLabelVi", label: "Label gói VI", defaultValue: settings.plansSectionLabelVi },
+                { name: "plansSectionLabelEn", label: "Label gói EN", defaultValue: settings.plansSectionLabelEn },
+                { name: "plansSectionTitleVi", label: "Title gói VI", defaultValue: settings.plansSectionTitleVi },
+                { name: "plansSectionTitleEn", label: "Title gói EN", defaultValue: settings.plansSectionTitleEn },
+                { name: "plansSectionDescriptionVi", label: "Mô tả gói VI", defaultValue: settings.plansSectionDescriptionVi, type: "textarea", rows: 3 },
+                { name: "plansSectionDescriptionEn", label: "Mô tả gói EN", defaultValue: settings.plansSectionDescriptionEn, type: "textarea", rows: 3 },
+                { name: "faqSectionLabelVi", label: "Label FAQ VI", defaultValue: settings.faqSectionLabelVi },
+                { name: "faqSectionLabelEn", label: "Label FAQ EN", defaultValue: settings.faqSectionLabelEn },
+                { name: "faqSectionTitleVi", label: "Title FAQ VI", defaultValue: settings.faqSectionTitleVi },
+                { name: "faqSectionTitleEn", label: "Title FAQ EN", defaultValue: settings.faqSectionTitleEn },
+                { name: "heroPrimaryCtaLabelVi", label: "CTA chính VI", defaultValue: settings.heroPrimaryCtaLabelVi },
+                { name: "heroPrimaryCtaLabelEn", label: "CTA chính EN", defaultValue: settings.heroPrimaryCtaLabelEn },
+                { name: "heroPrimaryCtaHref", label: "Link CTA chính", defaultValue: settings.heroPrimaryCtaHref },
+                { name: "heroSecondaryCtaLabelVi", label: "CTA phụ VI", defaultValue: settings.heroSecondaryCtaLabelVi },
+                { name: "heroSecondaryCtaLabelEn", label: "CTA phụ EN", defaultValue: settings.heroSecondaryCtaLabelEn },
+                { name: "heroSecondaryCtaHref", label: "Link CTA phụ", defaultValue: settings.heroSecondaryCtaHref },
+                { name: "announcementTextVi", label: "Announcement VI", defaultValue: settings.announcementTextVi, type: "textarea", rows: 3 },
+                { name: "announcementTextEn", label: "Announcement EN", defaultValue: settings.announcementTextEn, type: "textarea", rows: 3 },
+                { name: "announcementVisible", label: "Hiện announcement", type: "checkbox", defaultValue: String(settings.announcementVisible) },
+                { name: "showFeaturedPlansSection", label: "Hiện gói nổi bật", type: "checkbox", defaultValue: String(settings.showFeaturedPlansSection) },
+                { name: "showDonateSection", label: "Hiện support package", type: "checkbox", defaultValue: String(settings.showDonateSection) },
+                { name: "showFaqSection", label: "Hiện FAQ", type: "checkbox", defaultValue: String(settings.showFaqSection) },
+                { name: "heroImagePath", label: "Ảnh hero", defaultValue: settings.heroImagePath ?? "" },
+                { name: "heroImageAltVi", label: "Alt ảnh VI", defaultValue: settings.heroImageAltVi ?? "" },
+                { name: "heroImageAltEn", label: "Alt ảnh EN", defaultValue: settings.heroImageAltEn ?? "" },
+                { name: "navigation", label: "JSON điều hướng", type: "textarea", rows: 8, defaultValue: JSON.stringify(settings.navigation, null, 2) },
+                { name: "footerNoteVi", label: "Ghi chú footer VI", defaultValue: settings.footerNoteVi },
+                { name: "footerNoteEn", label: "Ghi chú footer EN", defaultValue: settings.footerNoteEn },
+                { name: "faqItems", label: "JSON FAQ", type: "textarea", rows: 10, defaultValue: JSON.stringify(settings.faqItems, null, 2) }
+              ]
+            }
+          ]}
           triggerLabel="Mở form chỉnh nội dung"
           drawerTitle="Chỉnh nội dung website"
-          drawerDescription="Mở drawer để chỉnh nhanh storefront content mà không chiếm diện tích trang."
+          drawerDescription="Chỉnh toàn bộ homepage copy, menu, footer, FAQ, ảnh hero và toggle section trong một lần."
         />
         <div className="space-y-6">
           <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -163,24 +108,6 @@ export default async function AdminSiteSettingsPage({
                 <p>Gói hỗ trợ: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
               </div>
             </div>
-          </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold">Quy trình nội dung</h3>
-            <ul className="mt-4 space-y-2 text-sm text-slate-600">
-              <li>Chỉnh hero và menu trước, rồi xem preview landing page.</li>
-              <li>Giữ nội dung tiếng Việt và tiếng Anh khớp nhau trước khi publish.</li>
-              <li>Dùng toggle section để ẩn nội dung chưa xong mà không cần sửa code.</li>
-              <li>Lưu FAQ và footer trước khi gửi duyệt cổng thanh toán.</li>
-            </ul>
-          </article>
-          <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold">Checklist nội dung</h3>
-            <ul className="mt-4 space-y-2 text-sm text-slate-600">
-              <li>Giữ hero song ngữ nhưng ngắn gọn.</li>
-              <li>Dùng announcement cho launch hoặc bảo trì.</li>
-              <li>Tắt/mở section để ẩn block chưa hoàn thiện mà không cần đổi code.</li>
-              <li>Cập nhật FAQ trước khi nộp duyệt với cổng thanh toán.</li>
-            </ul>
           </article>
         </div>
       </div>

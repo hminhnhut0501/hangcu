@@ -1,6 +1,6 @@
 import { listDonatePackages } from "@/modules/donate-packages/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
-import { SupportPackageEditDrawer } from "@/components/admin/support-package-edit-drawer";
+import { SupportPackageQuickRow } from "@/components/admin/support-package-quick-row";
 
 export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
@@ -53,7 +53,7 @@ export default async function AdminDonatePackagesPage() {
                 </td>
                 <td className="px-6 py-4">{pkg.status}</td>
                 <td className="px-6 py-4">
-                  <SupportPackageEditDrawer packageItem={pkg} />
+                  <SupportPackageQuickRow packageItem={pkg} />
                 </td>
               </tr>
             ))}
