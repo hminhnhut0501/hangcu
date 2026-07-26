@@ -3,10 +3,9 @@ import Image from "next/image";
 import { ChevronRight, Download, Layers3, MoveRight, Sparkles, SplitSquareHorizontal, WandSparkles } from "lucide-react";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
-import { listFeaturedProducts } from "@/modules/products/service";
-import { getCurrentPriceForProduct } from "@/modules/prices/service";
+import { listLicensePlans } from "@/modules/license-plans/service";
+import { listDonatePackages } from "@/modules/donate-packages/service";
 import { getStoragePublicUrl } from "@/lib/storage/service";
-import { supporterPackages } from "@/lib/supporter-packages";
 
 type Locale = "vi" | "en";
 
@@ -30,16 +29,10 @@ function formatMoney(amountMinor: number, currency: string, locale: Locale) {
 export default async function HomePage() {
   const locale = (await getStorefrontLocale()) as Locale;
   const settings = await getSiteContentSettings();
-  const featuredProducts = await listFeaturedProducts();
+  const licensePlans = await listLicensePlans();
+  const donatePackages = await listDonatePackages();
   const heroImageUrl = settings.heroImagePath ? await getStoragePublicUrl(settings.heroImagePath) : null;
   const heroImageSrc = heroImageUrl ?? "/brand/hangcu-hero-mockup.png";
-
-  const featuredPlans = await Promise.all(
-    featuredProducts.slice(0, 2).map(async (product) => ({
-      product,
-      price: await getCurrentPriceForProduct(product.id)
-    }))
-  );
 
   const copy = {
     vi: {
@@ -155,7 +148,13 @@ export default async function HomePage() {
   const comparePlans = [
     {
       name: locale === "vi" ? "30 ngày" : "30-day license",
-      price: featuredPlans[0]?.price ? formatMoney(featuredPlans[0].price.amountMinor, featuredPlans[0].price.currency, locale) : null,
+      price: (() => {
+        const plan = licensePlans.find((item) => item.code === "HCV_30D" || item.code === "HCV-LIC-30" || item.durationDays === 30 || !item.isLifetime);
+        if (!plan) return null;
+        const amountMinor = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
+        const currency = locale === "vi" ? "VND" : "USD";
+        return amountMinor != null ? formatMoney(amountMinor, currency, locale) : null;
+      })(),
       desc:
         locale === "vi"
           ? "Phù hợp để dùng ngắn hạn hoặc test workflow trước khi mua lâu dài."
@@ -163,7 +162,13 @@ export default async function HomePage() {
     },
     {
       name: locale === "vi" ? "Trọn đời" : "Lifetime license",
-      price: featuredPlans[1]?.price ? formatMoney(featuredPlans[1].price.amountMinor, featuredPlans[1].price.currency, locale) : null,
+      price: (() => {
+        const plan = licensePlans.find((item) => item.code === "HCV_LIFETIME" || item.code === "HCV-LIC-LIFE" || item.isLifetime);
+        if (!plan) return null;
+        const amountMinor = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
+        const currency = locale === "vi" ? "VND" : "USD";
+        return amountMinor != null ? formatMoney(amountMinor, currency, locale) : null;
+      })(),
       desc:
         locale === "vi"
           ? "Một lần thanh toán, dùng lâu dài."
@@ -184,12 +189,17 @@ export default async function HomePage() {
           { label: "Support package", value: "Separate from the license purchase" }
         ];
 
-  const supportPackages = supporterPackages.slice(0, 3).map((item) => ({
+  const supportPackages = donatePackages.slice(0, 3).map((item) => ({
     slug: item.slug,
-    name: locale === "vi" ? item.nameVi : item.nameEn,
-    description: locale === "vi" ? item.descriptionVi : item.descriptionEn,
-    badge: locale === "vi" ? item.badgeVi : item.badgeEn,
-    amount: formatMoney(item.amountMinor, item.currency, locale)
+    name: item.name,
+    description: item.description,
+    badge: item.code,
+    amount:
+      item.suggestedAmountMinor != null && item.currency
+        ? formatMoney(item.suggestedAmountMinor, item.currency, locale)
+        : locale === "vi"
+          ? "Tùy chọn"
+          : "Optional"
   }));
 
   return (
