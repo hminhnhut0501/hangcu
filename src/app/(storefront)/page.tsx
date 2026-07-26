@@ -392,7 +392,17 @@ export default async function HomePage() {
             <div className="border-b border-white/10 px-5 py-4">
               <p className="text-sm font-medium text-white/60">{copy.demoLabel}</p>
             </div>
-              <video src="/brand/hangcu-demo.mp4" controls playsInline className="aspect-[4/3] w-full object-cover" />
+              <div className="aspect-[4/3] w-full overflow-hidden bg-black">
+                <video
+                  src="/brand/hangcu-demo.mp4"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full object-cover animate-fade-up animate-soft-float [animation-delay:220ms]"
+                />
+              </div>
             </div>
 
           <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:240ms]">
