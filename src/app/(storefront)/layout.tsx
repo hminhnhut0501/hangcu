@@ -54,11 +54,13 @@ export default async function StorefrontLayout({
                   className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition ${
                     index === 0
                       ? "bg-slate-950 text-white shadow-sm hover:bg-slate-800"
+                      : item.href === "/download"
+                        ? "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                   }`}
                 >
                   <span>{item.label}</span>
-                  {index === 0 ? null : <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
+                  {index === 0 ? null : <ChevronRight className={`h-3.5 w-3.5 ${item.href === "/download" ? "opacity-70" : "opacity-50"}`} />}
                 </Link>
               ))}
             </nav>
