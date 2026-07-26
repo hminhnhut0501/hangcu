@@ -156,13 +156,7 @@ class SupabaseLicensePlanRepository implements LicensePlanRepository {
 
   async save(plan: LicensePlanSummary): Promise<LicensePlanSummary> {
     if (!this.client) {
-      const index = plans.findIndex((entry) => entry.id === plan.id);
-      if (index >= 0) {
-        plans[index] = plan;
-      } else {
-        plans.push(plan);
-      }
-      return plan;
+      throw new Error("PERSISTENCE_UNAVAILABLE: Supabase persistence is not configured.");
     }
 
     const { data, error } = await this.client
@@ -190,7 +184,9 @@ class SupabaseLicensePlanRepository implements LicensePlanRepository {
       .maybeSingle();
 
     if (error || !data) {
-      return plan;
+      throw new Error(
+        `PERSISTENCE_UNAVAILABLE: Failed to save license plan. ${error?.message ?? "Supabase did not return updated data."}`
+      );
     }
 
     return mapRowToLicensePlan(data as Parameters<typeof mapRowToLicensePlan>[0]);
@@ -198,16 +194,14 @@ class SupabaseLicensePlanRepository implements LicensePlanRepository {
 
   async delete(id: string): Promise<boolean> {
     if (!this.client) {
-      const index = plans.findIndex((entry) => entry.id === id);
-      if (index < 0) {
-        return false;
-      }
-
-      plans.splice(index, 1);
-      return true;
+      throw new Error("PERSISTENCE_UNAVAILABLE: Supabase persistence is not configured.");
     }
 
     const { error } = await this.client.from("license_plans").delete().eq("id", id);
-    return !error;
+    if (error) {
+      throw new Error(`PERSISTENCE_UNAVAILABLE: Failed to delete license plan. ${error.message}`);
+    }
+
+    return true;
   }
 }

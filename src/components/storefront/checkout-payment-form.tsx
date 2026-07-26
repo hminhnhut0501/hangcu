@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { ArrowRight, BadgeCheck, CreditCard, Sparkles, Wallet } from "lucide-react";
+import { MoneyAmount } from "@/components/money/money-amount";
 
 type CheckoutOption = {
   slug: string;
@@ -11,6 +13,18 @@ type CheckoutOption = {
   amountMinor: number;
   currency: string;
 };
+
+function StepIcon({ active, children }: { active?: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`flex h-10 w-10 items-center justify-center rounded-2xl ${
+        active ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-700"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
 
 type Props = {
   locale: "vi" | "en";
@@ -60,6 +74,15 @@ export function CheckoutPaymentForm({
 
   const selectedLicense = activeLicenseOptions.find((option) => option.slug === selectedSlug) ?? activeLicenseOptions[0] ?? null;
   const selectedSupport = activeSupportOptions.find((option) => option.slug === selectedSlug) ?? activeSupportOptions[0] ?? null;
+  const selectedCurrency = mode === "custom" ? "VND" : selectedOption?.currency?.toUpperCase() ?? null;
+
+  React.useEffect(() => {
+    if (selectedCurrency === "USD") {
+      setProvider((current) => (current === "paypal" || current === "lemonsqueezy" ? current : "paypal"));
+    } else if (selectedCurrency === "VND") {
+      setProvider((current) => (current === "paypal" || current === "lemonsqueezy" ? "payos" : current));
+    }
+  }, [selectedCurrency]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -130,53 +153,79 @@ export function CheckoutPaymentForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form onSubmit={submit} className="space-y-5 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)]">
       <div className="grid gap-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3">
           <button
             type="button"
             onClick={() => setMode("license")}
-            className={`rounded-2xl border px-4 py-4 text-left transition ${
-              mode === "license" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
+            className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+              mode === "license" ? "border-slate-950 bg-slate-950 text-white shadow-[0_16px_30px_rgba(15,23,42,0.12)]" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-sm font-semibold">{locale === "vi" ? "Gói license" : "License pack"}</p>
-            <p className="mt-2 text-sm font-medium">{locale === "vi" ? "30 ngày / trọn đời" : "30-day / lifetime"}</p>
-            <p className="mt-1 text-sm opacity-80">
-              {locale === "vi" ? "Chọn license để đi thanh toán ngay." : "Pick a license and continue to payment."}
-            </p>
+            <div className="flex items-start gap-3">
+              <StepIcon active={mode === "license"}>
+                <BadgeCheck className="h-5 w-5" />
+              </StepIcon>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] opacity-80">{locale === "vi" ? "Gói license" : "License pack"}</p>
+                <p className="mt-1 text-sm font-semibold">{locale === "vi" ? "30 ngày / trọn đời" : "30-day / lifetime"}</p>
+                <p className="mt-1 text-sm leading-6 opacity-80">
+                  {locale === "vi" ? "Hai gói chính, chọn là đi tiếp." : "Two main plans, select and continue."}
+                </p>
+              </div>
+            </div>
           </button>
           <button
             type="button"
             onClick={() => setMode("support")}
-            className={`rounded-2xl border px-4 py-4 text-left transition ${
-              mode === "support" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
+            className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+              mode === "support" ? "border-slate-950 bg-slate-950 text-white shadow-[0_16px_30px_rgba(15,23,42,0.12)]" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-sm font-semibold">{locale === "vi" ? "Gói support" : "Support pack"}</p>
-            <p className="mt-2 text-sm font-medium">{locale === "vi" ? "Chọn mức gợi ý" : "Choose a suggested amount"}</p>
-            <p className="mt-1 text-sm opacity-80">
-              {locale === "vi" ? "Đi theo mức hỗ trợ đã đặt sẵn." : "Use one of the preset support tiers."}
-            </p>
+            <div className="flex items-start gap-3">
+              <StepIcon active={mode === "support"}>
+                <Wallet className="h-5 w-5" />
+              </StepIcon>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] opacity-80">{locale === "vi" ? "Gói support" : "Support pack"}</p>
+                <p className="mt-1 text-sm font-semibold">{locale === "vi" ? "Mức gợi ý" : "Suggested amount"}</p>
+                <p className="mt-1 text-sm leading-6 opacity-80">
+                  {locale === "vi" ? "Chọn nhanh một mức ủng hộ." : "Pick one suggested contribution."}
+                </p>
+              </div>
+            </div>
           </button>
           <button
             type="button"
             onClick={() => setMode("custom")}
-            className={`rounded-2xl border px-4 py-4 text-left transition ${
-              mode === "custom" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
+            className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+              mode === "custom" ? "border-slate-950 bg-slate-950 text-white shadow-[0_16px_30px_rgba(15,23,42,0.12)]" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-sm font-semibold">{locale === "vi" ? "Ủng hộ tự do" : "Custom support"}</p>
-            <p className="mt-2 text-sm font-medium">{locale === "vi" ? "Tự nhập số tiền" : "Enter your own amount"}</p>
-            <p className="mt-1 text-sm opacity-80">
-              {locale === "vi" ? "Dành cho khách muốn nhập số tiền bất kỳ." : "For customers who want to enter any amount."}
-            </p>
+            <div className="flex items-start gap-3">
+              <StepIcon active={mode === "custom"}>
+                <Sparkles className="h-5 w-5" />
+              </StepIcon>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] opacity-80">{locale === "vi" ? "Ủng hộ tự do" : "Custom support"}</p>
+                <p className="mt-1 text-sm font-semibold">{locale === "vi" ? "Tự nhập số tiền" : "Enter your own amount"}</p>
+                <p className="mt-1 text-sm leading-6 opacity-80">
+                  {locale === "vi" ? "Dành cho khoản ủng hộ linh hoạt." : "For a flexible contribution amount."}
+                </p>
+              </div>
+            </div>
           </button>
         </div>
 
         {mode === "license" ? (
-          <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-700">{locale === "vi" ? "Chọn license" : "Choose a license"}</p>
+          <div className="space-y-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-700">{locale === "vi" ? "Chọn license" : "Choose a license"}</p>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">
+                {locale === "vi" ? "2 lựa chọn" : "2 options"}
+              </span>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {activeLicenseOptions.map((option) => (
                 <button
@@ -186,16 +235,20 @@ export function CheckoutPaymentForm({
                     setSelectedSlug(option.slug);
                     setCustomAmount("");
                   }}
-                  className={`rounded-2xl border px-4 py-4 text-left transition ${
-                    selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
+                  className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+                    selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm ring-1 ring-slate-950/10" : "border-slate-200 bg-white hover:border-slate-300"
                   }`}
                 >
-                  <p className="text-sm font-medium text-slate-500">{option.code}</p>
-                  <p className="mt-2 text-base font-semibold text-slate-900">{option.name}</p>
-                  <p className="mt-2 text-sm text-slate-600">{option.description}</p>
-                  <p className="mt-3 text-sm font-semibold text-slate-900">
-                    {option.currency} {(option.amountMinor / 100).toFixed(2)}
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">{option.code}</p>
+                      <p className="text-base font-semibold text-slate-950">{option.name}</p>
+                      <p className="text-sm leading-6 text-slate-600">{option.description}</p>
+                    </div>
+                    <span className="rounded-2xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-950">
+                      <MoneyAmount amount={option.amountMinor} currency={option.currency} locale={locale} />
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -203,9 +256,14 @@ export function CheckoutPaymentForm({
         ) : null}
 
         {mode === "support" ? (
-          <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-medium text-slate-700">{locale === "vi" ? "Chọn gói support" : "Choose a support pack"}</p>
-            <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm font-medium text-slate-700">{locale === "vi" ? "Chọn gói support" : "Choose a support pack"}</p>
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">
+                {locale === "vi" ? "Gọn, nhanh" : "Compact"}
+              </span>
+            </div>
+            <div className="grid gap-3">
               {activeSupportOptions.map((option) => (
                 <button
                   key={option.slug}
@@ -214,17 +272,20 @@ export function CheckoutPaymentForm({
                     setSelectedSlug(option.slug);
                     setCustomAmount(String(option.amountMinor));
                   }}
-                  className={`rounded-2xl border px-4 py-4 text-left transition ${
-                    selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
+                  className={`rounded-[1.35rem] border px-4 py-3 text-left transition ${
+                    selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm ring-1 ring-slate-950/10" : "border-slate-200 bg-white hover:border-slate-300"
                   }`}
                 >
-                  <p className="text-sm font-medium text-slate-500">{option.code}</p>
-                  <p className="mt-2 text-base font-semibold text-slate-900">{option.name}</p>
-                  <p className="mt-2 text-sm text-slate-600">{option.description}</p>
-                  <p className="mt-3 text-sm font-semibold text-slate-900">
-                    {option.currency} {(option.amountMinor / 100).toFixed(2)}
-                  </p>
-                </button>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                    <p className="text-sm font-semibold text-slate-950">{option.name}</p>
+                    <p className="mt-1 text-sm text-slate-600">{option.description}</p>
+                  </div>
+                  <span className="rounded-full bg-slate-950 px-3 py-1 text-sm font-semibold text-white">
+                      <MoneyAmount amount={option.amountMinor} currency={option.currency} locale={locale} />
+                  </span>
+                </div>
+              </button>
               ))}
             </div>
           </div>
@@ -267,20 +328,31 @@ export function CheckoutPaymentForm({
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
           >
             <option value="payos">PayOS</option>
-            <option value="paypal" disabled={Boolean(orderSummary.currency) && orderSummary.currency?.toUpperCase() !== "USD"}>PayPal (USD)</option>
-            <option value="lemonsqueezy" disabled={Boolean(orderSummary.currency) && orderSummary.currency?.toUpperCase() !== "USD"}>Lemon Squeezy (USD)</option>
+            <option value="paypal" disabled={selectedCurrency != null && selectedCurrency !== "USD"}>PayPal (USD)</option>
+            <option value="lemonsqueezy" disabled={selectedCurrency != null && selectedCurrency !== "USD"}>Lemon Squeezy (USD)</option>
             <option value="sandbox">Sandbox</option>
             <option value="manual">Manual</option>
           </select>
+          <p className="mt-2 text-xs text-slate-500">
+            {selectedCurrency === "VND"
+              ? locale === "vi"
+                ? "Các gói VNĐ sẽ đi qua PayOS."
+                : "VNĐ packages route through PayOS."
+              : locale === "vi"
+                ? "Các gói USD sẽ đi qua PayPal hoặc Lemon Squeezy."
+                : "USD packages route through PayPal or Lemon Squeezy."}
+          </p>
         </label>
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-60"
       >
+        <CreditCard className="h-4 w-4" />
         {loading ? (locale === "vi" ? "Đang tạo thanh toán..." : "Creating payment...") : locale === "vi" ? "Tiếp tục thanh toán" : "Continue to payment"}
+        {!loading ? <ArrowRight className="h-4 w-4" /> : null}
       </button>
 
       {message ? <p className="text-sm text-rose-600">{message}</p> : null}

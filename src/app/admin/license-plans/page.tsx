@@ -3,6 +3,10 @@ import { listLicensePlans } from "@/modules/license-plans/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { LicensePlanActions } from "@/components/admin/license-plan-actions";
 import { LicensePlanQuickRow } from "@/components/admin/license-plan-quick-row";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ mode?: string }> }) {
   const plans = await listLicensePlans();
@@ -29,7 +33,7 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
           { name: "nameEn", label: "Tên EN", defaultValue: "New License Plan" },
           { name: "slug", label: "Slug", defaultValue: "new-license-plan" },
           { name: "description", label: "Mô tả", defaultValue: "Description" },
-          { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: "199000" },
+          { name: "vndPrice", label: "Giá VNĐ", type: "number", defaultValue: "199000" },
           { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: "9.99" },
           { name: "planType", label: "Loại gói", defaultValue: "regular" },
           { name: "durationDays", label: "Số ngày", type: "number", defaultValue: "30" },
@@ -55,7 +59,13 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
               <tr key={plan.id}>
                 <td className="px-6 py-4 font-medium">{plan.code}</td>
                 <td className="px-6 py-4">{plan.name}</td>
-                <td className="px-6 py-4">{plan.currencyPrices.VND ? `${plan.currencyPrices.VND.toLocaleString("vi-VN")}đ` : "-"} / {plan.currencyPrices.USD ? `${plan.currencyPrices.USD} USD` : "-"}</td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-2">
+                    <MoneyAmount amount={plan.currencyPrices.VND} currency="VND" locale="vi" kind="catalog" />
+                    <span>/</span>
+                    <MoneyAmount amount={plan.currencyPrices.USD} currency="USD" locale="en" kind="catalog" />
+                  </div>
+                </td>
                 <td className="px-6 py-4">{plan.status}</td>
                 <td className="px-6 py-4">
                   <div className="space-y-3">

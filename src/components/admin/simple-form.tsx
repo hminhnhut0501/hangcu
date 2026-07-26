@@ -14,6 +14,7 @@ type Field = {
   placeholder?: string;
   defaultValue?: string;
   rows?: number;
+  options?: Array<{ label: string; value: string }>;
 };
 
 type Props = {
@@ -194,7 +195,19 @@ function SimpleAdminFormInner({
                           defaultValue={field.defaultValue}
                           rows={field.rows ?? 5}
                           className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 font-mono text-sm outline-none ring-0 focus:border-blue-500"
-                        />
+                          />
+                      ) : field.type === "select" ? (
+                        <select
+                          name={field.name}
+                          defaultValue={field.defaultValue}
+                          className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"
+                        >
+                          {field.options?.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         <input
                           name={field.name}

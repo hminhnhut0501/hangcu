@@ -7,6 +7,13 @@ export async function getSiteContentSettings(): Promise<SiteContentSettings> {
   return repository.get();
 }
 
+export async function getSiteContentSettingsWithSource(): Promise<{
+  settings: SiteContentSettings;
+  source: "supabase" | "fallback";
+}> {
+  return repository.getWithSource();
+}
+
 export async function updateSiteContentSettings(input: Partial<SiteContentSettings>) {
   const current = await repository.get();
   return repository.save({

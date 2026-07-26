@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
-import { getSupporterPackageBySlug } from "@/lib/supporter-packages";
+import { getDonatePackageBySlug } from "@/modules/donate-packages/service";
+import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type CollectionDetailPageProps = {
   params: Promise<{
@@ -13,17 +18,14 @@ export default async function CollectionDetailPage({
 }: CollectionDetailPageProps) {
   const { slug } = await params;
   const locale = await getStorefrontLocale();
-  const packageItem = getSupporterPackageBySlug(slug);
+  const rawPackage = await getDonatePackageBySlug(slug).catch(() => null);
+  const packageItem = rawPackage ? mapDonatePackageToViewModel(rawPackage, locale) : null;
 
   if (!packageItem) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-16">
-        <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
-        </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-          {locale === "vi" ? "Không tìm thấy gói này" : "Package not found"}
-        </h1>
+        <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}</p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight">{locale === "vi" ? "Không tìm thấy gói này" : "Package not found"}</h1>
         <p className="mt-4 text-lg leading-8 text-slate-600">
           {locale === "vi"
             ? "Vui lòng quay lại danh sách gói và chọn một gói mẫu."
@@ -36,15 +38,9 @@ export default async function CollectionDetailPage({
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
-        <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-tight">
-          {locale === "vi" ? packageItem.nameVi : packageItem.nameEn}
-        </h1>
-        <p className="max-w-2xl text-lg leading-8 text-slate-600">
-          {locale === "vi" ? packageItem.descriptionVi : packageItem.descriptionEn}
-        </p>
+        <p className="text-sm font-medium text-blue-600">{locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}</p>
+        <h1 className="text-4xl font-semibold tracking-tight">{packageItem.name}</h1>
+        <p className="max-w-2xl text-lg leading-8 text-slate-600">{packageItem.description}</p>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
             ? "Đây là mức gợi ý để khách chọn nhanh rồi sang checkout ngay."
@@ -53,16 +49,14 @@ export default async function CollectionDetailPage({
       </div>
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
-            {locale === "vi" ? "Mức ủng hộ" : "Support amount"}
-          </p>
+          <p className="text-sm font-medium text-slate-500">{locale === "vi" ? "Mức ủng hộ" : "Support amount"}</p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            {packageItem.currency} {(packageItem.amountMinor / 100).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+            <MoneyAmount amount={packageItem.amountMinor} currency={packageItem.currency} locale={locale} />
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
             {locale === "vi"
-            ? "Chọn mức này sẽ đưa bạn sang checkout với số tiền gợi ý đã điền sẵn."
-            : "Choosing this option will take you to checkout with the suggested amount prefilled."}
+              ? "Chọn mức này sẽ đưa bạn sang checkout với số tiền gợi ý đã điền sẵn."
+              : "Choosing this option will take you to checkout with the suggested amount prefilled."}
           </p>
           <Link
             href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}
@@ -72,9 +66,7 @@ export default async function CollectionDetailPage({
           </Link>
         </div>
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">
-            {locale === "vi" ? "Thông tin nhanh" : "Quick facts"}
-          </p>
+          <p className="text-sm font-medium text-slate-500">{locale === "vi" ? "Thông tin nhanh" : "Quick facts"}</p>
           <dl className="mt-4 space-y-4 text-sm">
             <div className="flex items-start justify-between gap-6 border-b border-slate-200 pb-3">
               <dt className="text-slate-500">{locale === "vi" ? "Mã gói" : "Package code"}</dt>

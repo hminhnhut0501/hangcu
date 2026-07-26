@@ -68,8 +68,8 @@ export const catalogProducts: CatalogProduct[] = [
     downloadLimit: 1,
     downloadExpiryDays: 30,
     currency: "USD",
-    amountMinor: 9900,
-    compareAtAmountMinor: 12900,
+    amountMinor: 999,
+    compareAtAmountMinor: 1299,
     media: [
       {
         id: "med_skyline_preview",
@@ -97,8 +97,8 @@ export const catalogProducts: CatalogProduct[] = [
     downloadLimit: 1,
     downloadExpiryDays: 36500,
     currency: "USD",
-    amountMinor: 29900,
-    compareAtAmountMinor: 39900,
+    amountMinor: 2999,
+    compareAtAmountMinor: 3999,
     media: [
       {
         id: "med_calm_preview",

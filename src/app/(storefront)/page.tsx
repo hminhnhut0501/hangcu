@@ -5,7 +5,10 @@ import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { listDonatePackages } from "@/modules/donate-packages/service";
-import { formatCatalogPrice } from "@/lib/money/format";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type Locale = "vi" | "en";
 
@@ -47,17 +50,6 @@ const legacyHeroPaths = new Set([
   "/brand/hangcu-hero-mockup.png",
   "/brand/hangcu-hero-macbook.png"
 ]);
-
-function formatMoney(amountMinor: number, currency: string, locale: Locale) {
-  const normalizedCurrency = currency.toUpperCase();
-  if (normalizedCurrency === "VND") {
-    return locale === "vi"
-      ? `${new Intl.NumberFormat("vi-VN").format(amountMinor)}đ`
-      : `${new Intl.NumberFormat("en-US").format(amountMinor)} VND`;
-  }
-
-  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor)} ${normalizedCurrency}`;
-}
 
 function parseJsonArray<T>(value: T[] | null | undefined, fallback: T[]): T[] {
   return Array.isArray(value) ? value : fallback;
@@ -125,39 +117,21 @@ export default async function HomePage() {
   ]);
 
   const copy = {
-    vi: {
-      heroBadge: "Tele video",
-      heroEyebrow: "App macOS native xử lý video hàng loạt",
-      heroTitle: "Kéo thả video, xử lý hàng loạt, làm nhanh gọn trên Mac.",
-      heroText:
-        "Tele video gồm Join, Cut, Thumb / Face Find, Watermark, Intro / Outro, Optimize và Encode. Giao diện SwiftUI tối giản, đúng kiểu macOS native.",
-      primary: "Xem tính năng",
-      secondary: "Chọn gói license",
-      appLabel: settings.demoSectionLabelVi,
-      appCaption: settings.demoSectionDescriptionVi,
-      demoLabel: settings.demoSectionLabelVi,
-      compareLabel: settings.plansSectionLabelVi,
-      faqLabel: settings.faqSectionLabelVi,
-      appCta: "Xem app",
-      packagesCta: "Mua license"
-    },
-    en: {
-      heroBadge: "Tele video",
-      heroEyebrow: "A native macOS batch video app",
-      heroTitle: "Drag, batch, and finish video work fast on Mac.",
-      heroText:
-        "Tele video includes Join, Cut, Thumb / Face Find, Watermark, Intro / Outro, Optimize, and Encode. The SwiftUI interface stays minimal and native to macOS.",
-      primary: "See features",
-      secondary: "Choose a license",
-      appLabel: settings.demoSectionLabelEn,
-      appCaption: settings.demoSectionDescriptionEn,
-      demoLabel: settings.demoSectionLabelEn,
-      compareLabel: settings.plansSectionLabelEn,
-      faqLabel: settings.faqSectionLabelEn,
-      appCta: "Open app",
-      packagesCta: "Buy license"
-    }
-  }[locale];
+    heroBadge: locale === "vi" ? "Tele video" : "Tele video",
+    heroEyebrow: locale === "vi" ? settings.heroEyebrowVi : settings.heroEyebrowEn,
+    heroTitle: locale === "vi" ? settings.heroTitleVi : settings.heroTitleEn,
+    heroText: locale === "vi" ? settings.heroDescriptionVi : settings.heroDescriptionEn,
+    heroSecondaryText: locale === "vi" ? settings.heroSecondaryTextVi : settings.heroSecondaryTextEn,
+    primary: locale === "vi" ? settings.heroPrimaryCtaLabelVi : settings.heroPrimaryCtaLabelEn,
+    secondary: locale === "vi" ? settings.heroSecondaryCtaLabelVi : settings.heroSecondaryCtaLabelEn,
+    appLabel: locale === "vi" ? settings.demoSectionLabelVi : settings.demoSectionLabelEn,
+    appCaption: locale === "vi" ? settings.demoSectionDescriptionVi : settings.demoSectionDescriptionEn,
+    demoLabel: locale === "vi" ? settings.demoSectionLabelVi : settings.demoSectionLabelEn,
+    compareLabel: locale === "vi" ? settings.plansSectionLabelVi : settings.plansSectionLabelEn,
+    faqLabel: locale === "vi" ? settings.faqSectionLabelVi : settings.faqSectionLabelEn,
+    appCta: locale === "vi" ? "Xem app" : "Open app",
+    packagesCta: locale === "vi" ? "Mua license" : "Buy license"
+  };
 
   const features: FeatureCard[] = [
     {
@@ -238,7 +212,7 @@ export default async function HomePage() {
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
-        return formatCatalogPrice(amount, currency, locale);
+        return { amount, currency };
       })(),
       desc:
         locale === "vi"
@@ -252,7 +226,7 @@ export default async function HomePage() {
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
-        return formatCatalogPrice(amount, currency, locale);
+        return { amount, currency };
       })(),
       desc:
         locale === "vi"
@@ -268,18 +242,21 @@ export default async function HomePage() {
       value: locale === "vi" ? item.textVi : item.textEn
     }));
 
-  const supportPackages = donatePackages.slice(0, 3).map((item) => ({
-    slug: item.slug,
-    name: item.name,
-    description: item.description,
-    badge: item.code,
-    amount:
-      item.suggestedAmountMinor != null && item.currency
-        ? formatMoney(item.suggestedAmountMinor, item.currency, locale)
-        : locale === "vi"
-          ? "Tùy chọn"
-          : "Optional"
-  }));
+  const supportPackages = donatePackages
+    .filter((item) => item.status === "active")
+    .map((item) => ({
+      slug: item.slug,
+      name: item.name,
+      description: item.description,
+      badge: item.code,
+      amount:
+        item.suggestedAmountMinor != null && item.currency
+          ? { amount: item.suggestedAmountMinor, currency: item.currency }
+          : locale === "vi"
+            ? "Tùy chọn"
+            : "Optional"
+    }))
+    .slice(0, 3);
 
   return (
     <main className="overflow-hidden bg-[#f6f8fc] text-slate-950">
@@ -296,6 +273,7 @@ export default async function HomePage() {
               {copy.heroTitle}
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-slate-600">{copy.heroText}</p>
+            <p className="max-w-2xl text-sm leading-7 text-slate-500">{copy.heroSecondaryText}</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -362,7 +340,7 @@ export default async function HomePage() {
       </section>
 
       <section id="demo" className="mx-auto max-w-7xl px-6 pb-10">
-          <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="animate-fade-up overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
             <div className="border-b border-slate-200 px-5 py-4">
               <p className="text-sm font-medium text-slate-500">{copy.appLabel}</p>
@@ -422,9 +400,7 @@ export default async function HomePage() {
         <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
           <div className="flex items-start justify-between gap-4">
             <div className="max-w-2xl space-y-3">
-              <p className="text-sm font-medium text-blue-600">
-                {locale === "vi" ? settings.plansSectionLabelVi : settings.plansSectionLabelEn}
-              </p>
+              <p className="text-sm font-medium text-blue-600">{copy.compareLabel}</p>
               <h2 className="text-2xl font-semibold tracking-tight">
                 {locale === "vi" ? settings.plansSectionTitleVi : settings.plansSectionTitleEn}
               </h2>
@@ -459,9 +435,11 @@ export default async function HomePage() {
                     <h3 className="text-2xl font-semibold">{plan.name}</h3>
                     <p className={`max-w-xl text-sm leading-6 ${index === 0 ? "text-slate-300" : "text-slate-600"}`}>{plan.desc}</p>
                   </div>
-                  <div className={`rounded-2xl px-4 py-3 text-right ${index === 0 ? "bg-white/10" : "bg-slate-50"}`}>
+                <div className={`rounded-2xl px-4 py-3 text-right ${index === 0 ? "bg-white/10" : "bg-slate-50"}`}>
                     <p className={`text-[11px] ${index === 0 ? "text-slate-300" : "text-slate-500"}`}>{locale === "vi" ? "Từ" : "From"}</p>
-                    <p className="mt-1 text-lg font-semibold">{plan.price ?? "-"}</p>
+                    <p className="mt-1 text-lg font-semibold">
+                      {typeof plan.price === "string" ? plan.price : plan.price ? <MoneyAmount amount={plan.price.amount} currency={plan.price.currency} locale={locale} kind="catalog" /> : "-"}
+                    </p>
                   </div>
                 </div>
 
@@ -564,7 +542,9 @@ export default async function HomePage() {
                     </div>
                     <div className="rounded-2xl bg-white px-3 py-2 text-right ring-1 ring-slate-200">
                       <p className="text-[11px] text-slate-500">{locale === "vi" ? "Từ" : "From"}</p>
-                      <p className="mt-1 text-base font-semibold text-slate-950">{item.amount}</p>
+                      <p className="mt-1 text-base font-semibold text-slate-950">
+                        {typeof item.amount === "string" ? item.amount : <MoneyAmount amount={item.amount.amount} currency={item.amount.currency} locale={locale} />}
+                      </p>
                     </div>
                   </div>
                   <Link

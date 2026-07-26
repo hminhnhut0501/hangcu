@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
-import { formatCatalogPrice, getPrimaryStoreCurrency } from "@/lib/money/format";
+import { getPrimaryStoreCurrency } from "@/lib/money/format";
 import { StaticPage } from "@/components/storefront/static-page";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function PricingPage() {
   const locale = await getStorefrontLocale();
@@ -19,7 +23,7 @@ export default async function PricingPage() {
       intro={
         vi
           ? "VNĐ là giá thanh toán chính cho khách Việt, USD là giá tham chiếu hoặc thanh toán quốc tế. Support package tách riêng và dùng VNĐ."
-          : "VND is the main checkout currency for Vietnamese customers, while USD is used for reference or international checkout. Support packages stay separate and use VND."
+          : "USD is the main checkout currency for English storefront pricing, while VNĐ is used for Vietnamese support amounts. Support packages stay separate."
       }
       sections={[]}
       footer={
@@ -38,11 +42,11 @@ export default async function PricingPage() {
                   <div className="mt-5 rounded-2xl bg-slate-50 p-4">
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">{vi ? "Giá chính" : "Primary price"}</p>
                     <p className="mt-2 text-3xl font-semibold text-slate-950">
-                      {formatCatalogPrice(primaryAmount, primaryCurrency, locale) ?? "-"}
+                      <MoneyAmount amount={primaryAmount} currency={primaryCurrency} locale={locale} kind="catalog" />
                     </p>
                     {secondaryAmount != null ? (
                       <p className="mt-2 text-sm text-slate-500">
-                        {secondaryCurrency}: {formatCatalogPrice(secondaryAmount, secondaryCurrency, locale)}
+                        {secondaryCurrency}: <MoneyAmount amount={secondaryAmount} currency={secondaryCurrency} locale={locale} kind="catalog" />
                       </p>
                     ) : null}
                   </div>
@@ -62,8 +66,8 @@ export default async function PricingPage() {
             <h2 className="text-xl font-semibold text-slate-950">{vi ? "Gói hỗ trợ riêng" : "Separate support package"}</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               {vi
-                ? "Gói hỗ trợ là khoản ủng hộ tự nguyện, tách biệt khỏi license và luôn giữ theo VND."
-                : "The support package is a voluntary contribution, separate from licenses and always kept in VND."}
+                ? "Gói hỗ trợ là khoản ủng hộ tự nguyện, tách biệt khỏi license và luôn giữ theo VNĐ."
+                : "The support package is a voluntary contribution, separate from licenses and always kept in VNĐ."}
             </p>
           </div>
         </div>

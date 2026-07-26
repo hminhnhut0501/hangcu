@@ -2,8 +2,11 @@ import Link from "next/link";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { listDonatePackages } from "@/modules/donate-packages/service";
-import { formatMoney, mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
-import { formatCatalogPrice } from "@/lib/money/format";
+import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function ProductsPage() {
   const plans = (await listLicensePlans())
@@ -41,10 +44,15 @@ export default async function ProductsPage() {
                 <h2 className="text-xl font-semibold text-slate-950">{locale === "vi" ? plan.nameVi : plan.nameEn}</h2>
                 <p className="max-w-xl text-sm leading-6 text-slate-600">{plan.description}</p>
               </div>
-              <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
-                <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Giá" : "Price"}</p>
+                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
+                  <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Giá" : "Price"}</p>
                 <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {formatCatalogPrice(locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD, locale === "vi" ? "VND" : "USD", locale) ?? "-"}
+                  <MoneyAmount
+                    amount={locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD}
+                    currency={locale === "vi" ? "VND" : "USD"}
+                    locale={locale}
+                    kind="catalog"
+                  />
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {plan.isLifetime ? (locale === "vi" ? "Trọn đời" : "Lifetime") : `${plan.durationDays} ${locale === "vi" ? "ngày" : "days"}`}
@@ -94,7 +102,7 @@ export default async function ProductsPage() {
               {packageItem.name}
             </h3>
             <p className="mt-2 text-sm font-medium text-slate-900">
-              {formatMoney(packageItem.amountMinor, packageItem.currency, locale) ?? "-"}
+              <MoneyAmount amount={packageItem.amountMinor} currency={packageItem.currency} locale={locale} />
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               {packageItem.description}

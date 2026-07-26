@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { OrderStatusForm } from "@/components/admin/order-status-form";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
+import { MoneyAmount } from "@/components/money/money-amount";
+import { formatCurrencyLabel } from "@/lib/money/format";
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
@@ -16,13 +18,6 @@ const statusStyles: Record<string, string> = {
   unfulfilled: "bg-amber-100 text-amber-800",
   partially_fulfilled: "bg-blue-100 text-blue-800"
 };
-
-function formatMoney(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency
-  }).format(amountMinor / 100);
-}
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "N/A";
@@ -98,14 +93,18 @@ export default async function AdminOrderDetailPage({
             </div>
             <div className="flex flex-wrap gap-2 text-sm text-slate-500">
               <span className="rounded-full bg-slate-100 px-3 py-1">Nguồn: {order.source}</span>
-              <span className="rounded-full bg-slate-100 px-3 py-1">Currency: {order.currency}</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1">
+                Currency: {formatCurrencyLabel(order.currency, "vi") ?? order.currency}
+              </span>
               <span className="rounded-full bg-slate-100 px-3 py-1">Items: {order.items.length}</span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Tổng đơn</p>
-              <p className="mt-2 text-2xl font-semibold">{formatMoney(order.totalMinor, order.currency)}</p>
+              <p className="mt-2 text-2xl font-semibold">
+                <MoneyAmount amount={order.totalMinor} currency={order.currency} locale="vi" />
+              </p>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Mã đơn</p>
@@ -147,7 +146,9 @@ export default async function AdminOrderDetailPage({
                     </td>
                     <td className="px-6 py-4">{item.sku}</td>
                     <td className="px-6 py-4">{item.quantity}</td>
-                    <td className="px-6 py-4">{formatMoney(item.totalAmountMinor, order.currency)}</td>
+                    <td className="px-6 py-4">
+                      <MoneyAmount amount={item.totalAmountMinor} currency={order.currency} locale="vi" />
+                    </td>
                   </tr>
                 ))}
               </tbody>

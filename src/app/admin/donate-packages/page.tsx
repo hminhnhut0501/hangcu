@@ -1,7 +1,10 @@
 import { listDonatePackages } from "@/modules/donate-packages/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { SupportPackageQuickRow } from "@/components/admin/support-package-quick-row";
-import { formatMoney } from "@/modules/donate-packages/view-model";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
@@ -27,8 +30,17 @@ export default async function AdminDonatePackagesPage() {
           { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
           { name: "name", label: "Tên", defaultValue: "Mức ủng hộ mới" },
           { name: "description", label: "Mô tả", defaultValue: "Mức ủng hộ tự do mới", type: "textarea" },
-          { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "9900" },
-          { name: "currency", label: "Tiền tệ", defaultValue: "VND" },
+          { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: "9900" },
+          {
+            name: "currency",
+            label: "Tiền tệ",
+            type: "select",
+            defaultValue: "VND",
+            options: [
+              { label: "VNĐ", value: "VND" },
+              { label: "USD", value: "USD" }
+            ]
+          },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
         ]}
       />
@@ -51,7 +63,7 @@ export default async function AdminDonatePackagesPage() {
                 <td className="px-6 py-4">{pkg.name}</td>
                 <td className="px-6 py-4 text-slate-600">{pkg.slug}</td>
                 <td className="px-6 py-4">
-                  {formatMoney(pkg.suggestedAmountMinor ?? null, pkg.currency ?? null, "vi") ?? "-"}
+                  <MoneyAmount amount={pkg.suggestedAmountMinor} currency={pkg.currency} locale="vi" />
                 </td>
                 <td className="px-6 py-4">{pkg.status}</td>
                 <td className="px-6 py-4">

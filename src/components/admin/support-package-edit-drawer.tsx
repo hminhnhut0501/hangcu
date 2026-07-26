@@ -40,8 +40,17 @@ export function SupportPackageEditDrawer({ packageItem }: Props) {
           { name: "name", label: "Tên", defaultValue: packageItem.name },
           { name: "slug", label: "Slug", defaultValue: packageItem.slug },
           { name: "description", label: "Mô tả", defaultValue: packageItem.description, type: "textarea", rows: 4 },
-          { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
-          { name: "currency", label: "Tiền tệ", defaultValue: packageItem.currency ?? "USD" },
+          { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
+          {
+            name: "currency",
+            label: "Tiền tệ",
+            type: "select",
+            defaultValue: packageItem.currency ?? "VND",
+            options: [
+              { label: "VNĐ", value: "VND" },
+              { label: "USD", value: "USD" }
+            ]
+          },
           { name: "status", label: "Trạng thái", defaultValue: packageItem.status }
         ]}
       />

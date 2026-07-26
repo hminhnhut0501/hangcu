@@ -148,6 +148,12 @@ const defaultSettings: SiteContentSettings = {
   updatedAt: new Date().toISOString()
 };
 
+export type SiteSettingsSource = "supabase" | "fallback";
+
+function allowMemoryFallback() {
+  return process.env.SITE_SETTINGS_ALLOW_MEMORY_FALLBACK === "true";
+}
+
 function normalize(value: unknown): SiteContentSettings {
   const candidate = siteContentSettingsSchema.safeParse(value);
   return candidate.success ? candidate.data : defaultSettings;
@@ -232,9 +238,18 @@ export class SupabaseSiteSettingsRepository {
   private client = getSupabaseServiceClient();
   private memory = new InMemorySiteSettingsRepository();
 
-  async get(): Promise<SiteContentSettings> {
+  private missingSettingsError() {
+    return new Error(
+      "SITE_SETTINGS_DB_ERROR: Không thể đọc site_settings từ Supabase. Hãy kiểm tra bảng, quyền hoặc cấu hình kết nối."
+    );
+  }
+
+  async getWithSource(): Promise<{ settings: SiteContentSettings; source: SiteSettingsSource }> {
     if (!this.client) {
-      return this.memory.get();
+      if (!allowMemoryFallback()) {
+        throw this.missingSettingsError();
+      }
+      return { settings: await this.memory.get(), source: "fallback" };
     }
 
     const { data, error } = await this.client
@@ -244,18 +259,28 @@ export class SupabaseSiteSettingsRepository {
       .maybeSingle();
 
     if (error) {
-      if (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings")) {
-        return this.memory.get();
+      if (allowMemoryFallback() && (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings"))) {
+        return { settings: await this.memory.get(), source: "fallback" };
       }
       throw error;
     }
-    return data ? mapRowToSettings(data as Record<string, unknown>) : defaultSettings;
+    return {
+      settings: data ? mapRowToSettings(data as Record<string, unknown>) : defaultSettings,
+      source: "supabase"
+    };
+  }
+
+  async get(): Promise<SiteContentSettings> {
+    return (await this.getWithSource()).settings;
   }
 
   async save(settings: SiteContentSettings): Promise<SiteContentSettings> {
     const normalized = normalize(settings);
 
     if (!this.client) {
+      if (!allowMemoryFallback()) {
+        throw this.missingSettingsError();
+      }
       return this.memory.save(normalized);
     }
 
@@ -320,7 +345,7 @@ export class SupabaseSiteSettingsRepository {
     });
 
     if (error) {
-      if (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings")) {
+      if (allowMemoryFallback() && (error.code === "PGRST205" || String(error.message ?? "").includes("site_settings"))) {
         return this.memory.save(normalized);
       }
       throw error;

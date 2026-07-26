@@ -29,8 +29,10 @@ export async function upsertDonatePackage(input: {
   currency: string | null;
   status: "active" | "hidden" | "archived";
 }) {
+  const normalizedCurrency = typeof input.currency === "string" ? input.currency.trim().toUpperCase().replace("VNĐ", "VND") : null;
   return repository.save({
     ...input,
+    currency: normalizedCurrency === "VND" || normalizedCurrency === "USD" ? normalizedCurrency : input.currency,
     metadata: {}
   });
 }

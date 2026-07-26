@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
-import { supporterPackages } from "@/lib/supporter-packages";
+import { listDonatePackages } from "@/modules/donate-packages/service";
+import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { MoneyAmount } from "@/components/money/money-amount";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function CollectionsPage() {
   const locale = await getStorefrontLocale();
-  const packages = supporterPackages;
+  const packages = (await listDonatePackages())
+    .filter((pkg) => pkg.status === "active")
+    .map((pkg) => mapDonatePackageToViewModel(pkg, locale));
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -29,13 +36,13 @@ export default async function CollectionsPage() {
           >
             <p className="text-sm text-slate-500">{packageItem.slug}</p>
             <h2 className="mt-2 text-xl font-semibold">
-              {locale === "vi" ? packageItem.nameVi : packageItem.nameEn}
+              {packageItem.name}
             </h2>
             <p className="mt-2 text-sm font-medium text-slate-900">
-              {packageItem.currency} {(packageItem.amountMinor / 100).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+              <MoneyAmount amount={packageItem.amountMinor} currency={packageItem.currency} locale={locale} />
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              {locale === "vi" ? packageItem.descriptionVi : packageItem.descriptionEn}
+              {packageItem.description}
             </p>
             <Link
               href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}

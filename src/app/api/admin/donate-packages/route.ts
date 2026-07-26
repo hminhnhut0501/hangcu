@@ -21,21 +21,36 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  await requireAdminMutationAccess("content_manager");
-  const payload = await request.json().catch(() => null);
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
+  try {
+    await requireAdminMutationAccess("content_manager");
+    const payload = await request.json().catch(() => null);
+    const parsed = schema.safeParse(payload);
+    if (!parsed.success) {
+      return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
+    }
+
+    const pkg = await upsertDonatePackage(parsed.data);
+    await writeAuditLog({
+      ...getAdminMutationContext(),
+      action: "donate_package_upserted",
+      entityType: "donate_package",
+      entityId: pkg.id,
+      afterData: pkg
+    });
+
+    return Response.json({ success: true, data: pkg });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const isPersistenceError = message.startsWith("PERSISTENCE_UNAVAILABLE:");
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: isPersistenceError ? "PERSISTENCE_UNAVAILABLE" : "INTERNAL_ERROR",
+          message: isPersistenceError ? message.replace(/^PERSISTENCE_UNAVAILABLE:\s*/, "") : message
+        }
+      },
+      { status: isPersistenceError ? 503 : 500 }
+    );
   }
-
-  const pkg = await upsertDonatePackage(parsed.data);
-  await writeAuditLog({
-    ...getAdminMutationContext(),
-    action: "donate_package_upserted",
-    entityType: "donate_package",
-    entityId: pkg.id,
-    afterData: pkg
-  });
-
-  return Response.json({ success: true, data: pkg });
 }

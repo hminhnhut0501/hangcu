@@ -10,6 +10,7 @@ type Field = {
   label: string;
   type?: string;
   defaultValue?: string;
+  options?: Array<{ label: string; value: string }>;
 };
 
 type Props = {
@@ -153,6 +154,18 @@ export function InlineRowForm({ endpoint, fields, submitLabel = "Lưu", onSucces
                   defaultChecked={field.defaultValue === "true" || field.defaultValue === "on"}
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
+              ) : field.type === "select" ? (
+                <select
+                  name={field.name}
+                  defaultValue={field.defaultValue}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500"
+                >
+                  {field.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <input
                   name={field.name}

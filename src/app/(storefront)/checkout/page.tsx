@@ -3,8 +3,15 @@ import Link from "next/link";
 import { CheckoutPaymentForm } from "@/components/storefront/checkout-payment-form";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
-import { listProducts } from "@/modules/products/service";
-import { getSupporterPackageBySlug, supporterPackages } from "@/lib/supporter-packages";
+import { listLicensePlans } from "@/modules/license-plans/service";
+import { getDonatePackageBySlug, listDonatePackages } from "@/modules/donate-packages/service";
+import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { MoneyAmount } from "@/components/money/money-amount";
+import { licensePlansSeed } from "@/lib/license/mock-data";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type CheckoutSearchParams = {
   order?: string | string[];
   planCode?: string | string[];
@@ -38,35 +45,6 @@ function normalizeCheckoutStatus(value: string | undefined) {
   return "";
 }
 
-function formatCurrencyLabel(amount: string | undefined, currency: string | undefined, locale: "vi" | "en") {
-  if (!amount || !currency) return null;
-  const normalizedCurrency = currency.toUpperCase();
-  const numericAmount = Number(amount);
-  if (!Number.isFinite(numericAmount)) {
-    return null;
-  }
-
-  if (normalizedCurrency === "VND") {
-    return locale === "vi"
-      ? `${new Intl.NumberFormat("vi-VN").format(numericAmount)}đ`
-      : `${new Intl.NumberFormat("en-US").format(numericAmount)} VND`;
-  }
-
-  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numericAmount)} ${normalizedCurrency}`;
-}
-
-function formatMinorAmount(amountMinor: number | undefined, currency: string | undefined, locale: "vi" | "en") {
-  if (amountMinor == null || !currency) return null;
-  const normalizedCurrency = currency.toUpperCase();
-  if (normalizedCurrency === "VND") {
-    return locale === "vi"
-      ? `${new Intl.NumberFormat("vi-VN").format(amountMinor)}đ`
-      : `${new Intl.NumberFormat("en-US").format(amountMinor)} VND`;
-  }
-
-  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
-}
-
 export default async function CheckoutPage({
   searchParams
 }: {
@@ -77,7 +55,7 @@ export default async function CheckoutPage({
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
-  const amountLabel = formatCurrencyLabel(firstValue(resolvedSearchParams.amount), firstValue(resolvedSearchParams.currency), locale);
+  const amountMinorQuery = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const amountMinorParam = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const checkoutId = firstValue(resolvedSearchParams.checkout);
   const customerRef = firstValue(resolvedSearchParams.customerRef);
@@ -85,36 +63,41 @@ export default async function CheckoutPage({
   const returnedOrderCode = firstValue(resolvedSearchParams.orderCode);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
   const resolvedOrderLabel = order?.items?.[0]?.productName ?? (order?.metadata?.planName as string | undefined) ?? null;
-  const resolvedAmountLabel = formatMinorAmount(amountMinorParam ?? order?.totalMinor, order?.currency ?? firstValue(resolvedSearchParams.currency), locale);
   const resolvedCustomerRef = customerRef ?? (order?.metadata?.customerRef as string | undefined) ?? null;
   const resolvedPlanCode = planLabel ?? (order?.metadata?.planCode as string | undefined) ?? null;
-  const summaryAmount = amountLabel ?? resolvedAmountLabel;
   const summaryPlan = planLabel ?? resolvedOrderLabel ?? resolvedPlanCode;
+  const summaryAmountMinor = amountMinorParam ?? order?.totalMinor ?? amountMinorQuery ?? null;
+  const summaryAmountCurrency = firstValue(resolvedSearchParams.currency) ?? order?.currency ?? null;
   const selectedPackageSlug = firstValue(resolvedSearchParams.package);
-  const selectedPackage = selectedPackageSlug ? getSupporterPackageBySlug(selectedPackageSlug) : null;
-  const catalogProducts = await listProducts();
-  const licenseProducts = catalogProducts
-    .filter((product) => product.sku === "HCV-LIC-30" || product.sku === "HCV-LIC-LIFE")
-    .map((product) => ({
-      slug: product.sku,
-      code: product.sku,
+  const selectedPackage = selectedPackageSlug ? await getDonatePackageBySlug(selectedPackageSlug).catch(() => null) : null;
+  const selectedPackageView = selectedPackage ? mapDonatePackageToViewModel(selectedPackage, locale) : null;
+  const catalogPlans = (await listLicensePlans())
+    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const fallbackPlans = licensePlansSeed
+    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+  const licenseSourcePlans = catalogPlans.length > 0 ? catalogPlans : fallbackPlans;
+  const licenseProducts = licenseSourcePlans.map((plan) => ({
+      slug: plan.code,
+      code: plan.code,
       kind: "license" as const,
-      name: locale === "vi" ? product.name : product.name,
-      description:
-        locale === "vi"
-          ? product.shortDescription || product.description
-          : product.shortDescription || product.description,
-      amountMinor: product.amountMinor,
-      currency: product.currency
+      name: locale === "vi" ? plan.nameVi : plan.nameEn,
+      description: plan.description,
+      amountMinor: locale === "vi" ? (plan.currencyPrices.VND ?? 0) : Math.round((plan.currencyPrices.USD ?? 0) * 100),
+      currency: locale === "vi" ? "VND" : "USD"
     }));
-  const supportOptions = supporterPackages.map((item) => ({
+  const supportPackages = (await listDonatePackages())
+    .filter((item) => item.status === "active" && item.suggestedAmountMinor != null && item.currency)
+    .map((item) => mapDonatePackageToViewModel(item, locale));
+  const supportOptions = supportPackages.map((item) => ({
     slug: item.slug,
-    code: item.slug,
+    code: item.code,
     kind: "support" as const,
-    name: locale === "vi" ? item.nameVi : item.nameEn,
-    description: locale === "vi" ? item.descriptionVi : item.descriptionEn,
-    amountMinor: item.amountMinor,
-    currency: item.currency
+    name: item.name,
+    description: item.description,
+    amountMinor: item.amountMinor ?? 0,
+    currency: item.currency ?? "VND"
   }));
   const packageOptions = [...licenseProducts, ...supportOptions];
   const initialMode = selectedPackage
@@ -128,17 +111,18 @@ export default async function CheckoutPage({
         : "license";
   const initialPackage = selectedPackage
     ? {
-        slug: selectedPackage.slug,
-        code: selectedPackage.slug,
+        slug: selectedPackageView?.slug ?? selectedPackage.slug,
+        code: selectedPackageView?.code ?? selectedPackage.code,
         kind: "support" as const,
-        name: locale === "vi" ? selectedPackage.nameVi : selectedPackage.nameEn,
-        description: locale === "vi" ? selectedPackage.descriptionVi : selectedPackage.descriptionEn,
-        amountMinor: selectedPackage.amountMinor,
+        name: selectedPackageView?.name ?? selectedPackage.name,
+        description: selectedPackageView?.description ?? selectedPackage.description,
+        amountMinor: selectedPackage.suggestedAmountMinor,
         currency: selectedPackage.currency
       }
     : firstValue(resolvedSearchParams.planCode)
       ? packageOptions.find((option) => option.slug === firstValue(resolvedSearchParams.planCode)) ?? packageOptions[0] ?? null
       : packageOptions[0] ?? null;
+  const selectedCheckoutPackage = initialPackage ?? packageOptions[0] ?? null;
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -149,16 +133,47 @@ export default async function CheckoutPage({
               {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-            {locale === "vi" ? "Thanh toán license hoặc ủng hộ tự do" : "Pay for a license or a flexible support contribution"}
-          </h1>
-          <p className="mt-4 text-lg leading-8 text-slate-600">
-            {locale === "vi"
-                ? "Chọn license hoặc gói ủng hộ, nhập email, nhập số tiền nếu là ủng hộ, rồi chọn cổng thanh toán."
-                : "Choose a license or support option, enter your email, enter an amount if it is support, then pick a payment gateway."}
-          </p>
-        </div>
+              {locale === "vi" ? "Thanh toán gói license hoặc ủng hộ tự do" : "Pay for a license or a flexible support contribution"}
+            </h1>
+            <p className="mt-4 text-lg leading-8 text-slate-600">
+              {locale === "vi"
+                ? "Chọn một gói, nhập email, rồi bấm tiếp tục để sang cổng thanh toán."
+                : "Pick a package, enter your email, then continue to the payment gateway."}
+            </p>
+          </div>
 
-          {orderNumber || summaryPlan || summaryAmount || checkoutId || resolvedCustomerRef ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 1" : "Step 1"}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chọn gói" : "Choose a pack"}</p>
+              <p className="mt-1 text-sm text-slate-600">{locale === "vi" ? "License hoặc support." : "License or support."}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập email" : "Enter email"}</p>
+              <p className="mt-1 text-sm text-slate-600">{locale === "vi" ? "Nhận hóa đơn và key." : "Get receipt and key."}</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 3" : "Step 3"}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Thanh toán" : "Pay"}</p>
+              <p className="mt-1 text-sm text-slate-600">{locale === "vi" ? "Đi tới cổng phù hợp." : "Continue to gateway."}</p>
+            </div>
+          </div>
+
+          {selectedCheckoutPackage ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <p className="text-sm font-medium text-slate-500">{locale === "vi" ? "Đang chọn" : "Selected"}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <p className="text-base font-semibold text-slate-950">{selectedCheckoutPackage.name}</p>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+                  <MoneyAmount amount={selectedCheckoutPackage.amountMinor} currency={selectedCheckoutPackage.currency} locale={locale} />
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{selectedCheckoutPackage.description}</p>
+            </div>
+          ) : null}
+
+          {orderNumber || summaryPlan || summaryAmountMinor != null || checkoutId || resolvedCustomerRef ? (
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
               <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-blue-700">
                 <span>{locale === "vi" ? "Thông tin từ bot" : "Bot checkout context"}</span>
@@ -175,10 +190,12 @@ export default async function CheckoutPage({
                     <p className="mt-1 text-base font-semibold text-slate-900">{summaryPlan}</p>
                   </div>
                 ) : null}
-                {summaryAmount ? (
+                {summaryAmountMinor != null && summaryAmountCurrency ? (
                   <div className="rounded-xl bg-white p-4 ring-1 ring-blue-100">
                     <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Số tiền" : "Amount"}</p>
-                    <p className="mt-1 text-base font-semibold text-slate-900">{summaryAmount}</p>
+                    <p className="mt-1 text-base font-semibold text-slate-900">
+                      <MoneyAmount amount={summaryAmountMinor} currency={summaryAmountCurrency} locale={locale} />
+                    </p>
                   </div>
                 ) : null}
                 {resolvedCustomerRef ? (
@@ -234,7 +251,7 @@ export default async function CheckoutPage({
               checkoutId,
               planCode: planCode ?? (order?.metadata?.planCode as string | undefined) ?? null,
               planLabel: summaryPlan,
-              amountLabel: summaryAmount,
+              amountLabel: summaryAmountMinor != null && summaryAmountCurrency ? `${summaryAmountMinor} ${summaryAmountCurrency}` : null,
               customerRef: resolvedCustomerRef,
               amountMinor: amountMinorParam ?? order?.totalMinor ?? null,
               currency: firstValue(resolvedSearchParams.currency) ?? order?.currency ?? null

@@ -27,8 +27,17 @@ export function SupportPackageQuickRow({ packageItem }: Props) {
         { name: "name", label: "Tên", defaultValue: packageItem.name },
         { name: "description", label: "Mô tả", defaultValue: packageItem.description },
         { name: "slug", label: "Slug", defaultValue: packageItem.slug },
-        { name: "suggestedAmountMinor", label: "Số tiền", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
-        { name: "currency", label: "Tiền tệ", defaultValue: packageItem.currency ?? "VND" },
+        { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
+        {
+          name: "currency",
+          label: "Tiền tệ",
+          type: "select",
+          defaultValue: packageItem.currency ?? "VND",
+          options: [
+            { label: "VNĐ", value: "VND" },
+            { label: "USD", value: "USD" }
+          ]
+        },
         { name: "status", label: "Trạng thái", defaultValue: packageItem.status }
       ]}
     />

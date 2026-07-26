@@ -38,8 +38,8 @@ export function LicensePlanEditDrawer({ plan, isAdvanced }: Props) {
         { name: "nameEn", label: "Tên EN", defaultValue: plan.nameEn },
         { name: "slug", label: "Slug", defaultValue: plan.slug },
         { name: "description", label: "Mô tả", defaultValue: plan.description },
-        { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: String(plan.currencyPrices.VND ?? "") },
-        { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: String(plan.currencyPrices.USD ?? "") },
+        { name: "vndPrice", label: "Giá thanh toán VNĐ", type: "number", defaultValue: String(plan.currencyPrices.VND ?? "") },
+        { name: "usdPrice", label: "Giá thanh toán USD", type: "number", defaultValue: String(plan.currencyPrices.USD ?? "") },
         { name: "planType", label: "Loại gói", defaultValue: plan.planType },
         { name: "durationDays", label: "Số ngày", type: "number", defaultValue: String(plan.durationDays) },
         { name: "isLifetime", label: "Trọn đời", type: "checkbox", defaultValue: plan.isLifetime ? "true" : "" },
@@ -53,8 +53,8 @@ export function LicensePlanEditDrawer({ plan, isAdvanced }: Props) {
         { name: "name", label: "Tên", defaultValue: plan.name },
         { name: "nameVi", label: "Tên VI", defaultValue: plan.nameVi },
         { name: "nameEn", label: "Tên EN", defaultValue: plan.nameEn },
-        { name: "vndPrice", label: "Giá VND", type: "number", defaultValue: String(plan.currencyPrices.VND ?? "") },
-        { name: "usdPrice", label: "Giá USD", type: "number", defaultValue: String(plan.currencyPrices.USD ?? "") },
+        { name: "vndPrice", label: "Giá thanh toán VNĐ", type: "number", defaultValue: String(plan.currencyPrices.VND ?? "") },
+        { name: "usdPrice", label: "Giá thanh toán USD", type: "number", defaultValue: String(plan.currencyPrices.USD ?? "") },
         { name: "status", label: "Trạng thái", defaultValue: plan.status },
         { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(plan.sortOrder) }
       ];

@@ -28,67 +28,97 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  await requireAdminMutationAccess("content_manager");
-  const payload = await request.json().catch(() => null);
-  const parsed = schema.safeParse(payload);
-  if (!parsed.success) {
-    return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
+  try {
+    await requireAdminMutationAccess("content_manager");
+    const payload = await request.json().catch(() => null);
+    const parsed = schema.safeParse(payload);
+    if (!parsed.success) {
+      return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
+    }
+
+    const existing = await getLicensePlanById(parsed.data.id);
+    const plan = await upsertLicensePlan({
+      id: parsed.data.id,
+      code: parsed.data.code,
+      name: parsed.data.name,
+      nameVi: parsed.data.nameVi,
+      nameEn: parsed.data.nameEn,
+      slug: parsed.data.slug ?? existing?.slug,
+      description: parsed.data.description ?? existing?.description,
+      currencyPrices: {
+        VND: parsed.data.vndPrice ?? null,
+        USD: parsed.data.usdPrice ?? null
+      },
+      planType: parsed.data.planType ?? existing?.planType,
+      durationDays: parsed.data.durationDays ?? existing?.durationDays,
+      isLifetime: parsed.data.isLifetime ?? existing?.isLifetime,
+      status: parsed.data.status ?? existing?.status,
+      sortOrder: parsed.data.sortOrder ?? existing?.sortOrder,
+      entitlementTags: parsed.data.entitlementTags
+        ? parsed.data.entitlementTags.split(",").map((tag) => tag.trim()).filter(Boolean)
+        : existing?.entitlementTags
+    });
+    await writeAuditLog({
+      ...getAdminMutationContext(),
+      action: "license_plan_upserted",
+      entityType: "license_plan",
+      entityId: plan.id,
+      afterData: plan
+    });
+
+    return Response.json({ success: true, data: plan });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const isPersistenceError = message.startsWith("PERSISTENCE_UNAVAILABLE:");
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: isPersistenceError ? "PERSISTENCE_UNAVAILABLE" : "INTERNAL_ERROR",
+          message: isPersistenceError ? message.replace(/^PERSISTENCE_UNAVAILABLE:\s*/, "") : message
+        }
+      },
+      { status: isPersistenceError ? 503 : 500 }
+    );
   }
-
-  const existing = await getLicensePlanById(parsed.data.id);
-  const plan = await upsertLicensePlan({
-    id: parsed.data.id,
-    code: parsed.data.code,
-    name: parsed.data.name,
-    nameVi: parsed.data.nameVi,
-    nameEn: parsed.data.nameEn,
-    slug: parsed.data.slug ?? existing?.slug,
-    description: parsed.data.description ?? existing?.description,
-    currencyPrices: {
-      VND: parsed.data.vndPrice ?? null,
-      USD: parsed.data.usdPrice ?? null
-    },
-    planType: parsed.data.planType ?? existing?.planType,
-    durationDays: parsed.data.durationDays ?? existing?.durationDays,
-    isLifetime: parsed.data.isLifetime ?? existing?.isLifetime,
-    status: parsed.data.status ?? existing?.status,
-    sortOrder: parsed.data.sortOrder ?? existing?.sortOrder,
-    entitlementTags: parsed.data.entitlementTags
-      ? parsed.data.entitlementTags.split(",").map((tag) => tag.trim()).filter(Boolean)
-      : existing?.entitlementTags
-  });
-  await writeAuditLog({
-    ...getAdminMutationContext(),
-    action: "license_plan_upserted",
-    entityType: "license_plan",
-    entityId: plan.id,
-    afterData: plan
-  });
-
-  return Response.json({ success: true, data: plan });
 }
 
 export async function DELETE(request: Request) {
-  await requireAdminMutationAccess("content_manager");
-  const payload = await request.json().catch(() => null);
-  const id = typeof payload?.id === "string" ? payload.id : "";
-  if (!id) {
-    return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Missing plan id." } }, { status: 400 });
+  try {
+    await requireAdminMutationAccess("content_manager");
+    const payload = await request.json().catch(() => null);
+    const id = typeof payload?.id === "string" ? payload.id : "";
+    if (!id) {
+      return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Missing plan id." } }, { status: 400 });
+    }
+
+    const existing = await getLicensePlanById(id);
+    if (!existing) {
+      return Response.json({ success: false, error: { code: "NOT_FOUND", message: "License plan not found." } }, { status: 404 });
+    }
+
+    const deleted = await deleteLicensePlan(id);
+    await writeAuditLog({
+      ...getAdminMutationContext(),
+      action: "license_plan_deleted",
+      entityType: "license_plan",
+      entityId: id,
+      beforeData: existing
+    });
+
+    return Response.json({ success: true, data: { deleted } });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    const isPersistenceError = message.startsWith("PERSISTENCE_UNAVAILABLE:");
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: isPersistenceError ? "PERSISTENCE_UNAVAILABLE" : "INTERNAL_ERROR",
+          message: isPersistenceError ? message.replace(/^PERSISTENCE_UNAVAILABLE:\s*/, "") : message
+        }
+      },
+      { status: isPersistenceError ? 503 : 500 }
+    );
   }
-
-  const existing = await getLicensePlanById(id);
-  if (!existing) {
-    return Response.json({ success: false, error: { code: "NOT_FOUND", message: "License plan not found." } }, { status: 404 });
-  }
-
-  const deleted = await deleteLicensePlan(id);
-  await writeAuditLog({
-    ...getAdminMutationContext(),
-    action: "license_plan_deleted",
-    entityType: "license_plan",
-    entityId: id,
-    beforeData: existing
-  });
-
-  return Response.json({ success: true, data: { deleted } });
 }

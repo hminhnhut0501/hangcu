@@ -6,6 +6,9 @@ import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront
 import { LanguageSwitcher } from "@/components/storefront/language-switcher";
 import { StorefrontFooterLinks } from "@/components/storefront/footer-links";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function StorefrontLayout({
   children
 }: Readonly<{

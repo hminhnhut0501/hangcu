@@ -1,6 +1,8 @@
 import { OrderBulkActions } from "@/components/admin/order-bulk-actions";
 import Link from "next/link";
 import { listAllOrders } from "@/modules/orders/service";
+import { MoneyAmount } from "@/components/money/money-amount";
+import { formatCurrencyLabel } from "@/lib/money/format";
 
 const statusStyles: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
@@ -18,13 +20,6 @@ const quickFilters = [
   { label: "Lỗi", href: "/admin/orders?status=failed" },
   { label: "Đã trả", href: "/admin/orders?paymentStatus=paid" }
 ];
-
-function formatMoney(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency
-  }).format(amountMinor / 100);
-}
 
 function renderStatusBadge(value: string) {
   return <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
@@ -200,7 +195,7 @@ export default async function AdminOrdersPage({
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-medium">{order.customerEmail}</p>
-                    <p className="text-xs text-slate-500">{order.currency}</p>
+                    <p className="text-xs text-slate-500">{formatCurrencyLabel(order.currency, "vi") ?? order.currency}</p>
                   </td>
                   <td className="px-6 py-4">{renderStatusBadge(order.status)}</td>
                   <td className="px-6 py-4">{renderStatusBadge(order.paymentStatus)}</td>
@@ -211,7 +206,9 @@ export default async function AdminOrdersPage({
                       {order.providerOrderId || order.providerCheckoutId || order.providerPaymentId || "Chưa có mã"}
                     </p>
                   </td>
-                  <td className="px-6 py-4 font-medium">{formatMoney(order.totalMinor, order.currency)}</td>
+                  <td className="px-6 py-4 font-medium">
+                    <MoneyAmount amount={order.totalMinor} currency={order.currency} locale="vi" />
+                  </td>
                 </tr>
               ))
             )}
