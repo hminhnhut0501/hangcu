@@ -43,6 +43,11 @@ type JsonHighlight = {
   visible?: boolean;
 };
 
+const legacyHeroPaths = new Set([
+  "/brand/hangcu-hero-mockup.png",
+  "/brand/hangcu-hero-macbook.png"
+]);
+
 function formatMoney(amountMinor: number, currency: string, locale: Locale) {
   const normalizedCurrency = currency.toUpperCase();
   if (normalizedCurrency === "VND") {
@@ -63,8 +68,10 @@ export default async function HomePage() {
   const settings = await getSiteContentSettings();
   const licensePlans = await listLicensePlans();
   const donatePackages = await listDonatePackages();
-  const heroImageUrl = settings.heroImagePath ? await getStoragePublicUrl(settings.heroImagePath) : null;
-  const heroImageSrc = heroImageUrl ?? "/brand/hangcu-hero-mockup.png";
+  const resolvedHeroImagePath = settings.heroImagePath && !legacyHeroPaths.has(settings.heroImagePath) ? settings.heroImagePath : "/brand/hangcu-hero-imac.png";
+  const heroImageUrl = resolvedHeroImagePath ? await getStoragePublicUrl(resolvedHeroImagePath) : null;
+  const heroImageSrc = heroImageUrl ?? "/brand/hangcu-hero-imac.png";
+  const heroDemoImageSrc = "/brand/hangcu-hero-imac.png";
   const heroChips = parseJsonArray<JsonChip>(settings.heroChips, [
     { labelVi: "Join", labelEn: "Join", visible: true },
     { labelVi: "Cut", labelEn: "Cut", visible: true },
@@ -371,7 +378,7 @@ export default async function HomePage() {
             </div>
             <div className="bg-[#091221] p-4">
               <Image
-                src="/brand/hangcu-hero-mockup.png"
+                src={heroDemoImageSrc}
                 alt={locale === "vi" ? "Ảnh giao diện Tele video" : "Tele video UI screenshot"}
                 width={1200}
                 height={900}
