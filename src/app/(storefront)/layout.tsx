@@ -14,17 +14,6 @@ export default async function StorefrontLayout({
   const settings = await getSiteContentSettings();
   const locale = await getStorefrontLocale();
   const preferredOrder = ["/products", "/download", "/checkout", "/orders"];
-  const utilityNavigation = [
-    { href: "/privacy", labelVi: "Privacy", labelEn: "Privacy" },
-    { href: "/terms", labelVi: "Terms", labelEn: "Terms" },
-    { href: "/refund-policy", labelVi: "Refund", labelEn: "Refund" },
-    { href: "/license-agreement", labelVi: "License Agreement", labelEn: "License Agreement" },
-    { href: "/faq", labelVi: "FAQ", labelEn: "FAQ" },
-    { href: "/contact", labelVi: "Contact", labelEn: "Contact" },
-    { href: "/about", labelVi: "About", labelEn: "About" },
-    { href: "/pricing", labelVi: "Pricing", labelEn: "Pricing" },
-    { href: "/download", labelVi: "Download", labelEn: "Download" }
-  ];
   const navigationSource = settings.navigation.some((item) => item.href === "/download")
     ? settings.navigation
     : [
@@ -59,10 +48,6 @@ export default async function StorefrontLayout({
       const normalizedB = bIndex === -1 ? preferredOrder.length : bIndex;
       return normalizedA - normalizedB;
     });
-  const visibleUtilityNavigation = utilityNavigation.map((item) => ({
-    ...item,
-    label: locale === "vi" ? item.labelVi : item.labelEn
-  }));
 
   return (
     <div className="min-h-screen bg-white text-slate-950">
@@ -98,22 +83,7 @@ export default async function StorefrontLayout({
                 </Link>
               ))}
             </nav>
-            <div className="flex flex-wrap items-center gap-2">
-              {visibleUtilityNavigation.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href as any}
-                  className={`inline-flex items-center rounded-full border px-3 py-2 text-xs font-medium transition ${
-                    item.href === "/download"
-                      ? "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <LanguageSwitcher currentLocale={locale} />
-            </div>
+            <LanguageSwitcher currentLocale={locale} />
           </div>
         </div>
       </header>

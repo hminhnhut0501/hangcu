@@ -117,6 +117,15 @@ export default async function CheckoutPage({
     currency: item.currency
   }));
   const packageOptions = [...licenseProducts, ...supportOptions];
+  const initialMode = selectedPackage
+    ? "support"
+    : firstValue(resolvedSearchParams.planCode)
+      ? licenseProducts.some((option) => option.slug === firstValue(resolvedSearchParams.planCode))
+        ? "license"
+        : "support"
+      : selectedPackageSlug
+        ? "support"
+        : "license";
   const initialPackage = selectedPackage
     ? {
         slug: selectedPackage.slug,
@@ -215,8 +224,10 @@ export default async function CheckoutPage({
 
           <CheckoutPaymentForm
             locale={locale}
-            options={packageOptions}
+            licenseOptions={licenseProducts}
+            supportOptions={supportOptions}
             initialSelectedSlug={initialPackage?.slug ?? ""}
+            initialMode={initialMode}
             initialEmail=""
             orderSummary={{
               orderNumber,

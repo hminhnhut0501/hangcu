@@ -317,14 +317,14 @@ export default async function HomePage() {
         </div>
 
         <div className="relative animate-fade-up [animation-delay:180ms]">
-          <div className="relative mx-auto max-w-[620px]">
+          <div className="relative mx-auto max-w-[720px] lg:translate-x-2 xl:max-w-[780px]">
             <Image
               src={heroImageSrc}
               alt={locale === "vi" ? "Ảnh app Tele video" : "Tele video app screenshot"}
-              width={1400}
-              height={1200}
+              width={1600}
+              height={1320}
               priority
-              className="h-auto w-full animate-soft-float"
+              className="h-auto w-full scale-[1.02] animate-soft-float"
             />
           </div>
         </div>
@@ -425,85 +425,104 @@ export default async function HomePage() {
       </section>
 
       <section id="plans" className="mx-auto max-w-7xl px-6 pb-10">
-          <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
-          <div className="flex items-center justify-between gap-4">
-            <div>
+        <div className="animate-fade-up rounded-[2.2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] [animation-delay:120ms]">
+          <div className="flex items-start justify-between gap-4">
+            <div className="max-w-2xl space-y-3">
               <p className="text-sm font-medium text-blue-600">
                 {locale === "vi" ? settings.plansSectionLabelVi : settings.plansSectionLabelEn}
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight">
+              <h2 className="text-2xl font-semibold tracking-tight">
                 {locale === "vi" ? settings.plansSectionTitleVi : settings.plansSectionTitleEn}
               </h2>
+              <p className="text-sm leading-7 text-slate-600">
+                {locale === "vi"
+                  ? "Hai gói license chính ở trên cùng, support tách riêng bên dưới, và bảng so sánh ngắn để nhìn là hiểu ngay."
+                  : "Two main license plans are shown first, support is kept separate below, and a short comparison makes the differences obvious at a glance."}
+              </p>
             </div>
-            <Link href="/products" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white">
+            <Link
+              href="/products"
+              className="inline-flex h-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+            >
               {locale === "vi" ? "Xem gói" : "View plans"}
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <div className="mt-7 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
             {comparePlans.map((plan, index) => (
               <article
                 key={plan.name}
-                className={`group rounded-[1.9rem] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(15,23,42,0.08)] ${
+                className={`rounded-[2rem] border p-6 transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_rgba(15,23,42,0.08)] ${
                   index === 0 ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white text-slate-950"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-3">
                     <p className={`text-xs font-medium ${index === 0 ? "text-slate-300" : "text-slate-500"}`}>
-                      {index === 0 ? (locale === "vi" ? "Mẫu gợi ý" : "Recommended") : locale === "vi" ? "Dùng lâu dài" : "Long term"}
+                      {index === 0 ? (locale === "vi" ? "Đề xuất cho khách mới" : "Best for first-time buyers") : locale === "vi" ? "Dài hạn" : "Long-term"}
                     </p>
                     <h3 className="text-2xl font-semibold">{plan.name}</h3>
                     <p className={`max-w-xl text-sm leading-6 ${index === 0 ? "text-slate-300" : "text-slate-600"}`}>{plan.desc}</p>
                   </div>
-                  <div className={`rounded-2xl px-3 py-2 text-right transition duration-300 ${index === 0 ? "bg-white/10" : "bg-slate-50 group-hover:bg-slate-100"}`}>
+                  <div className={`rounded-2xl px-4 py-3 text-right ${index === 0 ? "bg-white/10" : "bg-slate-50"}`}>
                     <p className={`text-[11px] ${index === 0 ? "text-slate-300" : "text-slate-500"}`}>{locale === "vi" ? "Từ" : "From"}</p>
                     <p className="mt-1 text-lg font-semibold">{plan.price ?? "-"}</p>
                   </div>
                 </div>
 
-                <div className="relative mt-5 flex flex-wrap gap-2 text-xs">
+                <div className="mt-5 flex flex-wrap gap-2 text-xs">
                   <span className={`rounded-full px-3 py-1 ${index === 0 ? "bg-white/10 text-slate-100" : "bg-slate-100 text-slate-700"}`}>
                     {index === 0 ? (locale === "vi" ? "30 ngày" : "30 days") : locale === "vi" ? "Trọn đời" : "Lifetime"}
                   </span>
                   <span className={`rounded-full px-3 py-1 ${index === 0 ? "bg-white/10 text-slate-100" : "bg-slate-100 text-slate-700"}`}>
-                    {locale === "vi" ? "Cấp tự động" : "Auto delivery"}
+                    {locale === "vi" ? "Giao tự động" : "Auto delivery"}
                   </span>
                   <span className={`rounded-full px-3 py-1 ${index === 0 ? "bg-white/10 text-slate-100" : "bg-slate-100 text-slate-700"}`}>
                     {locale === "vi" ? "1-2 máy" : "1-2 Macs"}
                   </span>
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap gap-3">
                   <Link
                     href={`/checkout?planCode=${encodeURIComponent(index === 0 ? "HCV-LIC-30" : "HCV-LIC-LIFE")}`}
                     className={`inline-flex rounded-full px-4 py-2 text-sm font-medium ${
                       index === 0 ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-slate-950 text-white hover:bg-slate-800"
                     }`}
                   >
-                    {index === 0 ? (locale === "vi" ? "Mua license" : "Buy license") : locale === "vi" ? "Xem chi tiết" : "View details"}
+                    {locale === "vi" ? "Mua ngay" : "Buy now"}
+                  </Link>
+                  <Link
+                    href="/products"
+                    className={`inline-flex rounded-full px-4 py-2 text-sm font-medium ${
+                      index === 0 ? "border border-white/20 text-white hover:bg-white/10" : "border border-slate-200 text-slate-900 hover:bg-slate-50"
+                    }`}
+                  >
+                    {locale === "vi" ? "Chi tiết" : "Details"}
                   </Link>
                 </div>
               </article>
             ))}
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {compareHighlights.map((item) => (
-              <div key={item.label} className="rounded-[1.8rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
-                <p className="text-sm font-medium text-slate-500">{item.label}</p>
-                <p className="mt-2 text-sm leading-7 text-slate-700">{item.value}</p>
+              <div
+                key={item.label}
+                className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white"
+              >
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">{item.label}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{item.value}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[1.8rem] border border-slate-200 bg-slate-50 transition duration-300 hover:shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
-            <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr_0.9fr]">
+          <div className="mt-6 overflow-hidden rounded-[1.8rem] border border-slate-200 bg-slate-50">
+            <div className="grid gap-0 md:grid-cols-2 xl:grid-cols-3">
               {planRows.map((row) => (
-                <div key={row.label} className="border-b border-slate-200 p-4 transition duration-300 hover:bg-white lg:border-b-0 lg:border-r lg:last:border-r-0">
+                <div key={row.label} className="border-b border-slate-200 p-4 md:border-b-0 md:border-r md:last:border-r-0">
                   <p className="text-sm font-medium text-slate-500">{row.label}</p>
-                  <div className="mt-3 grid gap-2 text-sm">
+                  <div className="mt-3 space-y-2 text-sm">
                     <p className="text-slate-700">
                       <span className="font-medium text-slate-950">30D:</span> {row.a}
                     </p>
@@ -519,32 +538,44 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <div className="flex items-center justify-between gap-4">
-              <h3 className="text-lg font-semibold text-slate-950">
-                {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
-              </h3>
-              <p className="text-sm text-slate-500">
-                {locale === "vi" ? "Khách tự nhập số tiền, tách riêng khỏi license." : "Customers enter their own amount, separate from licenses."}
-              </p>
+          <div className="mt-6 rounded-[1.8rem] border border-slate-200 bg-white p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-950">
+                  {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  {locale === "vi"
+                    ? "Khách tự nhập số tiền, tách riêng khỏi license."
+                    : "Customers enter their own amount, separate from licenses."}
+                </p>
+              </div>
+              <Link
+                href="/collections"
+                className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-white"
+              >
+                {locale === "vi" ? "Xem support" : "View support"}
+              </Link>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               {supportPackages.map((item) => (
-                <article key={item.slug} className="group rounded-[1.8rem] border border-slate-200 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]">
+                <article key={item.slug} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2">
-                      <p className="text-xs font-medium text-slate-500">{item.badge ?? (locale === "vi" ? "Support" : "Support")}</p>
-                      <h4 className="text-xl font-semibold text-slate-950">{item.name}</h4>
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+                        {item.badge ?? (locale === "vi" ? "Support" : "Support")}
+                      </p>
+                      <h4 className="text-lg font-semibold text-slate-950">{item.name}</h4>
                       <p className="text-sm leading-6 text-slate-600">{item.description}</p>
                     </div>
-                    <div className="rounded-2xl bg-slate-50 px-3 py-2 text-right">
+                    <div className="rounded-2xl bg-white px-3 py-2 text-right ring-1 ring-slate-200">
                       <p className="text-[11px] text-slate-500">{locale === "vi" ? "Từ" : "From"}</p>
                       <p className="mt-1 text-base font-semibold text-slate-950">{item.amount}</p>
                     </div>
                   </div>
                   <Link
                     href={`/checkout?package=${encodeURIComponent(item.slug)}`}
-                    className="mt-5 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800"
+                    className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                   >
                     {locale === "vi" ? "Ủng hộ" : "Support"}
                   </Link>

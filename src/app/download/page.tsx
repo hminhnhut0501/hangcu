@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { StaticPage } from "@/components/storefront/static-page";
 
@@ -50,9 +49,6 @@ export default async function DownloadPage() {
               ? "Link này đang tải trực tiếp file cài đặt chính thức."
               : "This link downloads the official installer directly."}
           </p>
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm">
-            <Image src="/brand/hangcu-hero-mockup.png" alt={vi ? "Ảnh ứng dụng Hang Cú video" : "Hang Cú video app preview"} width={1400} height={900} className="rounded-[1.25rem]" />
-          </div>
         </div>
       }
     />

@@ -4,6 +4,7 @@ export function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
   const isAdminSubdomain = host.startsWith("admin.");
   const { pathname } = request.nextUrl;
+  const hasLocaleCookie = Boolean(request.cookies.get("lang")?.value);
 
   if (pathname.startsWith("/api") || pathname.startsWith("/_next")) {
     return NextResponse.next();
@@ -20,6 +21,16 @@ export function middleware(request: NextRequest) {
       url.searchParams.set("next", pathname + request.nextUrl.search);
       return NextResponse.redirect(url);
     }
+  }
+
+  if (!hasLocaleCookie && !isAdminSubdomain) {
+    const response = NextResponse.next();
+    response.cookies.set("lang", "en", {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax"
+    });
+    return response;
   }
 
   if (!isAdminSubdomain) {
