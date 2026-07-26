@@ -54,6 +54,10 @@ export const donatePackagesSeed: DonatePackageSummary[] = [
     description: "A small one-time support package for customers who want to support the project.",
     suggestedAmountMinor: 2000,
     currency: "USD",
+    currencyPrices: {
+      VND: 49900,
+      USD: 2
+    },
     status: "active",
     metadata: {}
   },
@@ -65,6 +69,10 @@ export const donatePackagesSeed: DonatePackageSummary[] = [
     description: "A lifetime-tier support package for long-term supporters.",
     suggestedAmountMinor: 5000,
     currency: "USD",
+    currencyPrices: {
+      VND: 99000,
+      USD: 5
+    },
     status: "active",
     metadata: {}
   }

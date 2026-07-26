@@ -24,16 +24,27 @@ function mapRowToDonatePackage(row: {
   status: "active" | "hidden" | "archived";
   metadata: Record<string, unknown> | null;
 }): DonatePackageSummary {
+  const metadata = row.metadata ?? {};
+  const rawPrices = (metadata.currencyPrices ?? metadata.currency_prices ?? {}) as {
+    VND?: number | null;
+    USD?: number | null;
+  };
+  const fallbackCurrency = row.currency?.toUpperCase() === "USD" ? "USD" : "VND";
+  const fallbackAmount = row.suggested_amount_minor ?? null;
   return {
     id: row.id,
     code: row.code,
     name: row.name,
     slug: row.slug,
     description: row.description ?? "",
-    suggestedAmountMinor: row.suggested_amount_minor ?? null,
+    suggestedAmountMinor: fallbackAmount,
     currency: row.currency,
+    currencyPrices: {
+      VND: typeof rawPrices.VND === "number" ? rawPrices.VND : fallbackCurrency === "VND" ? fallbackAmount : null,
+      USD: typeof rawPrices.USD === "number" ? rawPrices.USD : fallbackCurrency === "USD" ? fallbackAmount : null
+    },
     status: row.status,
-    metadata: row.metadata ?? {}
+    metadata
   };
 }
 

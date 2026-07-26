@@ -12,6 +12,8 @@ const schema = z.object({
   description: z.string(),
   suggestedAmountMinor: z.coerce.number().int().nonnegative().nullable(),
   currency: z.string().nullable(),
+  vndPrice: z.coerce.number().int().nonnegative().nullable().optional(),
+  usdPrice: z.coerce.number().nonnegative().nullable().optional(),
   status: z.enum(["active", "hidden", "archived"])
 });
 

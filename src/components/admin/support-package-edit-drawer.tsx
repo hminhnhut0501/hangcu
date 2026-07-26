@@ -11,6 +11,10 @@ type SupportPackage = {
   description: string;
   suggestedAmountMinor: number | null;
   currency: string | null;
+  currencyPrices: {
+    VND: number | null;
+    USD: number | null;
+  };
   status: "active" | "hidden" | "archived";
 };
 
@@ -40,17 +44,8 @@ export function SupportPackageEditDrawer({ packageItem }: Props) {
           { name: "name", label: "Tên", defaultValue: packageItem.name },
           { name: "slug", label: "Slug", defaultValue: packageItem.slug },
           { name: "description", label: "Mô tả", defaultValue: packageItem.description, type: "textarea", rows: 4 },
-          { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
-          {
-            name: "currency",
-            label: "Tiền tệ",
-            type: "select",
-            defaultValue: packageItem.currency ?? "VND",
-            options: [
-              { label: "VNĐ", value: "VND" },
-              { label: "USD", value: "USD" }
-            ]
-          },
+          { name: "vndPrice", label: "Số tiền gợi ý (VND)", type: "number", defaultValue: String(packageItem.currencyPrices?.VND ?? "") },
+          { name: "usdPrice", label: "Số tiền gợi ý (USD)", type: "number", defaultValue: String(packageItem.currencyPrices?.USD ?? "") },
           { name: "status", label: "Trạng thái", defaultValue: packageItem.status }
         ]}
       />

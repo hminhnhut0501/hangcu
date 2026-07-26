@@ -27,12 +27,21 @@ export async function upsertDonatePackage(input: {
   description: string;
   suggestedAmountMinor: number | null;
   currency: string | null;
+  vndPrice?: number | null;
+  usdPrice?: number | null;
   status: "active" | "hidden" | "archived";
 }) {
   const normalizedCurrency = typeof input.currency === "string" ? input.currency.trim().toUpperCase().replace("VNĐ", "VND") : null;
+  const currencyPrices = {
+    VND: typeof input.vndPrice === "number" ? input.vndPrice : null,
+    USD: typeof input.usdPrice === "number" ? input.usdPrice : null
+  };
   return repository.save({
     ...input,
     currency: normalizedCurrency === "VND" || normalizedCurrency === "USD" ? normalizedCurrency : input.currency,
-    metadata: {}
+    currencyPrices,
+    metadata: {
+      currencyPrices
+    }
   });
 }

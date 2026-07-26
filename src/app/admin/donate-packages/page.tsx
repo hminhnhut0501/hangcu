@@ -30,17 +30,8 @@ export default async function AdminDonatePackagesPage() {
           { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
           { name: "name", label: "Tên", defaultValue: "Mức ủng hộ mới" },
           { name: "description", label: "Mô tả", defaultValue: "Mức ủng hộ tự do mới", type: "textarea" },
-          { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: "9900" },
-          {
-            name: "currency",
-            label: "Tiền tệ",
-            type: "select",
-            defaultValue: "VND",
-            options: [
-              { label: "VNĐ", value: "VND" },
-              { label: "USD", value: "USD" }
-            ]
-          },
+          { name: "vndPrice", label: "Số tiền gợi ý (VND)", type: "number", defaultValue: "9900" },
+          { name: "usdPrice", label: "Số tiền gợi ý (USD)", type: "number", defaultValue: "0" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
         ]}
       />
@@ -63,7 +54,10 @@ export default async function AdminDonatePackagesPage() {
                 <td className="px-6 py-4">{pkg.name}</td>
                 <td className="px-6 py-4 text-slate-600">{pkg.slug}</td>
                 <td className="px-6 py-4">
-                  <MoneyAmount amount={pkg.suggestedAmountMinor} currency={pkg.currency} locale="vi" />
+                  <div className="space-y-1">
+                    <div><MoneyAmount amount={pkg.currencyPrices.VND} currency="VND" locale="vi" /></div>
+                    <div className="text-xs text-slate-500"><MoneyAmount amount={pkg.currencyPrices.USD} currency="USD" locale="en" /></div>
+                  </div>
                 </td>
                 <td className="px-6 py-4">{pkg.status}</td>
                 <td className="px-6 py-4">

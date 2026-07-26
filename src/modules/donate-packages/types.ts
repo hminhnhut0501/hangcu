@@ -6,6 +6,10 @@ export type DonatePackageSummary = {
   description: string;
   suggestedAmountMinor: number | null;
   currency: string | null;
+  currencyPrices: {
+    VND: number | null;
+    USD: number | null;
+  };
   status: "active" | "hidden" | "archived";
   metadata: Record<string, unknown>;
 };
