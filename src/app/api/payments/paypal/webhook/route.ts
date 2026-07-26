@@ -1,6 +1,6 @@
 import { PayPalPaymentProvider } from "@/providers/payments/paypal";
 import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
-import { getOrderByMetadataKey, getOrderByOrderNumber } from "@/modules/orders/service";
+import { getOrderByMetadataKey, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
 
 const provider = new PayPalPaymentProvider();
@@ -54,6 +54,26 @@ export async function POST(request: Request) {
   }
 
   if (linkedOrder && ["PAYMENT.CAPTURE.COMPLETED", "CHECKOUT.ORDER.COMPLETED"].includes(event.eventType)) {
+    await updateOrder(linkedOrder.orderNumber, {
+      paymentProvider: "paypal",
+      providerCheckoutId: paypalOrderId ?? linkedOrder.providerCheckoutId ?? null,
+      providerOrderId: orderNumber ?? paypalOrderId ?? linkedOrder.providerOrderId ?? null,
+      providerPaymentId: event.providerPaymentId || linkedOrder.providerPaymentId || null,
+      providerEventId: event.providerEventId,
+      paymentRecordedAt: new Date().toISOString(),
+      firstPaidAt: linkedOrder.firstPaidAt ?? new Date().toISOString(),
+      lastPaymentEventAt: new Date().toISOString(),
+      metadata: {
+        ...linkedOrder.metadata,
+        paymentProvider: "paypal",
+        providerCheckoutId: paypalOrderId ?? linkedOrder.metadata?.providerCheckoutId ?? null,
+        providerOrderId: orderNumber ?? paypalOrderId ?? null,
+        providerPaymentId: event.providerPaymentId || null,
+        providerEventId: event.providerEventId,
+        paymentRecordedAt: new Date().toISOString(),
+        lastPaymentEventAt: new Date().toISOString()
+      }
+    });
     await issueLicenseFromPaidOrder(linkedOrder.orderNumber);
   }
   return Response.json({ success: true, linkedOrder: linkedOrder?.orderNumber || null });

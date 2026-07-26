@@ -2,7 +2,7 @@ import { PayOSPaymentProvider } from "@/providers/payments/payos";
 import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
-import { getOrderByMetadataKey } from "@/modules/orders/service";
+import { getOrderByMetadataKey, updateOrder } from "@/modules/orders/service";
 
 const provider = new PayOSPaymentProvider();
 
@@ -97,6 +97,28 @@ export async function POST(request: Request) {
   });
 
   if (orderCode) {
+    const providerPaymentId = String(payload.data?.orderCode ?? payload.data?.paymentLinkId ?? "");
+    await updateOrder(linkedOrder?.orderNumber ?? orderCode, {
+      paymentProvider: "payos",
+      providerCheckoutId: paymentLinkId || linkedOrder?.providerCheckoutId || null,
+      providerOrderId: orderCode || null,
+      providerPaymentId: providerPaymentId || null,
+      providerEventId: event.providerEventId,
+      paymentRecordedAt: new Date().toISOString(),
+      firstPaidAt: linkedOrder?.firstPaidAt ?? new Date().toISOString(),
+      lastPaymentEventAt: new Date().toISOString(),
+      paymentReceiptUrl: linkedOrder?.paymentReceiptUrl ?? null,
+      metadata: {
+        ...(linkedOrder?.metadata ?? {}),
+        paymentProvider: "payos",
+        providerCheckoutId: paymentLinkId || linkedOrder?.metadata?.providerCheckoutId || null,
+        providerOrderId: orderCode,
+        providerPaymentId,
+        providerEventId: event.providerEventId,
+        lastPaymentEventAt: new Date().toISOString(),
+        paymentRecordedAt: new Date().toISOString()
+      }
+    });
     console.info(
       `[payos-webhook] dispatch license issue eventId=${event.providerEventId} orderCode=${orderCode} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
     );

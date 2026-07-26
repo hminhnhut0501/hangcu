@@ -148,9 +148,12 @@ export async function POST(request: Request) {
     });
   }
 
+  const metadataProviderCheckoutId = String(order.metadata?.providerCheckoutId ?? "").trim() || null;
+  const metadataPayosOrderCode = String(order.metadata?.payosOrderCode ?? "").trim() || null;
+  const metadataProviderPaymentId = String(order.metadata?.providerPaymentId ?? "").trim() || null;
   const payosOrderCode =
     parsed.data.provider === "payos"
-      ? String(order.metadata?.payosOrderCode ?? "") || String(generatePayosOrderCode())
+      ? metadataPayosOrderCode || String(generatePayosOrderCode())
       : null;
 
   if (parsed.data.provider === "payos") {
@@ -162,7 +165,10 @@ export async function POST(request: Request) {
         ...order.metadata,
         payosOrderCode,
         paymentProvider: parsed.data.provider
-      }
+      },
+      paymentProvider: parsed.data.provider,
+      providerCheckoutId: metadataProviderCheckoutId,
+      providerOrderId: payosOrderCode
     });
   }
 
@@ -179,12 +185,19 @@ export async function POST(request: Request) {
   });
 
   await updateOrder(order.orderNumber, {
+    paymentProvider: parsed.data.provider,
+    providerCheckoutId: checkout.providerCheckoutId ?? metadataProviderCheckoutId ?? null,
+    providerOrderId: payosOrderCode ?? metadataPayosOrderCode ?? null,
+    providerPaymentId: checkout.providerPaymentId ?? metadataProviderPaymentId ?? null,
+    paymentReceiptUrl: checkout.checkoutUrl,
+    paymentRecordedAt: new Date().toISOString(),
+    lastPaymentEventAt: new Date().toISOString(),
     metadata: {
       ...order.metadata,
       paymentProvider: parsed.data.provider,
       paymentCheckoutUrl: checkout.checkoutUrl,
       providerCheckoutId: checkout.providerCheckoutId,
-      payosOrderCode: payosOrderCode ?? checkout.providerPaymentId ?? order.metadata?.payosOrderCode ?? null,
+      payosOrderCode: payosOrderCode ?? checkout.providerPaymentId ?? metadataPayosOrderCode,
       checkoutKind: order.metadata?.checkoutKind ?? (parsed.data.orderNumber || parsed.data.planCode ? "bot" : "storefront"),
       checkoutProvider: parsed.data.provider
     }

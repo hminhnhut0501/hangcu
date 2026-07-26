@@ -749,11 +749,33 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     status: "paid",
     paymentStatus: "paid",
     fulfillmentStatus: "fulfilled",
+    deliveredAt: new Date().toISOString(),
+    paymentRecordedAt: new Date().toISOString(),
+    lastPaymentEventAt: new Date().toISOString(),
+    fulfillmentMethod: "auto_email",
+    deliveryLicenseKeyIds: [issued.id],
+    deliveryProof: {
+      licenseKeyId: issued.id,
+      licenseKeyLastFour: issued.codeLastFour,
+      licensePlanId: plan.id,
+      fulfillmentType: "auto_email",
+      deliveredAt: new Date().toISOString()
+    },
+    paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? "payos"),
+    providerCheckoutId: String(order.metadata?.providerCheckoutId ?? order.metadata?.paymentSessionId ?? ""),
+    providerOrderId: String(order.metadata?.payosOrderCode ?? order.metadata?.orderId ?? ""),
+    providerPaymentId: String(order.metadata?.providerPaymentId ?? ""),
     metadata: {
       ...order.metadata,
       issuedLicenseKeyId: issued.id,
       issuedLicenseKeyCodeLastFour: issued.codeLastFour,
-      issuedAt: new Date().toISOString()
+      issuedAt: new Date().toISOString(),
+      deliveryProof: {
+        licenseKeyId: issued.id,
+        licenseKeyLastFour: issued.codeLastFour,
+        licensePlanId: plan.id,
+        fulfillmentType: "auto_email"
+      }
     }
   });
 

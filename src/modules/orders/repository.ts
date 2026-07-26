@@ -71,6 +71,19 @@ function mapRowToOrderSummary(row: {
   fulfillment_status: OrderSummary["fulfillmentStatus"];
   source: string;
   notes: string | null;
+  payment_provider: string | null;
+  provider_checkout_id: string | null;
+  provider_order_id: string | null;
+  provider_payment_id: string | null;
+  provider_event_id: string | null;
+  payment_receipt_url: string | null;
+  fulfillment_method: string | null;
+  delivery_license_key_ids: unknown;
+  delivery_proof: Record<string, unknown> | null;
+  delivered_at: string | null;
+  payment_recorded_at: string | null;
+  first_paid_at: string | null;
+  last_payment_event_at: string | null;
   metadata: Record<string, unknown> | null;
   items: OrderSummary["items"] | null;
   created_at?: string | null;
@@ -89,6 +102,21 @@ function mapRowToOrderSummary(row: {
     fulfillmentStatus: row.fulfillment_status,
     source: row.source,
     notes: row.notes,
+    paymentProvider: row.payment_provider,
+    providerCheckoutId: row.provider_checkout_id,
+    providerOrderId: row.provider_order_id,
+    providerPaymentId: row.provider_payment_id,
+    providerEventId: row.provider_event_id,
+    paymentReceiptUrl: row.payment_receipt_url,
+    fulfillmentMethod: row.fulfillment_method ?? "auto_email",
+    deliveryLicenseKeyIds: Array.isArray(row.delivery_license_key_ids)
+      ? row.delivery_license_key_ids.filter((value): value is string => typeof value === "string")
+      : [],
+    deliveryProof: row.delivery_proof ?? {},
+    deliveredAt: row.delivered_at ?? null,
+    paymentRecordedAt: row.payment_recorded_at ?? null,
+    firstPaidAt: row.first_paid_at ?? null,
+    lastPaymentEventAt: row.last_payment_event_at ?? null,
     metadata: row.metadata ?? {},
     items: row.items ?? []
   };
@@ -115,6 +143,19 @@ class SupabaseOrderRepository implements OrderRepository {
       fulfillment_status: order.fulfillmentStatus,
       source: order.source,
       notes: order.notes,
+      payment_provider: order.paymentProvider ?? null,
+      provider_checkout_id: order.providerCheckoutId ?? null,
+      provider_order_id: order.providerOrderId ?? null,
+      provider_payment_id: order.providerPaymentId ?? null,
+      provider_event_id: order.providerEventId ?? null,
+      payment_receipt_url: order.paymentReceiptUrl ?? null,
+      fulfillment_method: order.fulfillmentMethod ?? "auto_email",
+      delivery_license_key_ids: order.deliveryLicenseKeyIds ?? [],
+      delivery_proof: order.deliveryProof ?? {},
+      delivered_at: order.deliveredAt ?? null,
+      payment_recorded_at: order.paymentRecordedAt ?? null,
+      first_paid_at: order.firstPaidAt ?? null,
+      last_payment_event_at: order.lastPaymentEventAt ?? null,
       metadata: order.metadata,
       items: order.items
     };
@@ -252,6 +293,19 @@ class SupabaseOrderRepository implements OrderRepository {
       ...(patch.fulfillmentStatus ? { fulfillment_status: patch.fulfillmentStatus } : {}),
       ...(patch.source ? { source: patch.source } : {}),
       ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
+      ...(patch.paymentProvider !== undefined ? { payment_provider: patch.paymentProvider } : {}),
+      ...(patch.providerCheckoutId !== undefined ? { provider_checkout_id: patch.providerCheckoutId } : {}),
+      ...(patch.providerOrderId !== undefined ? { provider_order_id: patch.providerOrderId } : {}),
+      ...(patch.providerPaymentId !== undefined ? { provider_payment_id: patch.providerPaymentId } : {}),
+      ...(patch.providerEventId !== undefined ? { provider_event_id: patch.providerEventId } : {}),
+      ...(patch.paymentReceiptUrl !== undefined ? { payment_receipt_url: patch.paymentReceiptUrl } : {}),
+      ...(patch.fulfillmentMethod !== undefined ? { fulfillment_method: patch.fulfillmentMethod } : {}),
+      ...(patch.deliveryLicenseKeyIds !== undefined ? { delivery_license_key_ids: patch.deliveryLicenseKeyIds } : {}),
+      ...(patch.deliveryProof !== undefined ? { delivery_proof: patch.deliveryProof } : {}),
+      ...(patch.deliveredAt !== undefined ? { delivered_at: patch.deliveredAt } : {}),
+      ...(patch.paymentRecordedAt !== undefined ? { payment_recorded_at: patch.paymentRecordedAt } : {}),
+      ...(patch.firstPaidAt !== undefined ? { first_paid_at: patch.firstPaidAt } : {}),
+      ...(patch.lastPaymentEventAt !== undefined ? { last_payment_event_at: patch.lastPaymentEventAt } : {}),
       ...(patch.metadata ? { metadata: patch.metadata } : {}),
       ...(patch.items ? { items: patch.items } : {})
     };

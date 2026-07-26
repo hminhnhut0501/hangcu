@@ -30,6 +30,13 @@ function renderStatusBadge(value: string) {
   return <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
 }
 
+function formatProvider(order: { paymentProvider?: string | null; metadata?: Record<string, unknown> }) {
+  return (
+    order.paymentProvider ||
+    String(order.metadata?.paymentProvider ?? order.metadata?.checkoutProvider ?? order.metadata?.provider ?? order.metadata?.paymentGateway ?? "n/a")
+  );
+}
+
 export default async function AdminOrdersPage({
   searchParams
 }: {
@@ -171,6 +178,7 @@ export default async function AdminOrdersPage({
               <th className="px-6 py-4 font-medium">Trạng thái</th>
               <th className="px-6 py-4 font-medium">Payment</th>
               <th className="px-6 py-4 font-medium">Fulfillment</th>
+              <th className="px-6 py-4 font-medium">Gateway</th>
               <th className="px-6 py-4 font-medium">Tổng</th>
             </tr>
           </thead>
@@ -197,6 +205,12 @@ export default async function AdminOrdersPage({
                   <td className="px-6 py-4">{renderStatusBadge(order.status)}</td>
                   <td className="px-6 py-4">{renderStatusBadge(order.paymentStatus)}</td>
                   <td className="px-6 py-4">{renderStatusBadge(order.fulfillmentStatus)}</td>
+                  <td className="px-6 py-4">
+                    <p className="font-medium">{formatProvider(order)}</p>
+                    <p className="text-xs text-slate-500">
+                      {order.providerOrderId || order.providerCheckoutId || order.providerPaymentId || "Chưa có mã"}
+                    </p>
+                  </td>
                   <td className="px-6 py-4 font-medium">{formatMoney(order.totalMinor, order.currency)}</td>
                 </tr>
               ))
