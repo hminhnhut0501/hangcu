@@ -203,7 +203,7 @@ export default async function HomePage() {
           },
           {
             q: "License 30 ngày và trọn đời khác nhau thế nào?",
-            a: "Bản 30 ngày là license theo thời hạn. Bản trọn đời không hết hạn. Gói hỗ trợ được tách riêng nếu bạn muốn ủng hộ thêm."
+            a: "Bản 30 ngày là license theo thời hạn. Bản trọn đời không hết hạn. Phần ủng hộ là tự do, bạn tự nhập số tiền."
           },
           {
             q: "App có kéo thả không?",
@@ -217,7 +217,7 @@ export default async function HomePage() {
           },
           {
             q: "What is the difference between 30-day and lifetime licenses?",
-            a: "The 30-day plan is time-limited. The lifetime plan does not expire. Support packages are separate if you want to contribute extra."
+            a: "The 30-day plan is time-limited. The lifetime plan does not expire. Support is flexible, with your own amount."
           },
           {
             q: "Does the app support drag and drop?",
@@ -508,10 +508,10 @@ export default async function HomePage() {
           <div className="mt-6">
             <div className="flex items-center justify-between gap-4">
               <h3 className="text-lg font-semibold text-slate-950">
-                {locale === "vi" ? "Gói support" : "Support packages"}
+                {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
               </h3>
               <p className="text-sm text-slate-500">
-                {locale === "vi" ? "Ủng hộ thêm, tách riêng khỏi license." : "Optional support, separate from licenses."}
+                {locale === "vi" ? "Khách tự nhập số tiền, tách riêng khỏi license." : "Customers enter their own amount, separate from licenses."}
               </p>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
@@ -532,7 +532,7 @@ export default async function HomePage() {
                     href={`/checkout?package=${encodeURIComponent(item.slug)}`}
                     className="mt-5 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition duration-300 hover:-translate-y-0.5 hover:bg-slate-800"
                   >
-                    {locale === "vi" ? "Mua support" : "Buy support"}
+                    {locale === "vi" ? "Ủng hộ" : "Support"}
                   </Link>
                 </article>
               ))}

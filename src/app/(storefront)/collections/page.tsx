@@ -10,15 +10,15 @@ export default async function CollectionsPage() {
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
         <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Gói ủng hộ" : "Supporter packages"}
+          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight">
-          {locale === "vi" ? "Chọn gói ủng hộ phù hợp" : "Choose a support package"}
+          {locale === "vi" ? "Chọn mức ủng hộ bạn muốn" : "Choose how much you want to support"}
         </h1>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Chọn một gói mẫu, chuyển thẳng sang checkout và thanh toán bằng cổng phù hợp."
-            : "Pick a package, go straight to checkout, and pay with your preferred gateway."}
+            ? "Chọn một mức gợi ý hoặc vào checkout để tự nhập số tiền ủng hộ."
+            : "Pick a suggested level or go to checkout to enter your own support amount."}
         </p>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -41,7 +41,7 @@ export default async function CollectionsPage() {
               href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}
               className="mt-4 inline-flex text-sm font-medium text-blue-600"
             >
-              {locale === "vi" ? "Chọn gói này" : "Choose this package"}
+              {locale === "vi" ? "Chọn mức này" : "Choose this amount"}
             </Link>
           </article>
         ))}

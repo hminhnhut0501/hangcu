@@ -19,7 +19,7 @@ export default async function CollectionDetailPage({
     return (
       <main className="mx-auto max-w-3xl px-6 py-16">
         <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Gói ủng hộ" : "Supporter packages"}
+          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight">
           {locale === "vi" ? "Không tìm thấy gói này" : "Package not found"}
@@ -37,7 +37,7 @@ export default async function CollectionDetailPage({
     <main className="mx-auto max-w-6xl px-6 py-16">
       <div className="space-y-3">
         <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Gói ủng hộ" : "Supporter package"}
+          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
         </p>
         <h1 className="text-4xl font-semibold tracking-tight">
           {locale === "vi" ? packageItem.nameVi : packageItem.nameEn}
@@ -47,22 +47,22 @@ export default async function CollectionDetailPage({
         </p>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Đây là gói mẫu để khách chọn nhanh rồi sang checkout ngay."
-            : "This is a sample package customers can pick before going straight to checkout."}
+            ? "Đây là mức gợi ý để khách chọn nhanh rồi sang checkout ngay."
+            : "This is a suggested amount customers can pick before going straight to checkout."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-slate-500">
-            {locale === "vi" ? "Mức đóng góp" : "Contribution"}
+            {locale === "vi" ? "Mức ủng hộ" : "Support amount"}
           </p>
           <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
             {packageItem.currency} {(packageItem.amountMinor / 100).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
           </p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
             {locale === "vi"
-              ? "Chọn gói này sẽ đưa bạn sang checkout với gói đã được điền sẵn."
-              : "Choosing this package will take you to checkout with the package prefilled."}
+            ? "Chọn mức này sẽ đưa bạn sang checkout với số tiền gợi ý đã điền sẵn."
+            : "Choosing this option will take you to checkout with the suggested amount prefilled."}
           </p>
           <Link
             href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}

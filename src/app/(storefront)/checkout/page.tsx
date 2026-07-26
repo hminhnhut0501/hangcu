@@ -140,14 +140,14 @@ export default async function CheckoutPage({
               {locale === "vi" ? "Thanh toán" : "Checkout"}
             </p>
             <h1 className="mt-3 text-4xl font-semibold tracking-tight">
-              {locale === "vi" ? "Thanh toán gói ủng hộ" : "Pay for your support package"}
-            </h1>
-            <p className="mt-4 text-lg leading-8 text-slate-600">
-              {locale === "vi"
-                ? "Chọn gói, nhập email, chọn cổng thanh toán rồi mới sang bước thanh toán."
-                : "Pick a package, enter your email, choose a gateway, then continue to payment."}
-            </p>
-          </div>
+            {locale === "vi" ? "Thanh toán license hoặc ủng hộ tự do" : "Pay for a license or a flexible support contribution"}
+          </h1>
+          <p className="mt-4 text-lg leading-8 text-slate-600">
+            {locale === "vi"
+                ? "Chọn license hoặc gói ủng hộ, nhập email, nhập số tiền nếu là ủng hộ, rồi chọn cổng thanh toán."
+                : "Choose a license or support option, enter your email, enter an amount if it is support, then pick a payment gateway."}
+          </p>
+        </div>
 
           {orderNumber || summaryPlan || summaryAmount || checkoutId || resolvedCustomerRef ? (
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">

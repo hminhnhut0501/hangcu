@@ -33,9 +33,11 @@ export function CheckoutPaymentForm({ locale, options, initialSelectedSlug, init
   const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual">("payos");
   const [selectedSlug, setSelectedSlug] = useState(initialSelectedSlug ?? options[0]?.slug ?? "");
   const [email, setEmail] = useState(initialEmail ?? "");
+  const [customAmount, setCustomAmount] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const selectedOption = options.find((option) => option.slug === selectedSlug) ?? options[0] ?? null;
+  const isSupportOption = selectedOption?.kind === "support";
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,13 +53,20 @@ export function CheckoutPaymentForm({ locale, options, initialSelectedSlug, init
       setLoading(false);
       return;
     }
+    const customAmountMinor = isSupportOption ? Number(customAmount) : null;
+    if (isSupportOption && (customAmountMinor == null || !Number.isFinite(customAmountMinor) || customAmountMinor <= 0)) {
+      setMessage(locale === "vi" ? "Vui lòng nhập số tiền ủng hộ hợp lệ." : "Please enter a valid support amount.");
+      setLoading(false);
+      return;
+    }
     const payload: Record<string, string> = {
       provider,
       email
     };
     if (selectedOption?.code) payload.planCode = selectedOption.code;
     if (selectedOption?.name) payload.plan = selectedOption.name;
-    if (selectedOption?.amountMinor) payload.amountMinor = String(selectedOption.amountMinor);
+    if (isSupportOption && customAmountMinor != null) payload.amountMinor = String(Math.round(customAmountMinor));
+    else if (selectedOption?.amountMinor) payload.amountMinor = String(selectedOption.amountMinor);
     if (selectedOption?.currency) payload.currency = selectedOption.currency;
     if (orderSummary.orderNumber) payload.orderNumber = orderSummary.orderNumber;
     if (orderSummary.checkoutId) payload.checkoutId = orderSummary.checkoutId;
@@ -104,6 +113,25 @@ export function CheckoutPaymentForm({ locale, options, initialSelectedSlug, init
           </select>
           {selectedOption ? <p className="mt-2 text-sm text-slate-500">{selectedOption.description}</p> : null}
         </label>
+        {isSupportOption ? (
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">{locale === "vi" ? "Số tiền ủng hộ" : "Support amount"}</span>
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={customAmount}
+              onChange={(event) => setCustomAmount(event.target.value)}
+              placeholder={locale === "vi" ? "Tự nhập số tiền bạn muốn ủng hộ" : "Enter the amount you want to support with"}
+              className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              {locale === "vi"
+                ? "Gói ủng hộ là tự do, bạn có thể nhập số tiền bất kỳ."
+                : "Support is voluntary. You can enter any amount you like."}
+            </p>
+          </label>
+        ) : null}
         <label className="block">
           <span className="text-sm font-medium text-slate-700">{locale === "vi" ? "Email" : "Email"}</span>
           <input

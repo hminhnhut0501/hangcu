@@ -72,7 +72,7 @@ export default async function AdminSiteSettingsPage({
                 { name: "announcementTextEn", label: "Announcement EN", defaultValue: settings.announcementTextEn, type: "textarea", rows: 3 },
                 { name: "announcementVisible", label: "Hiện announcement", type: "checkbox", defaultValue: String(settings.announcementVisible) },
                 { name: "showFeaturedPlansSection", label: "Hiện gói nổi bật", type: "checkbox", defaultValue: String(settings.showFeaturedPlansSection) },
-                { name: "showDonateSection", label: "Hiện support package", type: "checkbox", defaultValue: String(settings.showDonateSection) },
+                { name: "showDonateSection", label: "Hiện ủng hộ tự do", type: "checkbox", defaultValue: String(settings.showDonateSection) },
                 { name: "showFaqSection", label: "Hiện FAQ", type: "checkbox", defaultValue: String(settings.showFaqSection) },
                 { name: "heroImagePath", label: "Ảnh hero", defaultValue: settings.heroImagePath ?? "" },
                 { name: "heroImageAltVi", label: "Alt ảnh VI", defaultValue: settings.heroImageAltVi ?? "" },
@@ -120,7 +120,7 @@ export default async function AdminSiteSettingsPage({
                 <p>Announcement: {settings.announcementVisible ? "Hiện" : "Ẩn"}</p>
                 <p>FAQ: {settings.showFaqSection ? "Hiện" : "Ẩn"}</p>
                 <p>Gói license: {settings.showFeaturedPlansSection ? "Hiện" : "Ẩn"}</p>
-                <p>Gói hỗ trợ: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
+                <p>Ủng hộ tự do: {settings.showDonateSection ? "Hiện" : "Ẩn"}</p>
               </div>
             </div>
           </article>

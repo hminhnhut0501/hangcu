@@ -20,8 +20,8 @@ export default async function ProductsPage() {
         </h1>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Duyệt license 30 ngày, license trọn đời và gói hỗ trợ tách biệt."
-            : "Browse the 30-day license, lifetime license, and the separate support package."}
+          ? "Duyệt license 30 ngày, license trọn đời và mục ủng hộ tự do."
+          : "Browse the 30-day license, lifetime license, and the flexible support option."}
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
@@ -57,15 +57,15 @@ export default async function ProductsPage() {
 
       <div className="mt-14 space-y-3">
         <p className="text-sm font-medium text-blue-600">
-          {locale === "vi" ? "Gói support" : "Support packages"}
+          {locale === "vi" ? "Ủng hộ tự do" : "Flexible support"}
         </p>
         <h2 className="text-3xl font-semibold tracking-tight">
-          {locale === "vi" ? "Các gói support tách riêng khỏi license" : "Support packages are separate from licenses"}
+          {locale === "vi" ? "Phần ủng hộ tách riêng khỏi license" : "Support is separate from licenses"}
         </h2>
         <p className="max-w-2xl text-base leading-7 text-slate-600">
           {locale === "vi"
-            ? "Các gói này chỉ là ủng hộ, không thay thế license 30 ngày hoặc trọn đời."
-            : "These packages are support-only and do not replace the 30-day or lifetime licenses."}
+            ? "Khách tự nhập số tiền ủng hộ, không thay thế license 30 ngày hoặc trọn đời."
+            : "Customers enter their own support amount. It does not replace the 30-day or lifetime licenses."}
         </p>
       </div>
 
@@ -89,7 +89,7 @@ export default async function ProductsPage() {
               href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}
               className="mt-4 inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              {locale === "vi" ? "Mua support" : "Buy support"}
+              {locale === "vi" ? "Ủng hộ" : "Support"}
             </Link>
           </article>
         ))}

@@ -8,23 +8,23 @@ export default async function AdminDonatePackagesPage() {
   return (
     <section className="space-y-8">
       <div>
-        <p className="text-sm font-medium text-blue-600">Support packages</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý support packages</h2>
+        <p className="text-sm font-medium text-blue-600">Flexible support</p>
+        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý mức ủng hộ</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Quản lý các gói support tách biệt khỏi license, dùng để ghi nhận khoản ủng hộ tự nguyện.
+          Quản lý các mức gợi ý cho phần ủng hộ tự do, tách biệt khỏi license.
         </p>
       </div>
       <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
-        onSuccessMessage="Đã lưu support package."
-        triggerLabel="Thêm support package"
-        drawerTitle="Thêm support package"
-        drawerDescription="Nhập thông tin gói support trong drawer để màn hình gọn hơn."
+        onSuccessMessage="Đã lưu mức ủng hộ."
+        triggerLabel="Thêm mức ủng hộ"
+        drawerTitle="Thêm mức ủng hộ"
+        drawerDescription="Nhập mức gợi ý cho phần ủng hộ tự do."
         fields={[
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
-          { name: "name", label: "Tên", defaultValue: "Gói hỗ trợ mới" },
+          { name: "name", label: "Tên", defaultValue: "Mức ủng hộ mới" },
           { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "2000" },
           { name: "currency", label: "Tiền tệ", defaultValue: "USD" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
