@@ -1,6 +1,7 @@
 import { listDonatePackages } from "@/modules/donate-packages/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { SupportPackageQuickRow } from "@/components/admin/support-package-quick-row";
+import { formatMoney } from "@/modules/donate-packages/view-model";
 
 export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
@@ -25,8 +26,9 @@ export default async function AdminDonatePackagesPage() {
           { name: "id", label: "ID", defaultValue: "dp_new" },
           { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
           { name: "name", label: "Tên", defaultValue: "Mức ủng hộ mới" },
-          { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "2000" },
-          { name: "currency", label: "Tiền tệ", defaultValue: "USD" },
+          { name: "description", label: "Mô tả", defaultValue: "Mức ủng hộ tự do mới", type: "textarea" },
+          { name: "suggestedAmountMinor", label: "Số tiền gợi ý", type: "number", defaultValue: "9900" },
+          { name: "currency", label: "Tiền tệ", defaultValue: "VND" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
         ]}
       />
@@ -49,7 +51,7 @@ export default async function AdminDonatePackagesPage() {
                 <td className="px-6 py-4">{pkg.name}</td>
                 <td className="px-6 py-4 text-slate-600">{pkg.slug}</td>
                 <td className="px-6 py-4">
-                  {pkg.currency ?? "USD"} {pkg.suggestedAmountMinor ? (pkg.suggestedAmountMinor / 100).toFixed(2) : "-"}
+                  {formatMoney(pkg.suggestedAmountMinor ?? null, pkg.currency ?? null, "vi") ?? "-"}
                 </td>
                 <td className="px-6 py-4">{pkg.status}</td>
                 <td className="px-6 py-4">

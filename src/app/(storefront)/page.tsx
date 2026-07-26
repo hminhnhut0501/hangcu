@@ -5,6 +5,7 @@ import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { listDonatePackages } from "@/modules/donate-packages/service";
+import { formatCatalogPrice } from "@/lib/money/format";
 
 type Locale = "vi" | "en";
 
@@ -55,7 +56,7 @@ function formatMoney(amountMinor: number, currency: string, locale: Locale) {
       : `${new Intl.NumberFormat("en-US").format(amountMinor)} VND`;
   }
 
-  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
+  return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor)} ${normalizedCurrency}`;
 }
 
 function parseJsonArray<T>(value: T[] | null | undefined, fallback: T[]): T[] {
@@ -235,9 +236,9 @@ export default async function HomePage() {
       price: (() => {
         const plan = licensePlans.find((item) => item.code === "HCV_30D" || item.code === "HCV-LIC-30" || item.durationDays === 30 || !item.isLifetime);
         if (!plan) return null;
-        const amountMinor = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
+        const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
-        return amountMinor != null ? formatMoney(amountMinor, currency, locale) : null;
+        return formatCatalogPrice(amount, currency, locale);
       })(),
       desc:
         locale === "vi"
@@ -249,9 +250,9 @@ export default async function HomePage() {
       price: (() => {
         const plan = licensePlans.find((item) => item.code === "HCV_LIFETIME" || item.code === "HCV-LIC-LIFE" || item.isLifetime);
         if (!plan) return null;
-        const amountMinor = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
+        const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
-        return amountMinor != null ? formatMoney(amountMinor, currency, locale) : null;
+        return formatCatalogPrice(amount, currency, locale);
       })(),
       desc:
         locale === "vi"

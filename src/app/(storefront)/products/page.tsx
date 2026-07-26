@@ -1,22 +1,18 @@
 import Link from "next/link";
 import { listLicensePlans } from "@/modules/license-plans/service";
-import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront";
-import { supporterPackages } from "@/lib/supporter-packages";
+import { getStorefrontLocale } from "@/modules/i18n/storefront";
+import { listDonatePackages } from "@/modules/donate-packages/service";
+import { formatMoney, mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { formatCatalogPrice } from "@/lib/money/format";
 
 export default async function ProductsPage() {
   const plans = (await listLicensePlans())
     .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const locale = await getStorefrontLocale();
-  const supportPackages = supporterPackages;
-
-  const formatMoney = (amountMinor: number | null, currency: string) => {
-    if (amountMinor == null) return null;
-    if (currency === "VND") {
-      return `${new Intl.NumberFormat(locale === "vi" ? "vi-VN" : "en-US").format(amountMinor)}${locale === "vi" ? "đ" : " VND"}`;
-    }
-    return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${currency}`;
-  };
+  const supportPackages = (await listDonatePackages())
+    .filter((pkg) => pkg.status === "active")
+    .map((pkg) => mapDonatePackageToViewModel(pkg, locale));
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -48,7 +44,7 @@ export default async function ProductsPage() {
               <div className="rounded-2xl bg-slate-50 px-4 py-3 text-right">
                 <p className="text-xs font-medium text-slate-500">{locale === "vi" ? "Giá" : "Price"}</p>
                 <p className="mt-1 text-lg font-semibold text-slate-950">
-                  {formatMoney(locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD, locale === "vi" ? "VND" : "USD") ?? "-"}
+                  {formatCatalogPrice(locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD, locale === "vi" ? "VND" : "USD", locale) ?? "-"}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {plan.isLifetime ? (locale === "vi" ? "Trọn đời" : "Lifetime") : `${plan.durationDays} ${locale === "vi" ? "ngày" : "days"}`}
@@ -95,13 +91,13 @@ export default async function ProductsPage() {
           >
             <p className="text-sm text-slate-500">{packageItem.slug}</p>
             <h3 className="mt-2 text-xl font-semibold">
-              {locale === "vi" ? packageItem.nameVi : packageItem.nameEn}
+              {packageItem.name}
             </h3>
             <p className="mt-2 text-sm font-medium text-slate-900">
-              {packageItem.currency} {(packageItem.amountMinor / 100).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+              {formatMoney(packageItem.amountMinor, packageItem.currency, locale) ?? "-"}
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              {locale === "vi" ? packageItem.descriptionVi : packageItem.descriptionEn}
+              {packageItem.description}
             </p>
             <Link
               href={`/checkout?package=${encodeURIComponent(packageItem.slug)}`}
