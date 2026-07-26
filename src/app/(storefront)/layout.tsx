@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront";
@@ -42,8 +43,16 @@ export default async function StorefrontLayout({
     <div className="min-h-screen bg-white text-slate-950">
       <header className="border-b border-slate-200">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-          <Link href="/" className="text-sm font-semibold">
-            {getLocalizedText(locale, { vi: settings.siteNameVi, en: settings.siteNameEn })}
+          <Link href="/" className="flex items-center gap-3 text-sm font-semibold">
+            <Image
+              src="/brand/hangcuvideo-logo.png"
+              alt={getLocalizedText(locale, { vi: settings.siteNameVi, en: settings.siteNameEn })}
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full"
+              priority
+            />
+            <span>{getLocalizedText(locale, { vi: settings.siteNameVi, en: settings.siteNameEn })}</span>
           </Link>
           <div className="flex items-center gap-3">
             <nav className="hidden items-center gap-2 md:flex">
