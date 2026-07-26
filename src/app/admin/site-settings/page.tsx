@@ -5,6 +5,10 @@ export default async function AdminSiteSettingsPage({
 }: {
 }) {
   const settings = await getSiteContentSettings();
+  const heroChips = JSON.stringify(settings.heroChips, null, 2);
+  const featureCards = JSON.stringify(settings.featureCards, null, 2);
+  const workflowSteps = JSON.stringify(settings.workflowSteps, null, 2);
+  const planHighlights = JSON.stringify(settings.planHighlights, null, 2);
   return (
     <section className="space-y-8">
       <div>
@@ -73,6 +77,10 @@ export default async function AdminSiteSettingsPage({
                 { name: "heroImagePath", label: "Ảnh hero", defaultValue: settings.heroImagePath ?? "" },
                 { name: "heroImageAltVi", label: "Alt ảnh VI", defaultValue: settings.heroImageAltVi ?? "" },
                 { name: "heroImageAltEn", label: "Alt ảnh EN", defaultValue: settings.heroImageAltEn ?? "" },
+                { name: "heroChips", label: "JSON chip hero", type: "textarea", rows: 8, defaultValue: heroChips },
+                { name: "featureCards", label: "JSON feature cards", type: "textarea", rows: 14, defaultValue: featureCards },
+                { name: "workflowSteps", label: "JSON workflow steps", type: "textarea", rows: 10, defaultValue: workflowSteps },
+                { name: "planHighlights", label: "JSON so sánh gói", type: "textarea", rows: 10, defaultValue: planHighlights },
                 { name: "navigation", label: "JSON điều hướng", type: "textarea", rows: 8, defaultValue: JSON.stringify(settings.navigation, null, 2) },
                 { name: "footerNoteVi", label: "Ghi chú footer VI", defaultValue: settings.footerNoteVi },
                 { name: "footerNoteEn", label: "Ghi chú footer EN", defaultValue: settings.footerNoteEn },
@@ -100,6 +108,13 @@ export default async function AdminSiteSettingsPage({
                 <span className="rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-slate-700">
                   {settings.heroSecondaryCtaLabelEn}
                 </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {settings.heroChips.filter((item) => item.visible).slice(0, 6).map((item) => (
+                  <span key={item.labelEn} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-medium text-slate-600">
+                    {item.labelEn}
+                  </span>
+                ))}
               </div>
               <div className="grid gap-2 text-xs text-slate-500 sm:grid-cols-2">
                 <p>Announcement: {settings.announcementVisible ? "Hiện" : "Ẩn"}</p>

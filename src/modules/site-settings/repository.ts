@@ -78,6 +78,73 @@ const defaultSettings: SiteContentSettings = {
       visible: true
     }
   ],
+  heroChips: [
+    { labelVi: "Join", labelEn: "Join", visible: true },
+    { labelVi: "Cut", labelEn: "Cut", visible: true },
+    { labelVi: "Thumb / Face Find", labelEn: "Thumb / Face Find", visible: true },
+    { labelVi: "Watermark", labelEn: "Watermark", visible: true },
+    { labelVi: "Intro / Outro", labelEn: "Intro / Outro", visible: true },
+    { labelVi: "Optimize / Encode", labelEn: "Optimize / Encode", visible: true }
+  ],
+  featureCards: [
+    {
+      labelVi: "Join",
+      labelEn: "Join",
+      textVi: "Ghép nhiều clip theo đúng thứ tự, có kéo thả để đổi thứ tự.",
+      textEn: "Merge clips in order, with drag-and-drop reordering.",
+      visible: true
+    },
+    {
+      labelVi: "Cut",
+      labelEn: "Cut",
+      textVi: "Cắt đầu video hàng loạt để trim nhanh trên nhiều file.",
+      textEn: "Trim the head of many videos in one fast batch.",
+      visible: true
+    },
+    {
+      labelVi: "Thumb / Face Find",
+      labelEn: "Thumb / Face Find",
+      textVi: "Xuất thumbnail, contact sheet, chọn frame, chia grid, chỉnh chất lượng.",
+      textEn: "Export thumbnails and contact sheets with frame, grid, and quality controls.",
+      visible: true
+    },
+    {
+      labelVi: "Watermark",
+      labelEn: "Watermark",
+      textVi: "Thêm watermark đầy đủ hoặc watermark ẩn cho video.",
+      textEn: "Add visible or hidden watermarks to video files.",
+      visible: true
+    }
+  ],
+  workflowSteps: [
+    { stepVi: "Kéo video vào module", stepEn: "Drag files into a module", visible: true },
+    { stepVi: "Chọn preset / grid / chất lượng", stepEn: "Choose preset / grid / quality", visible: true },
+    { stepVi: "Bấm xử lý hàng loạt", stepEn: "Run batch processing", visible: true },
+    { stepVi: "Xuất file sạch ngay", stepEn: "Export clean output", visible: true }
+  ],
+  planHighlights: [
+    {
+      labelVi: "30 ngày",
+      labelEn: "30 days",
+      textVi: "Dùng ngắn hạn, test workflow, đổi máy dễ hơn",
+      textEn: "Short-term use and workflow testing",
+      visible: true
+    },
+    {
+      labelVi: "Trọn đời",
+      labelEn: "Lifetime",
+      textVi: "Một lần thanh toán, dùng lâu dài",
+      textEn: "One-time payment, long-term use",
+      visible: true
+    },
+    {
+      labelVi: "Support package",
+      labelEn: "Support package",
+      textVi: "Tách riêng, không trộn với license",
+      textEn: "Separate from the license purchase",
+      visible: true
+    }
+  ],
   updatedAt: new Date().toISOString()
 };
 
@@ -140,6 +207,10 @@ function mapRowToSettings(row: Record<string, unknown>): SiteContentSettings {
     footerNoteVi: String(row.footer_note_vi ?? defaultSettings.footerNoteVi),
     footerNoteEn: String(row.footer_note_en ?? defaultSettings.footerNoteEn),
     faqItems: Array.isArray(row.faq_items) ? row.faq_items : defaultSettings.faqItems,
+    heroChips: Array.isArray(row.hero_chips) ? row.hero_chips : defaultSettings.heroChips,
+    featureCards: Array.isArray(row.feature_cards) ? row.feature_cards : defaultSettings.featureCards,
+    workflowSteps: Array.isArray(row.workflow_steps) ? row.workflow_steps : defaultSettings.workflowSteps,
+    planHighlights: Array.isArray(row.plan_highlights) ? row.plan_highlights : defaultSettings.planHighlights,
     updatedAt: String(row.updated_at ?? defaultSettings.updatedAt)
   });
 }
@@ -241,6 +312,10 @@ export class SupabaseSiteSettingsRepository {
       footer_note_vi: normalized.footerNoteVi,
       footer_note_en: normalized.footerNoteEn,
       faq_items: normalized.faqItems,
+      hero_chips: normalized.heroChips,
+      feature_cards: normalized.featureCards,
+      workflow_steps: normalized.workflowSteps,
+      plan_highlights: normalized.planHighlights,
       updated_at: normalized.updatedAt
     });
 

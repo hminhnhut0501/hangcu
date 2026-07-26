@@ -15,6 +15,34 @@ type FeatureCard = {
   text: string;
 };
 
+type JsonChip = {
+  labelVi: string;
+  labelEn: string;
+  visible?: boolean;
+};
+
+type JsonCard = {
+  labelVi: string;
+  labelEn: string;
+  textVi: string;
+  textEn: string;
+  visible?: boolean;
+};
+
+type JsonStep = {
+  stepVi: string;
+  stepEn: string;
+  visible?: boolean;
+};
+
+type JsonHighlight = {
+  labelVi: string;
+  labelEn: string;
+  textVi: string;
+  textEn: string;
+  visible?: boolean;
+};
+
 function formatMoney(amountMinor: number, currency: string, locale: Locale) {
   const normalizedCurrency = currency.toUpperCase();
   if (normalizedCurrency === "VND") {
@@ -26,6 +54,10 @@ function formatMoney(amountMinor: number, currency: string, locale: Locale) {
   return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${normalizedCurrency}`;
 }
 
+function parseJsonArray<T>(value: T[] | null | undefined, fallback: T[]): T[] {
+  return Array.isArray(value) ? value : fallback;
+}
+
 export default async function HomePage() {
   const locale = (await getStorefrontLocale()) as Locale;
   const settings = await getSiteContentSettings();
@@ -33,6 +65,59 @@ export default async function HomePage() {
   const donatePackages = await listDonatePackages();
   const heroImageUrl = settings.heroImagePath ? await getStoragePublicUrl(settings.heroImagePath) : null;
   const heroImageSrc = heroImageUrl ?? "/brand/hangcu-hero-mockup.png";
+  const heroChips = parseJsonArray<JsonChip>(settings.heroChips, [
+    { labelVi: "Join", labelEn: "Join", visible: true },
+    { labelVi: "Cut", labelEn: "Cut", visible: true },
+    { labelVi: "Thumb / Face Find", labelEn: "Thumb / Face Find", visible: true },
+    { labelVi: "Watermark", labelEn: "Watermark", visible: true },
+    { labelVi: "Intro / Outro", labelEn: "Intro / Outro", visible: true },
+    { labelVi: "Optimize / Encode", labelEn: "Optimize / Encode", visible: true }
+  ]);
+  const featureCards = parseJsonArray<JsonCard>(settings.featureCards, [
+    {
+      labelVi: "Join",
+      labelEn: "Join",
+      textVi: "Ghép nhiều clip theo đúng thứ tự, có kéo thả để đổi thứ tự.",
+      textEn: "Merge clips in order, with drag-and-drop reordering.",
+      visible: true
+    },
+    {
+      labelVi: "Cut",
+      labelEn: "Cut",
+      textVi: "Cắt đầu video hàng loạt để trim nhanh trên nhiều file.",
+      textEn: "Trim the head of many videos in one fast batch.",
+      visible: true
+    },
+    {
+      labelVi: "Thumb / Face Find",
+      labelEn: "Thumb / Face Find",
+      textVi: "Xuất thumbnail, contact sheet, chọn frame, chia grid, chỉnh chất lượng.",
+      textEn: "Export thumbnails and contact sheets with frame, grid, and quality controls.",
+      visible: true
+    },
+    {
+      labelVi: "Watermark",
+      labelEn: "Watermark",
+      textVi: "Thêm watermark đầy đủ hoặc watermark ẩn cho video.",
+      textEn: "Add visible or hidden watermarks to video files.",
+      visible: true
+    }
+  ]);
+  const workflowSteps = parseJsonArray<JsonStep>(settings.workflowSteps, [
+    { stepVi: "Kéo video vào module", stepEn: "Drag files into a module", visible: true },
+    { stepVi: "Chọn preset / grid / chất lượng", stepEn: "Choose preset / grid / quality", visible: true },
+    { stepVi: "Bấm xử lý hàng loạt", stepEn: "Run batch processing", visible: true },
+    { stepVi: "Xuất file sạch ngay", stepEn: "Export clean output", visible: true }
+  ]);
+  const planHighlights = parseJsonArray<JsonHighlight>(settings.planHighlights, [
+    {
+      labelVi: "30 ngày",
+      labelEn: "30 days",
+      textVi: "Dùng ngắn hạn, test workflow, đổi máy dễ hơn",
+      textEn: "Short-term use and workflow testing",
+      visible: true
+    }
+  ]);
 
   const copy = {
     vi: {
@@ -91,11 +176,6 @@ export default async function HomePage() {
       text: locale === "vi" ? "Thêm watermark đầy đủ hoặc watermark ẩn cho video." : "Add visible or hidden watermarks to video files."
     }
   ];
-
-  const workflowSteps =
-    locale === "vi"
-      ? ["Kéo video vào module", "Chọn preset / grid / chất lượng", "Bấm xử lý hàng loạt", "Xuất file sạch ngay"]
-      : ["Drag files into a module", "Choose preset / grid / quality", "Run batch processing", "Export clean output"];
 
   const planRows =
     locale === "vi"
@@ -176,18 +256,12 @@ export default async function HomePage() {
     }
   ];
 
-  const compareHighlights =
-    locale === "vi"
-      ? [
-          { label: "30 ngày", value: "Dùng ngắn hạn, test workflow, đổi máy dễ hơn" },
-          { label: "Trọn đời", value: "Một lần thanh toán, dùng lâu dài" },
-          { label: "Support package", value: "Tách riêng, không trộn với license" }
-        ]
-      : [
-          { label: "30 days", value: "Short-term use and workflow testing" },
-          { label: "Lifetime", value: "One-time payment, long-term use" },
-          { label: "Support package", value: "Separate from the license purchase" }
-        ];
+  const compareHighlights = planHighlights
+    .filter((item) => item.visible !== false)
+    .map((item) => ({
+      label: locale === "vi" ? item.labelVi : item.labelEn,
+      value: locale === "vi" ? item.textVi : item.textEn
+    }));
 
   const supportPackages = donatePackages.slice(0, 3).map((item) => ({
     slug: item.slug,
@@ -230,9 +304,9 @@ export default async function HomePage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {["Join", "Cut", "Thumb / Face Find", "Watermark", "Intro / Outro", "Optimize / Encode"].map((item) => (
-              <span key={item} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
-                {item}
+            {heroChips.filter((item) => item.visible !== false).map((item) => (
+              <span key={locale === "vi" ? item.labelVi : item.labelEn} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md">
+                {locale === "vi" ? item.labelVi : item.labelEn}
               </span>
             ))}
           </div>
@@ -269,17 +343,17 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {features.map((item) => {
-              const Icon = item.icon;
+            {featureCards.map((item, index) => {
+              const Icon = features[index % features.length].icon;
               return (
-                <article key={item.title} className="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+                <article key={locale === "vi" ? item.labelVi : item.labelEn} className="group rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
                   <div className="flex items-start gap-4">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white transition duration-300 group-hover:scale-105 group-hover:rotate-[-2deg]">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-950">{item.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+                      <h3 className="text-lg font-semibold text-slate-950">{locale === "vi" ? item.labelVi : item.labelEn}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{locale === "vi" ? item.textVi : item.textEn}</p>
                     </div>
                   </div>
                 </article>
@@ -323,11 +397,11 @@ export default async function HomePage() {
               </p>
               <div className="mt-4 space-y-3">
                 {workflowSteps.map((step, index) => (
-                  <div key={step} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
+                  <div key={locale === "vi" ? step.stepVi : step.stepEn} className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-sm">
                     <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
                       {index + 1}
                     </span>
-                    <span className="text-sm font-medium text-slate-700">{step}</span>
+                    <span className="text-sm font-medium text-slate-700">{locale === "vi" ? step.stepVi : step.stepEn}</span>
                   </div>
                 ))}
               </div>

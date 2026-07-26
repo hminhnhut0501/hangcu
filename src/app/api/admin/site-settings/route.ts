@@ -55,7 +55,11 @@ const schema = z.object({
   navigation: z.string().min(1),
   footerNoteVi: z.string().min(1),
   footerNoteEn: z.string().min(1),
-  faqItems: z.string().min(1)
+  faqItems: z.string().min(1),
+  heroChips: z.string().min(1),
+  featureCards: z.string().min(1),
+  workflowSteps: z.string().min(1),
+  planHighlights: z.string().min(1)
 });
 
 export async function GET() {
@@ -123,7 +127,11 @@ export async function POST(request: Request) {
     navigation: JSON.parse(parsed.data.navigation),
     footerNoteVi: parsed.data.footerNoteVi,
     footerNoteEn: parsed.data.footerNoteEn,
-    faqItems: JSON.parse(parsed.data.faqItems)
+    faqItems: JSON.parse(parsed.data.faqItems),
+    heroChips: JSON.parse(parsed.data.heroChips),
+    featureCards: JSON.parse(parsed.data.featureCards),
+    workflowSteps: JSON.parse(parsed.data.workflowSteps),
+    planHighlights: JSON.parse(parsed.data.planHighlights)
   });
 
   await writeAuditLog({

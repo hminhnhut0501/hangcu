@@ -14,6 +14,26 @@ const faqItemSchema = z.object({
   visible: z.boolean()
 });
 
+const listItemSchema = z.object({
+  labelVi: z.string().min(1),
+  labelEn: z.string().min(1),
+  textVi: z.string().min(1),
+  textEn: z.string().min(1),
+  visible: z.boolean()
+});
+
+const workflowStepSchema = z.object({
+  stepVi: z.string().min(1),
+  stepEn: z.string().min(1),
+  visible: z.boolean()
+});
+
+const heroChipSchema = z.object({
+  labelVi: z.string().min(1),
+  labelEn: z.string().min(1),
+  visible: z.boolean()
+});
+
 export const siteContentSettingsSchema = z.object({
   id: z.string(),
   siteNameVi: z.string().min(1),
@@ -67,5 +87,9 @@ export const siteContentSettingsSchema = z.object({
   footerNoteVi: z.string().min(1),
   footerNoteEn: z.string().min(1),
   faqItems: z.array(faqItemSchema),
+  heroChips: z.array(heroChipSchema),
+  featureCards: z.array(listItemSchema),
+  workflowSteps: z.array(workflowStepSchema),
+  planHighlights: z.array(listItemSchema),
   updatedAt: z.string()
 });

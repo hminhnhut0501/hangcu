@@ -12,6 +12,26 @@ export type SiteFaqItem = {
   visible: boolean;
 };
 
+export type SiteListItem = {
+  labelVi: string;
+  labelEn: string;
+  textVi: string;
+  textEn: string;
+  visible: boolean;
+};
+
+export type SiteWorkflowStep = {
+  stepVi: string;
+  stepEn: string;
+  visible: boolean;
+};
+
+export type SiteHeroChip = {
+  labelVi: string;
+  labelEn: string;
+  visible: boolean;
+};
+
 export type SiteContentSettings = {
   id: string;
   siteNameVi: string;
@@ -65,5 +85,9 @@ export type SiteContentSettings = {
   footerNoteVi: string;
   footerNoteEn: string;
   faqItems: SiteFaqItem[];
+  heroChips: SiteHeroChip[];
+  featureCards: SiteListItem[];
+  workflowSteps: SiteWorkflowStep[];
+  planHighlights: SiteListItem[];
   updatedAt: string;
 };
