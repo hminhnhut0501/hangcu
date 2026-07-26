@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
   response.cookies.set("admin_session", encodeAdminSession(parsed.data.adminId, parsed.data.role), {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/"
   });
@@ -40,7 +40,7 @@ export async function DELETE() {
   const response = NextResponse.json({ success: true });
   response.cookies.set("admin_session", "", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 0

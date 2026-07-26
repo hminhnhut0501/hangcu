@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
   response.cookies.set("admin_session", encodeAdminSession(adminId, role), {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/"
   });

@@ -49,6 +49,11 @@ type HealthSnapshot = {
   licenseKeyRedeemedCount: number;
 };
 
+type AdminSessionSnapshot = {
+  adminId: string;
+  role: string;
+} | null;
+
 export function AdminPanel({ children, className = "" }: AdminPanelProps) {
   return <div className={`rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)] ${className}`.trim()}>{children}</div>;
 }
@@ -62,6 +67,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const storageKey = "admin-sidebar-collapsed";
   const [collapsed, setCollapsed] = useState(false);
   const [health, setHealth] = useState<HealthSnapshot | null>(null);
+  const [session, setSession] = useState<AdminSessionSnapshot>(null);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
@@ -85,6 +91,32 @@ export function AdminShell({ children }: { children: ReactNode }) {
       } catch {
         if (active) {
           setHealth(null);
+        }
+      }
+    };
+
+    void load();
+    const interval = window.setInterval(() => {
+      void load();
+    }, 30000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch("/api/admin/session", { cache: "no-store", credentials: "include" });
+        const json = (await response.json().catch(() => null)) as { success?: boolean; data?: AdminSessionSnapshot } | null;
+        if (!active || !response.ok || !json?.success) return;
+        setSession(json.data ?? null);
+      } catch {
+        if (active) {
+          setSession(null);
         }
       }
     };
@@ -196,6 +228,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 >
                   {collapsed ? "Mở" : "Thu"}
                 </button>
+              </div>
+              <div className={`mt-4 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 ${collapsed ? "lg:hidden" : ""}`}>
+                <p className="font-semibold text-white">Phiên hiện tại</p>
+                <p className="mt-1">{session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session"}</p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
