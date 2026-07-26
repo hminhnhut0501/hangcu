@@ -42,7 +42,7 @@ function buildCancelUrl(input: {
 
 function buildLicenseCode() {
   const part = () => generateRandomToken(4).slice(0, 4).toUpperCase();
-  return `LIC-${part()}-${part()}-${part()}`;
+  return `HANGCU-${part()}-${part()}-${part()}`;
 }
 
 function buildPaymentSessionId(orderId: string, orderNumber: string) {

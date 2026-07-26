@@ -8,11 +8,22 @@ export function getAdminErrorMessage(error: unknown, fallback = "Thao tác thấ
     return "Thiếu bucket Supabase Storage cho upload. Hãy chạy migration tạo bucket hoặc cấu hình SUPABASE_STORAGE_BUCKET đúng tên bucket.";
   }
 
+  if (error && typeof error === "object" && "code" in error && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    const codeLabel = typeof code === "string" && code ? `${code}: ` : "";
+    if (typeof message === "string" && message.trim()) {
+      return `${codeLabel}${message}`;
+    }
+  }
+
   if (error instanceof Error) {
     return error.message || fallback;
   }
 
   if (typeof error === "string" && error.trim()) {
+    if (error.trim() === "Forbidden") {
+      return "FORBIDDEN: Forbidden";
+    }
     return error;
   }
 

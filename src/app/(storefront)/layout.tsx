@@ -14,7 +14,17 @@ export default async function StorefrontLayout({
   const settings = await getSiteContentSettings();
   const locale = await getStorefrontLocale();
   const preferredOrder = ["/products", "/download", "/checkout", "/orders"];
-  const visibleNavigation = settings.navigation
+  const navigationSource = settings.navigation.some((item) => item.href === "/download")
+    ? settings.navigation
+    : [
+        ...settings.navigation,
+        {
+          labelVi: "Download",
+          labelEn: "Download",
+          href: "/download"
+        }
+      ];
+  const visibleNavigation = navigationSource
     .filter((item) => ["/products", "/download", "/checkout", "/orders"].includes(item.href))
     .map((item) => {
       if (item.href === "/products") {
@@ -29,7 +39,7 @@ export default async function StorefrontLayout({
       if (item.href === "/orders") {
         return { ...item, label: locale === "vi" ? "Đơn hàng" : "Orders" };
       }
-      return item;
+      return { ...item, label: "label" in item ? item.label : item.labelEn };
     })
     .sort((a, b) => {
       const aIndex = preferredOrder.indexOf(a.href);

@@ -5,7 +5,6 @@ import { getStorefrontLocale } from "@/modules/i18n/storefront";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { listDonatePackages } from "@/modules/donate-packages/service";
-import { getStoragePublicUrl } from "@/lib/storage/service";
 
 type Locale = "vi" | "en";
 
@@ -68,9 +67,7 @@ export default async function HomePage() {
   const settings = await getSiteContentSettings();
   const licensePlans = await listLicensePlans();
   const donatePackages = await listDonatePackages();
-  const resolvedHeroImagePath = settings.heroImagePath && !legacyHeroPaths.has(settings.heroImagePath) ? settings.heroImagePath : "/brand/hangcu-hero-imac.png";
-  const heroImageUrl = resolvedHeroImagePath ? await getStoragePublicUrl(resolvedHeroImagePath) : null;
-  const heroImageSrc = heroImageUrl ?? "/brand/hangcu-hero-imac.png";
+  const heroImageSrc = "/brand/hangcu-hero-macbook.png";
   const heroDemoImageSrc = "/brand/hangcu-hero-imac.png";
   const heroChips = parseJsonArray<JsonChip>(settings.heroChips, [
     { labelVi: "Join", labelEn: "Join", visible: true },

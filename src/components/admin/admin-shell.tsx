@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Activity,
   ChevronRight,
@@ -64,10 +64,12 @@ export function AdminSection({ children, className = "" }: AdminSectionProps) {
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const storageKey = "admin-sidebar-collapsed";
   const [collapsed, setCollapsed] = useState(false);
   const [health, setHealth] = useState<HealthSnapshot | null>(null);
   const [session, setSession] = useState<AdminSessionSnapshot>(null);
+  const [sessionLoaded, setSessionLoaded] = useState(false);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(storageKey);
@@ -113,10 +115,22 @@ export function AdminShell({ children }: { children: ReactNode }) {
         const response = await fetch("/api/admin/session", { cache: "no-store", credentials: "include" });
         const json = (await response.json().catch(() => null)) as { success?: boolean; data?: AdminSessionSnapshot } | null;
         if (!active || !response.ok || !json?.success) return;
-        setSession(json.data ?? null);
+        const nextSession = json.data ?? null;
+        setSession(nextSession);
+        setSessionLoaded(true);
+        if (!nextSession && pathname !== "/admin/login") {
+          router.replace("/admin/login");
+        }
+        if (nextSession && pathname === "/admin/login") {
+          router.replace("/admin");
+        }
       } catch {
         if (active) {
           setSession(null);
+          setSessionLoaded(true);
+          if (pathname !== "/admin/login") {
+            router.replace("/admin/login");
+          }
         }
       }
     };
@@ -130,7 +144,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       active = false;
       window.clearInterval(interval);
     };
-  }, []);
+  }, [pathname, router]);
 
   const navSections: NavSection[] = [
     {
@@ -231,7 +245,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </div>
               <div className={`mt-4 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 ${collapsed ? "lg:hidden" : ""}`}>
                 <p className="font-semibold text-white">Phiên hiện tại</p>
-                <p className="mt-1">{session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session"}</p>
+                <p className="mt-1">
+                  {sessionLoaded ? (session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session") : "Đang kiểm tra..."}
+                </p>
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
