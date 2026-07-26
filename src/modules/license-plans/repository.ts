@@ -1,6 +1,7 @@
 import { licensePlansSeed } from "@/lib/license/mock-data";
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
 import { hasSupabasePersistence } from "@/lib/db/persistence";
+import { isMissingSupabaseTableError } from "@/lib/db/supabase-errors";
 import type { LicensePlanSummary } from "./types";
 
 const plans: LicensePlanSummary[] = [...licensePlansSeed];
@@ -100,13 +101,9 @@ function mapRowToLicensePlan(row: {
 class SupabaseLicensePlanRepository implements LicensePlanRepository {
   private client = getSupabaseServiceClient();
 
-  private async fallbackList(): Promise<LicensePlanSummary[]> {
-    return [...licensePlansSeed];
-  }
-
   async list(): Promise<LicensePlanSummary[]> {
     if (!this.client) {
-      return this.fallbackList();
+      return [...licensePlansSeed];
     }
 
     const { data, error } = await this.client
@@ -115,37 +112,46 @@ class SupabaseLicensePlanRepository implements LicensePlanRepository {
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
 
-    if (error || !data?.length) {
-      return this.fallbackList();
+    if (error) {
+      if (isMissingSupabaseTableError(error, "license_plans")) {
+        return [...licensePlansSeed];
+      }
+      throw error;
     }
 
-    return data.map((row) => mapRowToLicensePlan(row as Parameters<typeof mapRowToLicensePlan>[0]));
+    return (data ?? []).map((row) => mapRowToLicensePlan(row as Parameters<typeof mapRowToLicensePlan>[0]));
   }
 
   async findBySlug(slug: string): Promise<LicensePlanSummary | null> {
     if (!this.client) {
-      return (await this.fallbackList()).find((plan) => plan.slug === slug) ?? null;
+      return licensePlansSeed.find((plan) => plan.slug === slug) ?? null;
     }
 
     const { data, error } = await this.client.from("license_plans").select("*").eq("slug", slug).maybeSingle();
-    if (error || !data) {
-      return (await this.fallbackList()).find((plan) => plan.slug === slug) ?? null;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "license_plans")) {
+        return licensePlansSeed.find((plan) => plan.slug === slug) ?? null;
+      }
+      throw error;
     }
 
-    return mapRowToLicensePlan(data as Parameters<typeof mapRowToLicensePlan>[0]);
+    return data ? mapRowToLicensePlan(data as Parameters<typeof mapRowToLicensePlan>[0]) : null;
   }
 
   async findByCode(code: string): Promise<LicensePlanSummary | null> {
     if (!this.client) {
-      return (await this.fallbackList()).find((plan) => plan.code === code) ?? null;
+      return licensePlansSeed.find((plan) => plan.code === code) ?? null;
     }
 
     const { data, error } = await this.client.from("license_plans").select("*").eq("code", code).maybeSingle();
-    if (error || !data) {
-      return (await this.fallbackList()).find((plan) => plan.code === code) ?? null;
+    if (error) {
+      if (isMissingSupabaseTableError(error, "license_plans")) {
+        return licensePlansSeed.find((plan) => plan.code === code) ?? null;
+      }
+      throw error;
     }
 
-    return mapRowToLicensePlan(data as Parameters<typeof mapRowToLicensePlan>[0]);
+    return data ? mapRowToLicensePlan(data as Parameters<typeof mapRowToLicensePlan>[0]) : null;
   }
 
   async save(plan: LicensePlanSummary): Promise<LicensePlanSummary> {

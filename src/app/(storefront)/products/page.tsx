@@ -1,13 +1,22 @@
 import Link from "next/link";
-import { listProducts } from "@/modules/products/service";
+import { listLicensePlans } from "@/modules/license-plans/service";
 import { getStorefrontLocale, getLocalizedText } from "@/modules/i18n/storefront";
 import { supporterPackages } from "@/lib/supporter-packages";
 
 export default async function ProductsPage() {
-  const products = await listProducts();
+  const plans = (await listLicensePlans())
+    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
   const locale = await getStorefrontLocale();
-  const licenseProducts = products.filter((product) => product.sku === "HCV-LIC-30" || product.sku === "HCV-LIC-LIFE");
   const supportPackages = supporterPackages;
+
+  const formatMoney = (amountMinor: number | null, currency: string) => {
+    if (amountMinor == null) return null;
+    if (currency === "VND") {
+      return `${new Intl.NumberFormat(locale === "vi" ? "vi-VN" : "en-US").format(amountMinor)}${locale === "vi" ? "đ" : " VND"}`;
+    }
+    return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amountMinor / 100)} ${currency}`;
+  };
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-16">
@@ -25,28 +34,28 @@ export default async function ProductsPage() {
         </p>
       </div>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
-        {licenseProducts.map((product) => (
+        {plans.map((plan) => (
           <article
-            key={product.id}
+            key={plan.id}
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)]"
           >
             <div className="aspect-[4/5] bg-slate-100" />
             <div className="space-y-3 p-5">
               <div>
                 <p className="text-xs font-medium text-slate-500">
-                  {product.sku}
+                  {plan.code}
                 </p>
-                <h2 className="mt-2 text-xl font-semibold">{product.name}</h2>
+                <h2 className="mt-2 text-xl font-semibold">{locale === "vi" ? plan.nameVi : plan.nameEn}</h2>
               </div>
               <p className="text-sm leading-6 text-slate-600">
-                {product.shortDescription}
+                {plan.description}
               </p>
               <p className="text-sm font-medium text-slate-950">
-                {product.currency} {(product.amountMinor / 100).toFixed(2)}
+                {formatMoney(locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD, locale === "vi" ? "VND" : "USD") ?? "-"}
               </p>
               <Link
                 className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
-                href={`/checkout?planCode=${encodeURIComponent(product.sku)}`}
+                href={`/checkout?planCode=${encodeURIComponent(plan.code)}`}
               >
                 {locale === "vi" ? "Mua license" : "Buy license"}
               </Link>

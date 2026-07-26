@@ -392,7 +392,7 @@ export default async function HomePage() {
             <div className="border-b border-white/10 px-5 py-4">
               <p className="text-sm font-medium text-white/60">{copy.demoLabel}</p>
             </div>
-              <div className="aspect-[4/3] w-full overflow-hidden bg-black">
+              <div className="aspect-[4/3] w-full overflow-hidden bg-black p-4 sm:p-6">
                 <video
                   src="/brand/hangcu-demo.mp4"
                   autoPlay
@@ -400,7 +400,7 @@ export default async function HomePage() {
                   loop
                   playsInline
                   preload="metadata"
-                  className="h-full w-full object-cover animate-fade-up animate-soft-float [animation-delay:220ms]"
+                  className="h-full w-full object-contain animate-fade-up animate-soft-float [animation-delay:220ms]"
                 />
               </div>
             </div>
