@@ -1,6 +1,18 @@
 import Link from "next/link";
 
 export function StorefrontFooterLinks() {
+  const footerLinks = [
+    { href: "/privacy", label: "Privacy" },
+    { href: "/terms", label: "Terms" },
+    { href: "/refund-policy", label: "Refund" },
+    { href: "/license-agreement", label: "License Agreement" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/contact", label: "Contact" },
+    { href: "/about", label: "About" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/download", label: "Download" }
+  ];
+
   return (
     <footer className="border-t border-slate-200">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-8 text-sm text-slate-600 md:flex-row md:items-start md:justify-between">
@@ -16,15 +28,11 @@ export function StorefrontFooterLinks() {
           </div>
         </div>
         <nav className="flex flex-wrap gap-4">
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/terms">Terms</Link>
-          <Link href="/refund-policy">Refund</Link>
-          <Link href="/license-agreement">License Agreement</Link>
-          <Link href="/faq">FAQ</Link>
-          <Link href="/contact">Contact</Link>
-          <Link href="/about">About</Link>
-          <Link href="/pricing">Pricing</Link>
-          <Link href="/download">Download</Link>
+          {footerLinks.map((item) => (
+            <Link key={item.href} href={item.href as any}>
+              {item.label}
+            </Link>
+          ))}
         </nav>
       </div>
     </footer>

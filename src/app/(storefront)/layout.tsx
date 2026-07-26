@@ -64,18 +64,18 @@ export default async function StorefrontLayout({
             />
             <span>{getLocalizedText(locale, { vi: settings.siteNameVi, en: settings.siteNameEn })}</span>
           </Link>
-          <div className="flex flex-col gap-3 lg:items-end">
-            <nav className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+            <nav className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
               {visibleNavigation.map((item, index) => (
                 <Link
                   key={item.href}
                   href={item.href as any}
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium transition ${
+                  className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium transition ${
                     index === 0
                       ? "bg-slate-950 text-white shadow-sm hover:bg-slate-800"
                       : item.href === "/download"
                         ? "border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                   }`}
                 >
                   <span>{item.label}</span>
@@ -83,7 +83,9 @@ export default async function StorefrontLayout({
                 </Link>
               ))}
             </nav>
-            <LanguageSwitcher currentLocale={locale} />
+            <div className="self-start lg:self-auto">
+              <LanguageSwitcher currentLocale={locale} />
+            </div>
           </div>
         </div>
       </header>

@@ -140,7 +140,7 @@ export function CheckoutPaymentForm({
               mode === "license" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em]">{locale === "vi" ? "Gói license" : "License pack"}</p>
+            <p className="text-sm font-semibold">{locale === "vi" ? "Gói license" : "License pack"}</p>
             <p className="mt-2 text-sm font-medium">{locale === "vi" ? "30 ngày / trọn đời" : "30-day / lifetime"}</p>
             <p className="mt-1 text-sm opacity-80">
               {locale === "vi" ? "Chọn license để đi thanh toán ngay." : "Pick a license and continue to payment."}
@@ -153,7 +153,7 @@ export function CheckoutPaymentForm({
               mode === "support" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em]">{locale === "vi" ? "Gói support" : "Support pack"}</p>
+            <p className="text-sm font-semibold">{locale === "vi" ? "Gói support" : "Support pack"}</p>
             <p className="mt-2 text-sm font-medium">{locale === "vi" ? "Chọn mức gợi ý" : "Choose a suggested amount"}</p>
             <p className="mt-1 text-sm opacity-80">
               {locale === "vi" ? "Đi theo mức hỗ trợ đã đặt sẵn." : "Use one of the preset support tiers."}
@@ -166,7 +166,7 @@ export function CheckoutPaymentForm({
               mode === "custom" ? "border-slate-950 bg-slate-950 text-white" : "border-slate-200 bg-white hover:border-slate-300"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.2em]">{locale === "vi" ? "Ủng hộ tự do" : "Custom support"}</p>
+            <p className="text-sm font-semibold">{locale === "vi" ? "Ủng hộ tự do" : "Custom support"}</p>
             <p className="mt-2 text-sm font-medium">{locale === "vi" ? "Tự nhập số tiền" : "Enter your own amount"}</p>
             <p className="mt-1 text-sm opacity-80">
               {locale === "vi" ? "Dành cho khách muốn nhập số tiền bất kỳ." : "For customers who want to enter any amount."}
@@ -190,7 +190,7 @@ export function CheckoutPaymentForm({
                     selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
                   }`}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{option.code}</p>
+                  <p className="text-sm font-medium text-slate-500">{option.code}</p>
                   <p className="mt-2 text-base font-semibold text-slate-900">{option.name}</p>
                   <p className="mt-2 text-sm text-slate-600">{option.description}</p>
                   <p className="mt-3 text-sm font-semibold text-slate-900">
@@ -218,7 +218,7 @@ export function CheckoutPaymentForm({
                     selectedSlug === option.slug ? "border-slate-950 bg-white shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
                   }`}
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{option.code}</p>
+                  <p className="text-sm font-medium text-slate-500">{option.code}</p>
                   <p className="mt-2 text-base font-semibold text-slate-900">{option.name}</p>
                   <p className="mt-2 text-sm text-slate-600">{option.description}</p>
                   <p className="mt-3 text-sm font-semibold text-slate-900">
