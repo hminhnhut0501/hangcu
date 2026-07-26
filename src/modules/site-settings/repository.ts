@@ -42,7 +42,7 @@ const defaultSettings: SiteContentSettings = {
   heroSecondaryCtaLabelVi: "Bắt đầu checkout",
   heroSecondaryCtaLabelEn: "Start checkout",
   heroSecondaryCtaHref: "/checkout",
-  heroImagePath: "/brand/hangcu-hero-macbook.png",
+  heroImagePath: "/brand/hangcu-hero-imac.png",
   heroImageAltVi: "Ảnh hero của Hang Cú video",
   heroImageAltEn: "Hang Cú video hero image",
   announcementTextVi: "Đang mở bán license Hang Cú video.",
