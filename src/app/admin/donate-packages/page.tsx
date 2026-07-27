@@ -30,7 +30,7 @@ export default async function AdminDonatePackagesPage() {
           { name: "code", label: "Code", defaultValue: "SUPPORT_NEW" },
           { name: "name", label: "Tên", defaultValue: "Mức ủng hộ mới" },
           { name: "description", label: "Mô tả", defaultValue: "Mức ủng hộ tự do mới", type: "textarea" },
-          { name: "vndPrice", label: "Số tiền gợi ý (VND)", type: "number", defaultValue: "9900" },
+          { name: "vndPrice", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: "9900" },
           { name: "usdPrice", label: "Số tiền gợi ý (USD)", type: "number", defaultValue: "0" },
           { name: "status", label: "Trạng thái", defaultValue: "active" }
         ]}

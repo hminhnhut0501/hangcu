@@ -6,6 +6,8 @@ export type DonatePackageSummary = {
   description: string;
   suggestedAmountMinor: number | null;
   currency: string | null;
+  vndAmountMinor: number | null;
+  usdAmountMinor: number | null;
   currencyPrices: {
     VND: number | null;
     USD: number | null;

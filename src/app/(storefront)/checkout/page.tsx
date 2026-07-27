@@ -88,7 +88,7 @@ export default async function CheckoutPage({
       currency: locale === "vi" ? "VND" : "USD"
     }));
   const supportPackages = (await listDonatePackages())
-    .filter((item) => item.status === "active" && item.suggestedAmountMinor != null && item.currency)
+    .filter((item) => item.status === "active" && (item.vndAmountMinor != null || item.usdAmountMinor != null))
     .map((item) => mapDonatePackageToViewModel(item, locale));
   const supportOptions = supportPackages.map((item) => ({
     slug: item.slug,
@@ -116,8 +116,8 @@ export default async function CheckoutPage({
         kind: "support" as const,
         name: selectedPackageView?.name ?? selectedPackage.name,
         description: selectedPackageView?.description ?? selectedPackage.description,
-        amountMinor: selectedPackage.suggestedAmountMinor,
-        currency: selectedPackage.currency
+        amountMinor: selectedPackageView?.amountMinor ?? selectedPackage.suggestedAmountMinor,
+        currency: selectedPackageView?.currency ?? selectedPackage.currency
       }
     : firstValue(resolvedSearchParams.planCode)
       ? packageOptions.find((option) => option.slug === firstValue(resolvedSearchParams.planCode)) ?? packageOptions[0] ?? null

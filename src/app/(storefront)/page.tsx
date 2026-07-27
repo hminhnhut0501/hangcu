@@ -250,10 +250,12 @@ export default async function HomePage() {
       description: item.description,
       badge: item.code,
       amount:
-        item.suggestedAmountMinor != null && item.currency
-          ? { amount: item.suggestedAmountMinor, currency: item.currency }
-          : locale === "vi"
-            ? "Tùy chọn"
+        locale === "vi"
+          ? item.vndAmountMinor != null
+            ? { amount: item.vndAmountMinor, currency: "VND" }
+            : "Tùy chọn"
+          : item.usdAmountMinor != null
+            ? { amount: item.usdAmountMinor, currency: "USD" }
             : "Optional"
     }))
     .slice(0, 3);

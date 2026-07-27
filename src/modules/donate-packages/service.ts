@@ -32,16 +32,26 @@ export async function upsertDonatePackage(input: {
   status: "active" | "hidden" | "archived";
 }) {
   const normalizedCurrency = typeof input.currency === "string" ? input.currency.trim().toUpperCase().replace("VNĐ", "VND") : null;
-  const currencyPrices = {
-    VND: typeof input.vndPrice === "number" ? input.vndPrice : null,
-    USD: typeof input.usdPrice === "number" ? input.usdPrice : null
-  };
+  const vndAmountMinor = typeof input.vndPrice === "number" ? input.vndPrice : null;
+  const usdAmountMinor = typeof input.usdPrice === "number" ? input.usdPrice : null;
   return repository.save({
     ...input,
     currency: normalizedCurrency === "VND" || normalizedCurrency === "USD" ? normalizedCurrency : input.currency,
-    currencyPrices,
+    suggestedAmountMinor:
+      typeof input.suggestedAmountMinor === "number"
+        ? input.suggestedAmountMinor
+        : vndAmountMinor ?? usdAmountMinor,
+    vndAmountMinor,
+    usdAmountMinor,
+    currencyPrices: {
+      VND: vndAmountMinor,
+      USD: usdAmountMinor
+    },
     metadata: {
-      currencyPrices
+      currencyPrices: {
+        VND: vndAmountMinor,
+        USD: usdAmountMinor
+      }
     }
   });
 }

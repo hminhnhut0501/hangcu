@@ -10,6 +10,8 @@ export const donatePackageSchema = z.object({
   description: z.string(),
   suggestedAmountMinor: z.number().int().nonnegative().nullable(),
   currency: z.string().nullable(),
+  vndAmountMinor: z.number().int().nonnegative().nullable().optional(),
+  usdAmountMinor: z.number().int().nonnegative().nullable().optional(),
   status: donatePackageStatusSchema,
   metadata: z.record(z.string(), z.unknown())
 });

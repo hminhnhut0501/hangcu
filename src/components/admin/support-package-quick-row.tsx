@@ -9,8 +9,8 @@ type Props = {
     name: string;
     description: string;
     slug: string;
-    suggestedAmountMinor: number | null;
-    currency: string | null;
+    vndAmountMinor: number | null;
+    usdAmountMinor: number | null;
     status: "active" | "hidden" | "archived";
   };
 };
@@ -27,17 +27,8 @@ export function SupportPackageQuickRow({ packageItem }: Props) {
         { name: "name", label: "Tên", defaultValue: packageItem.name },
         { name: "description", label: "Mô tả", defaultValue: packageItem.description },
         { name: "slug", label: "Slug", defaultValue: packageItem.slug },
-        { name: "suggestedAmountMinor", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: String(packageItem.suggestedAmountMinor ?? "") },
-        {
-          name: "currency",
-          label: "Tiền tệ",
-          type: "select",
-          defaultValue: packageItem.currency ?? "VND",
-          options: [
-            { label: "VNĐ", value: "VND" },
-            { label: "USD", value: "USD" }
-          ]
-        },
+        { name: "vndPrice", label: "Số tiền gợi ý (VNĐ)", type: "number", defaultValue: String(packageItem.vndAmountMinor ?? "") },
+        { name: "usdPrice", label: "Số tiền gợi ý (USD)", type: "number", defaultValue: String(packageItem.usdAmountMinor ?? "") },
         { name: "status", label: "Trạng thái", defaultValue: packageItem.status }
       ]}
     />

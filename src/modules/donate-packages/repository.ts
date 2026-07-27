@@ -21,6 +21,8 @@ function mapRowToDonatePackage(row: {
   description: string | null;
   suggested_amount_minor: number | null;
   currency: string | null;
+  vnd_amount_minor?: number | null;
+  usd_amount_minor?: number | null;
   status: "active" | "hidden" | "archived";
   metadata: Record<string, unknown> | null;
 }): DonatePackageSummary {
@@ -29,8 +31,24 @@ function mapRowToDonatePackage(row: {
     VND?: number | null;
     USD?: number | null;
   };
+  const vndAmountMinor =
+    typeof row.vnd_amount_minor === "number"
+      ? row.vnd_amount_minor
+      : typeof rawPrices.VND === "number"
+        ? rawPrices.VND
+        : row.currency?.toUpperCase() === "VND"
+          ? row.suggested_amount_minor
+          : null;
+  const usdAmountMinor =
+    typeof row.usd_amount_minor === "number"
+      ? row.usd_amount_minor
+      : typeof rawPrices.USD === "number"
+        ? rawPrices.USD
+        : row.currency?.toUpperCase() === "USD"
+          ? row.suggested_amount_minor
+          : null;
   const fallbackCurrency = row.currency?.toUpperCase() === "USD" ? "USD" : "VND";
-  const fallbackAmount = row.suggested_amount_minor ?? null;
+  const fallbackAmount = row.suggested_amount_minor ?? vndAmountMinor ?? usdAmountMinor ?? null;
   return {
     id: row.id,
     code: row.code,
@@ -39,9 +57,11 @@ function mapRowToDonatePackage(row: {
     description: row.description ?? "",
     suggestedAmountMinor: fallbackAmount,
     currency: row.currency,
+    vndAmountMinor,
+    usdAmountMinor,
     currencyPrices: {
-      VND: typeof rawPrices.VND === "number" ? rawPrices.VND : fallbackCurrency === "VND" ? fallbackAmount : null,
-      USD: typeof rawPrices.USD === "number" ? rawPrices.USD : fallbackCurrency === "USD" ? fallbackAmount : null
+      VND: vndAmountMinor ?? (fallbackCurrency === "VND" ? fallbackAmount : null),
+      USD: usdAmountMinor ?? (fallbackCurrency === "USD" ? fallbackAmount : null)
     },
     status: row.status,
     metadata
@@ -142,8 +162,16 @@ class SupabaseDonatePackageRepository implements DonatePackageRepository {
         description: pkg.description,
         suggested_amount_minor: pkg.suggestedAmountMinor,
         currency: pkg.currency,
+        vnd_amount_minor: pkg.vndAmountMinor,
+        usd_amount_minor: pkg.usdAmountMinor,
         status: pkg.status,
-        metadata: pkg.metadata ?? {}
+        metadata: {
+          ...(pkg.metadata ?? {}),
+          currencyPrices: {
+            VND: pkg.vndAmountMinor,
+            USD: pkg.usdAmountMinor
+          }
+        }
       })
       .select("*")
       .maybeSingle();

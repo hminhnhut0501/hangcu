@@ -10,7 +10,7 @@ const schema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
   description: z.string(),
-  suggestedAmountMinor: z.coerce.number().int().nonnegative().nullable(),
+  suggestedAmountMinor: z.coerce.number().int().nonnegative().nullable().optional(),
   currency: z.string().nullable(),
   vndPrice: z.coerce.number().int().nonnegative().nullable().optional(),
   usdPrice: z.coerce.number().nonnegative().nullable().optional(),
@@ -31,7 +31,10 @@ export async function POST(request: Request) {
       return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
     }
 
-    const pkg = await upsertDonatePackage(parsed.data);
+    const pkg = await upsertDonatePackage({
+      ...parsed.data,
+      suggestedAmountMinor: parsed.data.suggestedAmountMinor ?? null
+    });
     await writeAuditLog({
       ...getAdminMutationContext(),
       action: "donate_package_upserted",
