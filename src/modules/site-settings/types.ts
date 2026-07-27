@@ -32,6 +32,14 @@ export type SiteHeroChip = {
   visible: boolean;
 };
 
+export type SitePaymentGateway = {
+  provider: "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual";
+  labelVi: string;
+  labelEn: string;
+  currencies: Array<"VND" | "USD">;
+  visible: boolean;
+};
+
 export type SiteContentSettings = {
   id: string;
   siteNameVi: string;
@@ -89,5 +97,6 @@ export type SiteContentSettings = {
   featureCards: SiteListItem[];
   workflowSteps: SiteWorkflowStep[];
   planHighlights: SiteListItem[];
+  paymentGateways: SitePaymentGateway[];
   updatedAt: string;
 };

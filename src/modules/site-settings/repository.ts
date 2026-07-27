@@ -145,6 +145,43 @@ const defaultSettings: SiteContentSettings = {
       visible: true
     }
   ],
+  paymentGateways: [
+    {
+      provider: "payos",
+      labelVi: "PayOS",
+      labelEn: "PayOS",
+      currencies: ["VND"],
+      visible: true
+    },
+    {
+      provider: "paypal",
+      labelVi: "PayPal",
+      labelEn: "PayPal",
+      currencies: ["USD"],
+      visible: true
+    },
+    {
+      provider: "lemonsqueezy",
+      labelVi: "Lemon Squeezy",
+      labelEn: "Lemon Squeezy",
+      currencies: ["USD"],
+      visible: true
+    },
+    {
+      provider: "sandbox",
+      labelVi: "Sandbox",
+      labelEn: "Sandbox",
+      currencies: ["VND", "USD"],
+      visible: true
+    },
+    {
+      provider: "manual",
+      labelVi: "Thủ công",
+      labelEn: "Manual",
+      currencies: ["VND", "USD"],
+      visible: true
+    }
+  ],
   updatedAt: new Date().toISOString()
 };
 
@@ -217,6 +254,7 @@ function mapRowToSettings(row: Record<string, unknown>): SiteContentSettings {
     featureCards: Array.isArray(row.feature_cards) ? row.feature_cards : defaultSettings.featureCards,
     workflowSteps: Array.isArray(row.workflow_steps) ? row.workflow_steps : defaultSettings.workflowSteps,
     planHighlights: Array.isArray(row.plan_highlights) ? row.plan_highlights : defaultSettings.planHighlights,
+    paymentGateways: Array.isArray(row.payment_gateways) ? row.payment_gateways : defaultSettings.paymentGateways,
     updatedAt: String(row.updated_at ?? defaultSettings.updatedAt)
   });
 }
@@ -341,6 +379,7 @@ export class SupabaseSiteSettingsRepository {
       feature_cards: normalized.featureCards,
       workflow_steps: normalized.workflowSteps,
       plan_highlights: normalized.planHighlights,
+      payment_gateways: normalized.paymentGateways,
       updated_at: normalized.updatedAt
     });
 

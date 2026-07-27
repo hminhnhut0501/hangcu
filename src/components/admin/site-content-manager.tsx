@@ -113,7 +113,8 @@ function buildPayload(settings: SiteContentSettings, overrides: Partial<Record<k
     heroChips: jsonString(merged.heroChips),
     featureCards: jsonString(merged.featureCards),
     workflowSteps: jsonString(merged.workflowSteps),
-    planHighlights: jsonString(merged.planHighlights)
+    planHighlights: jsonString(merged.planHighlights),
+    paymentGateways: jsonString(merged.paymentGateways)
   };
 }
 
@@ -492,6 +493,24 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
                 />
               }
             />
+            <OverviewCard
+              label="Thanh toán"
+              title="Gateway VI / EN"
+              text="Chỉnh cổng thanh toán hiển thị cho VNĐ và USD trong cùng một nguồn dữ liệu."
+              meta={`${settings.paymentGateways.filter((item) => item.visible).length} gateway`}
+              action={
+                <DrawerForm
+                  triggerLabel="Sửa payment gateways"
+                  title="Sửa cổng thanh toán"
+                  description="Cập nhật JSON gateway list để storefront và checkout đọc cùng một cấu hình."
+                  settings={settings}
+                  onSaved={setSettings}
+                  fields={[
+                    { name: "paymentGateways", label: "Payment gateways JSON", type: "textarea", rows: 12 }
+                  ]}
+                />
+              }
+            />
           </div>
         </div>
 
@@ -543,6 +562,7 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
                     <li>• Blocks: {blockVisibleCount}/4 bật</li>
                     <li>• Hero chips: {settings.heroChips.filter((item) => item.visible).length}</li>
                     <li>• Plan highlights: {settings.planHighlights.filter((item) => item.visible).length}</li>
+                    <li>• Gateways: {settings.paymentGateways.filter((item) => item.visible).length}</li>
                   </ul>
                 </div>
               </div>

@@ -59,7 +59,8 @@ const schema = z.object({
   heroChips: z.string().min(1),
   featureCards: z.string().min(1),
   workflowSteps: z.string().min(1),
-  planHighlights: z.string().min(1)
+  planHighlights: z.string().min(1),
+  paymentGateways: z.string().min(1)
 });
 
 export async function GET() {
@@ -131,7 +132,8 @@ export async function POST(request: Request) {
     heroChips: JSON.parse(parsed.data.heroChips),
     featureCards: JSON.parse(parsed.data.featureCards),
     workflowSteps: JSON.parse(parsed.data.workflowSteps),
-    planHighlights: JSON.parse(parsed.data.planHighlights)
+    planHighlights: JSON.parse(parsed.data.planHighlights),
+    paymentGateways: JSON.parse(parsed.data.paymentGateways)
   });
 
   await writeAuditLog({

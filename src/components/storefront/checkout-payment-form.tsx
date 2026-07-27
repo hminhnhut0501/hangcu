@@ -14,6 +14,14 @@ type CheckoutOption = {
   currency: string;
 };
 
+type PaymentGateway = {
+  provider: "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual";
+  labelVi: string;
+  labelEn: string;
+  currencies: Array<"VND" | "USD">;
+  visible: boolean;
+};
+
 function StepIcon({ active, children }: { active?: boolean; children: React.ReactNode }) {
   return (
     <span
@@ -30,6 +38,7 @@ type Props = {
   locale: "vi" | "en";
   licenseOptions: CheckoutOption[];
   supportOptions: CheckoutOption[];
+  paymentGateways: PaymentGateway[];
   initialSelectedSlug?: string;
   initialMode?: "license" | "support" | "custom";
   initialEmail?: string;
@@ -49,6 +58,7 @@ export function CheckoutPaymentForm({
   locale,
   licenseOptions,
   supportOptions,
+  paymentGateways,
   initialSelectedSlug,
   initialMode,
   initialEmail,
@@ -75,14 +85,36 @@ export function CheckoutPaymentForm({
   const selectedLicense = activeLicenseOptions.find((option) => option.slug === selectedSlug) ?? activeLicenseOptions[0] ?? null;
   const selectedSupport = activeSupportOptions.find((option) => option.slug === selectedSlug) ?? activeSupportOptions[0] ?? null;
   const selectedCurrency = mode === "custom" ? "VND" : selectedOption?.currency?.toUpperCase() ?? null;
+  const currentCurrency: "VND" | "USD" = selectedCurrency === "USD" ? "USD" : "VND";
+  const visibleGateways = paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currentCurrency));
+  const currentCurrencyLabel = currentCurrency === "VND" ? (locale === "vi" ? "VNĐ" : "VND") : "USD";
+  const currencyTitle =
+    currentCurrency === "VND"
+      ? locale === "vi"
+        ? "Cổng thanh toán cho VNĐ"
+        : "Payment gateways for VND"
+      : locale === "vi"
+        ? "Cổng thanh toán cho USD"
+        : "Payment gateways for USD";
+  const currencyDescription =
+    currentCurrency === "VND"
+      ? locale === "vi"
+        ? "Chỉ hiển thị các cổng nhận VNĐ cho gói đang chọn."
+        : "Only VNĐ gateways are shown for the selected package."
+      : locale === "vi"
+        ? "Chỉ hiển thị các cổng nhận USD cho gói đang chọn."
+        : "Only USD gateways are shown for the selected package.";
 
   React.useEffect(() => {
-    if (selectedCurrency === "USD") {
-      setProvider((current) => (current === "paypal" || current === "lemonsqueezy" ? current : "paypal"));
-    } else if (selectedCurrency === "VND") {
-      setProvider((current) => (current === "paypal" || current === "lemonsqueezy" ? "payos" : current));
+    if (visibleGateways.some((gateway) => gateway.provider === provider)) return;
+    const preferred =
+      currentCurrency === "USD"
+        ? visibleGateways.find((gateway) => gateway.provider === "paypal") ?? visibleGateways[0]
+        : visibleGateways.find((gateway) => gateway.provider === "payos") ?? visibleGateways[0];
+    if (preferred) {
+      setProvider(preferred.provider);
     }
-  }, [selectedCurrency]);
+  }, [currentCurrency, provider, visibleGateways]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -218,6 +250,68 @@ export function CheckoutPaymentForm({
           </button>
         </div>
 
+        <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-950">{currencyTitle}</p>
+              <p className="mt-1 text-sm text-slate-600">{currencyDescription}</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">
+              {currentCurrencyLabel}
+            </span>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {(["VND", "USD"] as const).map((currency) => {
+              const gateways = paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currency));
+              const highlighted = currency === currentCurrency;
+              return (
+                <div
+                  key={currency}
+                  className={`rounded-[1.5rem] border p-4 transition ${
+                    highlighted ? "border-slate-950 bg-white shadow-sm" : "border-slate-200 bg-white/80"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                        {locale === "vi" ? (currency === "VND" ? "VI / VNĐ" : "EN / USD") : currency === "VND" ? "VI / VND" : "EN / USD"}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-950">
+                        {currency === "VND"
+                          ? locale === "vi"
+                            ? "Nhóm cổng cho VNĐ"
+                            : "VND gateways"
+                          : locale === "vi"
+                            ? "Nhóm cổng cho USD"
+                            : "USD gateways"}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+                      {gateways.length} {locale === "vi" ? "cổng" : "gateways"}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {gateways.length > 0 ? (
+                      gateways.map((gateway) => (
+                        <span
+                          key={`${currency}-${gateway.provider}`}
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                            highlighted && gateway.provider === provider ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {locale === "vi" ? gateway.labelVi : gateway.labelEn}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-sm text-slate-500">{locale === "vi" ? "Chưa có cổng nào." : "No gateways available."}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {mode === "license" ? (
           <div className="space-y-3 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4">
             <div className="flex items-center justify-between gap-3">
@@ -327,20 +421,25 @@ export function CheckoutPaymentForm({
             onChange={(event) => setProvider(event.target.value as "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual")}
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
           >
-            <option value="payos">PayOS</option>
-            <option value="paypal" disabled={selectedCurrency != null && selectedCurrency !== "USD"}>PayPal (USD)</option>
-            <option value="lemonsqueezy" disabled={selectedCurrency != null && selectedCurrency !== "USD"}>Lemon Squeezy (USD)</option>
-            <option value="sandbox">Sandbox</option>
-            <option value="manual">Manual</option>
+            {visibleGateways.map((gateway) => (
+              <option key={gateway.provider} value={gateway.provider}>
+                {locale === "vi" ? gateway.labelVi : gateway.labelEn}
+                {" ("}
+                {gateway.currencies
+                  .map((item) => (item === "VND" ? (locale === "vi" ? "VNĐ" : "VND") : "USD"))
+                  .join(" / ")}
+                {")"}
+              </option>
+            ))}
           </select>
           <p className="mt-2 text-xs text-slate-500">
-            {selectedCurrency === "VND"
+            {currentCurrency === "VND"
               ? locale === "vi"
-                ? "Các gói VNĐ sẽ đi qua PayOS."
-                : "VNĐ packages route through PayOS."
+                ? "Các gói VNĐ sẽ đi qua nhóm gateway VNĐ đã bật."
+                : "VNĐ packages route through the enabled VNĐ gateways."
               : locale === "vi"
-                ? "Các gói USD sẽ đi qua PayPal hoặc Lemon Squeezy."
-                : "USD packages route through PayPal or Lemon Squeezy."}
+                ? "Các gói USD sẽ đi qua nhóm gateway USD đã bật."
+                : "USD packages route through the enabled USD gateways."}
           </p>
         </label>
       </div>

@@ -34,6 +34,14 @@ const heroChipSchema = z.object({
   visible: z.boolean()
 });
 
+const paymentGatewaySchema = z.object({
+  provider: z.enum(["payos", "paypal", "lemonsqueezy", "sandbox", "manual"]),
+  labelVi: z.string().min(1),
+  labelEn: z.string().min(1),
+  currencies: z.array(z.enum(["VND", "USD"])).min(1),
+  visible: z.boolean()
+});
+
 export const siteContentSettingsSchema = z.object({
   id: z.string(),
   siteNameVi: z.string().min(1),
@@ -91,5 +99,6 @@ export const siteContentSettingsSchema = z.object({
   featureCards: z.array(listItemSchema),
   workflowSteps: z.array(workflowStepSchema),
   planHighlights: z.array(listItemSchema),
+  paymentGateways: z.array(paymentGatewaySchema),
   updatedAt: z.string()
 });

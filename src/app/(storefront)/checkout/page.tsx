@@ -6,6 +6,7 @@ import { getOrderByOrderNumber } from "@/modules/orders/service";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { getDonatePackageBySlug, listDonatePackages } from "@/modules/donate-packages/service";
 import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
+import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { MoneyAmount } from "@/components/money/money-amount";
 import { licensePlansSeed } from "@/lib/license/mock-data";
 
@@ -51,6 +52,7 @@ export default async function CheckoutPage({
   searchParams?: Promise<CheckoutSearchParams>;
 }) {
   const locale = await getStorefrontLocale();
+  const siteSettings = await getSiteContentSettings();
   const resolvedSearchParams = (await searchParams) ?? {};
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
@@ -243,6 +245,7 @@ export default async function CheckoutPage({
             locale={locale}
             licenseOptions={licenseProducts}
             supportOptions={supportOptions}
+            paymentGateways={siteSettings.paymentGateways}
             initialSelectedSlug={initialPackage?.slug ?? ""}
             initialMode={initialMode}
             initialEmail=""
