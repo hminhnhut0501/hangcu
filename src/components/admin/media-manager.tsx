@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 import { AdminBanner, getAdminErrorMessage } from "@/components/admin/admin-feedback";
+import { AdminPanel } from "@/components/admin/admin-shell";
+import { ImageUploadForm } from "@/components/admin/image-upload-form";
 import type { ProductSummary } from "@/modules/products/types";
 import type { SiteAsset } from "@/modules/site-assets/types";
 import type { SiteContentSettings } from "@/modules/site-settings/types";
@@ -164,35 +166,6 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
     setProducts((current) =>
       current.map((product) => (product.slug === selectedProductSlug ? { ...product, media: productsJson.data ?? product.media } : product))
     );
-  }
-
-  async function handleSiteUpload(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setStatus("Đang tải lên site asset...");
-    const formData = new FormData(event.currentTarget);
-    try {
-      await withCsrf("/api/admin/site-assets", { method: "POST", body: formData });
-      await refreshData();
-      setStatus("Đã tải lên site asset.");
-    } catch (error) {
-      setStatus(getAdminErrorMessage(error, "Tải lên site asset thất bại."));
-    }
-  }
-
-  async function handleProductUpload(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!selectedProductSlug) return;
-    setStatus("Đang tải lên product media...");
-    const formData = new FormData(event.currentTarget);
-    try {
-      const result = await withCsrf("/api/admin/product-media", { method: "POST", body: formData });
-      setProducts((current) =>
-        current.map((product) => (product.slug === selectedProductSlug ? { ...product, media: result.data?.media ?? product.media } : product))
-      );
-      setStatus("Đã tải lên product media.");
-    } catch (error) {
-      setStatus(getAdminErrorMessage(error, "Tải lên product media thất bại."));
-    }
   }
 
   async function handleSaveHero(event: FormEvent<HTMLFormElement>) {
@@ -438,45 +411,108 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-emerald-600">Tải lên</p>
-              <h3 className="mt-2 text-xl font-semibold">Tải site asset</h3>
+              <h3 className="mt-2 text-xl font-semibold">Tải site asset trong drawer</h3>
             </div>
-            <p className="text-xs text-slate-500">Tải một lần, dùng ở nhiều nơi</p>
+            <p className="text-xs text-slate-500">Asset dùng chung cho hero, logo, banner, favicon</p>
           </div>
-          <form onSubmit={handleSiteUpload} className="mt-4 space-y-3">
-            <label className="block text-sm">
-              <span>Asset key</span>
-              <input name="assetKey" defaultValue={siteForm.assetKey} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
-            </label>
-            <label className="block text-sm">
-              <span>Danh mục</span>
-              <select name="category" defaultValue={siteForm.category} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
-                <option value="hero">Hero</option>
-                <option value="logo">Logo</option>
-                <option value="banner">Banner</option>
-                <option value="favicon">Favicon</option>
-                <option value="misc">Khác</option>
-              </select>
-            </label>
+          <div className="mt-4 grid gap-4">
+            <AdminPanel className="space-y-4 bg-slate-50/70 p-4 shadow-none">
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Đang chọn</p>
+                  <p className="mt-2 text-sm font-medium text-slate-950">{selectedAsset?.assetKey ?? "Chưa chọn asset"}</p>
+                  <p className="mt-1 text-xs text-slate-500">{selectedAsset?.category ?? "Hero / logo / banner / favicon"}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Ghi chú</p>
+                  <p className="mt-2 text-sm text-slate-600">Sau khi upload, danh sách và hero preview sẽ refresh ngay.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <ImageUploadForm
+                  title="Tải site asset"
+                  endpoint="/api/admin/site-assets"
+                  folder="site"
+                  description="Tải ảnh hero, logo, banner hoặc favicon vào thư viện dùng chung."
+                  triggerLabel="Mở drawer tải asset"
+                  onSuccess={refreshData}
+                  extraFields={[
+                    { name: "assetKey", label: "Asset key" },
+                    {
+                      name: "category",
+                      label: "Danh mục",
+                      type: "select",
+                      defaultValue: siteForm.category,
+                      options: [
+                        { label: "Hero", value: "hero" },
+                        { label: "Logo", value: "logo" },
+                        { label: "Banner", value: "banner" },
+                        { label: "Favicon", value: "favicon" },
+                        { label: "Khác", value: "misc" }
+                      ]
+                    },
+                    { name: "altTextVi", label: "Alt text VI" },
+                    { name: "altTextEn", label: "Alt text EN" },
+                    { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(siteForm.sortOrder) }
+                  ]}
+                />
+              </div>
+            </AdminPanel>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block text-sm">
-              <span>Alt text VI</span>
-                <input name="altTextVi" defaultValue={siteForm.altTextVi} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
-              </label>
-              <label className="block text-sm">
-              <span>Alt text EN</span>
-                <input name="altTextEn" defaultValue={siteForm.altTextEn} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
-              </label>
+              {visibleAssets.map((asset) => (
+                <button
+                  key={asset.id}
+                  type="button"
+                  onClick={() => selectAsset(asset)}
+                  className={`rounded-xl border px-3 py-3 text-left text-xs transition ${
+                    asset.assetKey === selectedAssetKey ? "border-blue-300 bg-blue-50" : "border-slate-200 hover:border-blue-300 hover:bg-blue-50"
+                  }`}
+                >
+                  <p className="font-medium">{asset.assetKey}</p>
+                  <p className="text-slate-500">{asset.category}</p>
+                </button>
+              ))}
             </div>
-            <label className="block text-sm">
-              <span>Thứ tự</span>
-              <input name="sortOrder" type="number" defaultValue={String(siteForm.sortOrder)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
-            </label>
-            <label className="block text-sm">
-              <span>Tệp</span>
-              <input name="file" type="file" accept="image/*" className="mt-1 block w-full text-sm" />
-            </label>
-            <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white">Tải asset lên</button>
-          </form>
+            {selectedAsset ? (
+              <div className="rounded-xl border border-slate-200 p-3">
+                <div className="relative h-52 overflow-hidden rounded-lg bg-slate-50">
+                  {previewUrl ? <Image src={previewUrl} alt={selectedAsset.altTextEn ?? selectedAsset.assetKey} fill className="object-cover" /> : null}
+                </div>
+                <div className="mt-3 grid gap-3">
+                  <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                    <p>Storage: {selectedAsset.storagePath}</p>
+                    <p>Loại: {selectedAsset.mimeType ?? "unknown"}</p>
+                    <p>Kích thước: {selectedAsset.width && selectedAsset.height ? `${selectedAsset.width}×${selectedAsset.height}` : "unknown"}</p>
+                    <p>Đang bật: {selectedAsset.isActive ? "Có" : "Không"}</p>
+                  </div>
+                  <label className="block">
+                    <span className="text-sm">Alt text EN</span>
+                    <input
+                      value={siteForm.altTextEn}
+                      onChange={(e) => setSiteForm((c) => ({ ...c, altTextEn: e.target.value }))}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm">Alt text VI</span>
+                    <input
+                      value={siteForm.altTextVi}
+                      onChange={(e) => setSiteForm((c) => ({ ...c, altTextVi: e.target.value }))}
+                      className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2"
+                    />
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => applyAssetToHero(selectedAsset)} className="rounded-full bg-slate-950 px-4 py-2 text-xs font-medium text-white">
+                      Dùng làm hero
+                    </button>
+                    <button type="button" onClick={() => applyAssetToProduct(selectedAsset)} className="rounded-full border border-slate-200 px-4 py-2 text-xs font-medium text-slate-700">
+                      Dùng làm preview sản phẩm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -525,26 +561,32 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                     <p>Preview: {productMediaStats.preview}</p>
                     <p>Detail: {productMediaStats.detail}</p>
                   </div>
-                  <form onSubmit={handleProductUpload} className="mt-4 space-y-3">
-                    <input type="hidden" name="productSlug" value={selectedProduct.slug} />
-                    <label className="block text-sm">
-                      <span>Loại media</span>
-                      <select name="mediaType" defaultValue={productForm.mediaType} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2">
-                        <option value="preview">Preview</option>
-                        <option value="detail">Detail</option>
-                        <option value="lifestyle">Lifestyle</option>
-                      </select>
-                    </label>
-                    <label className="block text-sm">
-                      <span>Alt text</span>
-                      <input name="altText" defaultValue={productForm.altText} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2" />
-                    </label>
-                    <label className="block text-sm">
-                      <span>Tệp</span>
-                      <input name="file" type="file" accept="image/*" className="mt-1 block w-full text-sm" />
-                    </label>
-                    <button className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white">Tải lên sản phẩm</button>
-                  </form>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <ImageUploadForm
+                      title="Tải media sản phẩm"
+                      endpoint="/api/admin/product-media"
+                      folder="products"
+                      description="Tải preview, detail hoặc lifestyle image vào gallery của sản phẩm đang chọn."
+                      triggerLabel="Mở drawer tải media"
+                      onSuccess={refreshData}
+                      hiddenFields={[{ name: "productSlug", value: selectedProduct.slug }]}
+                      extraFields={[
+                        {
+                          name: "mediaType",
+                          label: "Loại media",
+                          type: "select",
+                          defaultValue: productForm.mediaType,
+                          options: [
+                            { label: "Preview", value: "preview" },
+                            { label: "Detail", value: "detail" },
+                            { label: "Lifestyle", value: "lifestyle" }
+                          ]
+                        },
+                        { name: "altText", label: "Alt text", defaultValue: productForm.altText },
+                        { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: "0" }
+                      ]}
+                    />
+                  </div>
                 </div>
                 <div className="rounded-xl border border-slate-200 p-4">
                   <div className="flex items-center justify-between gap-3">
@@ -559,8 +601,8 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                         onClick={() => applyAssetToProduct(asset)}
                         className="rounded-xl border border-slate-200 px-3 py-2 text-left text-xs hover:border-blue-300 hover:bg-blue-50"
                       >
-                          <p className="font-medium">{asset.assetKey}</p>
-                          <p className="text-slate-500">{asset.category}</p>
+                        <p className="font-medium">{asset.assetKey}</p>
+                        <p className="text-slate-500">{asset.category}</p>
                       </button>
                     ))}
                   </div>
@@ -572,20 +614,20 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                     .map((media, index) => (
                       <div key={media.id} className="flex items-center gap-3 rounded-xl border border-slate-200 p-3">
                         <div className="flex flex-col gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleReorderMedia(media.id, "up")}
-                              disabled={index === 0}
-                              className="rounded border px-2 py-1 text-xs disabled:opacity-40"
-                            >
+                          <button
+                            type="button"
+                            onClick={() => handleReorderMedia(media.id, "up")}
+                            disabled={index === 0}
+                            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+                          >
                             ↑
                           </button>
-                            <button
-                              type="button"
-                              onClick={() => handleReorderMedia(media.id, "down")}
-                              disabled={index === selectedProduct.media.length - 1}
-                              className="rounded border px-2 py-1 text-xs disabled:opacity-40"
-                            >
+                          <button
+                            type="button"
+                            onClick={() => handleReorderMedia(media.id, "down")}
+                            disabled={index === selectedProduct.media.length - 1}
+                            className="rounded border px-2 py-1 text-xs disabled:opacity-40"
+                          >
                             ↓
                           </button>
                         </div>
@@ -594,10 +636,8 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
                         </button>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium">{media.type}</p>
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
-                              #{media.sortOrder}
-                            </span>
+                            <p className="text-sm font-medium">{media.type}</p>
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">#{media.sortOrder}</span>
                           </div>
                           <p className="truncate text-xs text-slate-500">{media.storagePath}</p>
                           <input

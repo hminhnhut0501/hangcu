@@ -8,9 +8,11 @@ const packages: DonatePackageSummary[] = [...donatePackagesSeed];
 
 export interface DonatePackageRepository {
   list(): Promise<DonatePackageSummary[]>;
+  findById(id: string): Promise<DonatePackageSummary | null>;
   findBySlug(slug: string): Promise<DonatePackageSummary | null>;
   findByCode(code: string): Promise<DonatePackageSummary | null>;
   save(pkg: DonatePackageSummary): Promise<DonatePackageSummary>;
+  delete(id: string): Promise<boolean>;
 }
 
 function mapRowToDonatePackage(row: {
@@ -73,6 +75,10 @@ export class InMemoryDonatePackageRepository implements DonatePackageRepository 
     return [...packages];
   }
 
+  async findById(id: string): Promise<DonatePackageSummary | null> {
+    return packages.find((pkg) => pkg.id === id) ?? null;
+  }
+
   async findBySlug(slug: string): Promise<DonatePackageSummary | null> {
     return packages.find((pkg) => pkg.slug === slug) ?? null;
   }
@@ -89,6 +95,13 @@ export class InMemoryDonatePackageRepository implements DonatePackageRepository 
       packages.push(pkg);
     }
     return pkg;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const index = packages.findIndex((entry) => entry.id === id);
+    if (index < 0) return false;
+    packages.splice(index, 1);
+    return true;
   }
 }
 
@@ -113,6 +126,22 @@ class SupabaseDonatePackageRepository implements DonatePackageRepository {
     }
 
     return (data ?? []).map((row) => mapRowToDonatePackage(row as Parameters<typeof mapRowToDonatePackage>[0]));
+  }
+
+  async findById(id: string): Promise<DonatePackageSummary | null> {
+    if (!this.client) {
+      return new InMemoryDonatePackageRepository().findById(id);
+    }
+
+    const { data, error } = await this.client.from("donate_packages").select("*").eq("id", id).maybeSingle();
+    if (error) {
+      if (isMissingSupabaseTableError(error, "donate_packages")) {
+        return new InMemoryDonatePackageRepository().findById(id);
+      }
+      throw error;
+    }
+
+    return data ? mapRowToDonatePackage(data as Parameters<typeof mapRowToDonatePackage>[0]) : null;
   }
 
   async findBySlug(slug: string): Promise<DonatePackageSummary | null> {
@@ -183,6 +212,19 @@ class SupabaseDonatePackageRepository implements DonatePackageRepository {
     }
 
     return mapRowToDonatePackage(data as Parameters<typeof mapRowToDonatePackage>[0]);
+  }
+
+  async delete(id: string): Promise<boolean> {
+    if (!this.client) {
+      throw new Error("PERSISTENCE_UNAVAILABLE: Supabase persistence is not configured.");
+    }
+
+    const { error } = await this.client.from("donate_packages").delete().eq("id", id);
+    if (error) {
+      throw new Error(`PERSISTENCE_UNAVAILABLE: Failed to delete donate package. ${error.message}`);
+    }
+
+    return true;
   }
 }
 

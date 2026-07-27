@@ -1,165 +1,105 @@
 import Link from "next/link";
+import { ReadinessMatrix } from "@/components/admin/readiness-matrix";
 
 const complianceItems = [
   {
     title: "Phủ chính sách",
-    status: "Sẵn sàng",
-    description: "Privacy, Terms, Refund, Delivery, License Terms, FAQ, Contact, About, and Merchant pages are live and linked in the footer."
+    status: "ready" as const,
+    description: "Tất cả trang chính sách quan trọng đã có mặt và có thể dẫn từ header/footer.",
+    details: [
+      "Privacy, Terms, Refund, License Agreement, FAQ, Contact, About, Pricing và Download đều phải thống nhất.",
+      "Mỗi trang phụ nên dùng cùng layout header + footer để reviewer thấy đây là một storefront hoàn chỉnh.",
+      "Không trộn lẫn câu chữ cũ kiểu donate khi đang bán license/support."
+    ]
   },
   {
-    title: "Công bố hàng số",
-    status: "Sẵn sàng",
-    description: "The storefront clearly states that this is a software license store with instant digital delivery, not a physical shipment business."
+    title: "Mô tả hàng số",
+    status: "ready" as const,
+    description: "Storefront phải nói rõ đây là ứng dụng macOS native và giao hàng số ngay sau thanh toán.",
+    details: [
+      "Nêu rõ sản phẩm là software license, không phải hàng vật lý.",
+      "Nhấn mạnh delivery bằng email hoặc automation sau khi thanh toán thành công.",
+      "Giữ wording ngắn, tránh mô tả mơ hồ khiến reviewer hiểu lẫn mô hình kinh doanh."
+    ]
   },
   {
-    title: "Quy trình hoàn tiền",
-    status: "Sẵn sàng",
-    description: "Refund rules are narrow and explicit: billing errors, duplicate charges, or delivery failures."
+    title: "Chính sách hoàn tiền",
+    status: "ready" as const,
+    description: "Refund chỉ mở cho lỗi thanh toán, giao không thành công hoặc cấp sai mã.",
+    details: [
+      "Không hứa hoàn tiền rộng cho license đã dùng xong.",
+      "Ghi rõ phạm vi xử lý trong Refund Policy và License Agreement.",
+      "Giữ cùng một wording trên website và hồ sơ submit cho provider."
+    ]
   },
   {
-    title: "Hiển thị hỗ trợ",
-    status: "Sẵn sàng",
-    description: "Support contact is visible across policy pages and merchant copy for billing, delivery, and license issues."
+    title: "Hỗ trợ khách hàng",
+    status: "ready" as const,
+    description: "Thông tin hỗ trợ xuất hiện ở footer, contact page và các trang pháp lý.",
+    details: [
+      "Email hỗ trợ phải nhìn thấy nhanh.",
+      "Nếu có bot Telegram thì chỉ nên là kênh phụ trợ, không thay thế email.",
+      "Luồng hỏi đáp, khiếu nại và đối soát cần thống nhất."
+    ]
   },
   {
-    title: "Storefront song ngữ",
-    status: "Sẵn sàng",
-    description: "Key customer-facing pages support Vietnamese and English to reduce confusion during provider review."
+    title: "Song ngữ storefront",
+    status: "ready" as const,
+    description: "Mặc định tiếng Anh, có thể chuyển sang tiếng Việt và giữ được trật tự nội dung.",
+    details: [
+      "Giá, đơn vị tiền tệ và câu chữ phải đổi theo ngôn ngữ.",
+      "Không dùng text dịch máy ở các phần chính của checkout và pricing.",
+      "Header/footer nên dùng cùng menu trên mọi trang phụ."
+    ]
   },
   {
-    title: "Bộ hồ sơ chứng minh",
-    status: "Chờ",
-    description: "Prepare screenshots, a full test purchase recording, payout details, and business identity info before submission."
+    title: "Bộ hồ sơ nộp",
+    status: "pending" as const,
+    description: "Cần gom ảnh chụp, video mua thử và thông tin pháp lý trước khi nộp reviewer.",
+    details: [
+      "Ảnh homepage, checkout, pricing, license delivery, refund, terms và privacy.",
+      "Video test purchase cho thấy đủ bước chọn gói, thanh toán và nhận license.",
+      "Bằng chứng ownership, payout account và email hỗ trợ phải sẵn."
+    ]
   }
 ];
 
 const evidencePack = [
-  "Company or merchant identity details",
-  "Payout account ownership proof",
-  "Screenshots of homepage, checkout, and legal pages",
-  "A test order recording showing checkout, payment, and delivery",
-  "Customer support email and response process",
-  "Refund and license revocation policy excerpts"
+  "Ảnh homepage, checkout, pricing, download, legal pages",
+  "Video test purchase từ chọn gói đến nhận license",
+  "Thông tin email hỗ trợ và quy trình phản hồi",
+  "Thông tin tài khoản nhận tiền và quyền sở hữu merchant",
+  "Tóm tắt chính sách refund / delivery / license agreement"
 ];
 
-const providerReadiness = [
-  {
-    provider: "PayPal",
-    points: [
-      "Show clear product description and delivery method.",
-      "Keep refund policy visible and consistent across pages.",
-      "Avoid ambiguity around subscriptions vs one-time license sales."
-    ]
-  },
-  {
-    provider: "Lemon Squeezy",
-    points: [
-      "Explain the product as digital software licenses.",
-      "Document who receives the license and how it is redeemed.",
-      "Keep merchant contact and policy links easy to find."
-    ]
-  }
-];
+const packetText = [
+  "Store sells macOS software licenses for Hang Cú video with instant digital delivery.",
+  "Support contact: hangcuvip@gmail.com and t.me/cuhotro_bot.",
+  "Refund only for billing errors, duplicate charges, delivery failures, or wrong license assignment.",
+  "Storefront is bilingual and links all legal pages in the header/footer."
+].join("\n");
 
 export default function AdminCompliancePage() {
   return (
-    <section className="space-y-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-blue-600">Compliance</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">Sẵn sàng cho merchant</h2>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Dùng trang này như checklist trước khi gửi cho PayPal, Lemon Squeezy hoặc bất kỳ bên duyệt nào cần câu chuyện
-            hàng số rõ ràng.
-          </p>
-        </div>
-        <Link
-          href="/legal"
-        className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-      >
-        Mở khu pháp lý
-        </Link>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        {complianceItems.map((item) => (
-          <article key={item.title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-              </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  item.status === "Ready" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {item.status}
-              </span>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold text-blue-600">Hồ sơ chứng minh</p>
-              <h3 className="mt-2 text-xl font-semibold">Cần chuẩn bị gì để duyệt</h3>
-            </div>
-            <p className="text-xs text-slate-500">Chuẩn bị trước khi nộp hồ sơ</p>
-          </div>
-          <ul className="mt-5 space-y-3 text-sm text-slate-600">
-            {evidencePack.map((item) => (
-              <li key={item} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                {item}
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold text-blue-600">Ghi chú nhà cung cấp</p>
-              <h3 className="mt-2 text-xl font-semibold">Bên duyệt thường cần gì</h3>
-            </div>
-            <p className="text-xs text-slate-500">Đồng bộ nội dung trước khi gửi</p>
-          </div>
-          <div className="mt-5 space-y-4">
-            {providerReadiness.map((provider) => (
-              <div key={provider.provider} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <h4 className="text-sm font-semibold text-slate-500">{provider.provider}</h4>
-                <ul className="mt-3 space-y-2 text-sm text-slate-600">
-                  {provider.points.map((point) => (
-                    <li key={point} className="rounded-xl border border-white/60 bg-white px-3 py-2 shadow-sm">
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </article>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <article className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Câu chuyện merchant</h3>
-          <p className="mt-3 text-sm text-slate-600">
-            The site sells digital software licenses for Hang Cú video with instant electronic delivery, bilingual storefront
-            content, visible support contact, and a refund policy limited to clear failure cases.
-          </p>
-        </article>
-        <article className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 shadow-sm">
-          <h3 className="text-lg font-semibold">Việc tiếp theo</h3>
-          <p className="mt-3 text-sm text-slate-600">
-            Capture screenshots of the live checkout flow, copy the support email and business identity into one review packet,
-            then submit the application only after the legal pages and merchant narrative are unchanged.
-          </p>
-        </article>
-      </div>
-    </section>
+    <ReadinessMatrix
+      eyebrow="Compliance"
+      title="Sẵn sàng merchant"
+      description="Màn này gom các điểm reviewer thường hỏi trước khi duyệt merchant: mô tả hàng số, hỗ trợ, hoàn tiền và bằng chứng vận hành."
+      summary={[
+        { label: "Chính sách", value: "Đã phủ", tone: "emerald" },
+        { label: "Storefront", value: "Song ngữ", tone: "blue" },
+        { label: "Hoàn tiền", value: "Rõ ràng", tone: "amber" },
+        { label: "Hồ sơ nộp", value: "Cần gom", tone: "rose" }
+      ]}
+      items={complianceItems}
+      packetText={packetText}
+      actions={[
+        { label: "Mở legal hub", href: "/legal" },
+        { label: "Mở checkout", href: "/checkout" },
+        { label: "Xem pricing", href: "/products" },
+        { label: "Site settings", href: "/admin/site-settings" },
+        { label: "Download", href: "/download" }
+      ]}
+    />
   );
 }

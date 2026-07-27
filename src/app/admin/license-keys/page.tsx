@@ -4,17 +4,10 @@ import { LicenseKeyBulkActions } from "@/components/admin/license-key-bulk-actio
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
 import { FilterPills } from "@/components/admin/filter-pills";
-import { SummaryCard } from "@/components/admin/summary-card";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { listLicenseKeys } from "@/modules/license-keys/service";
-
-const statusStyles: Record<string, string> = {
-  available: "bg-slate-100 text-slate-700",
-  reserved: "bg-amber-100 text-amber-800",
-  issued: "bg-blue-100 text-blue-800",
-  redeemed: "bg-emerald-100 text-emerald-800",
-  expired: "bg-rose-100 text-rose-800",
-  revoked: "bg-zinc-100 text-zinc-800"
-};
 
 const quickFilters = [
   { label: "Tất cả", href: "/admin/license-keys" },
@@ -31,7 +24,17 @@ function formatDate(value: Date | string | null) {
 }
 
 function formatStatus(value: string) {
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+  const tone =
+    value === "redeemed"
+      ? "emerald"
+      : value === "issued"
+        ? "blue"
+        : value === "reserved"
+          ? "amber"
+          : value === "expired"
+            ? "rose"
+            : "neutral";
+  return <AdminStatusBadge tone={tone} label={value} />;
 }
 
 export default async function AdminLicenseKeysPage({
@@ -71,11 +74,29 @@ export default async function AdminLicenseKeysPage({
         title="Quản lý license keys"
         description="Xem các key đã cấp, theo dõi trạng thái redeem và thực hiện thao tác lifecycle cho admin."
       />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard label="Keys" value={filtered.length} />
-        <SummaryCard label="Sẵn sàng" value={availableCount} tone="default" />
-        <SummaryCard label="Đã cấp" value={issuedCount} tone="blue" />
-        <SummaryCard label="Đã redeem" value={redeemedCount} tone="emerald" />
+      <AdminStatsRow
+        stats={[
+          { label: "Keys", value: filtered.length },
+          { label: "Sẵn sàng", value: availableCount },
+          { label: "Đã cấp", value: issuedCount, tone: "blue" },
+          { label: "Đã redeem", value: redeemedCount, tone: "emerald" }
+        ]}
+      />
+
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phím tắt</span>
+        <Link href="/admin/license-keys?status=available" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Key sẵn sàng
+        </Link>
+        <Link href="/admin/license-keys?status=issued" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Đã cấp
+        </Link>
+        <Link href="/admin/license-keys?status=redeemed" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Đã redeem
+        </Link>
+        <Link href="/admin/audit?entityType=license_key" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Mở audit
+        </Link>
       </div>
 
       <ModeSwitchHeader
@@ -107,7 +128,23 @@ export default async function AdminLicenseKeysPage({
         ]}
       />
 
-      <form className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-4">
+      <AdminFilterBar
+        asForm
+        actions={
+          <>
+            <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+              Áp dụng bộ lọc
+            </button>
+            <Link
+              href="/admin/license-keys"
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Xóa lọc
+            </Link>
+            <span className="text-sm text-slate-500">Đã thu hồi: {revokedCount}</span>
+          </>
+        }
+      >
         <input
           name="q"
           defaultValue={typeof params.q === "string" ? params.q : ""}
@@ -126,22 +163,7 @@ export default async function AdminLicenseKeysPage({
           placeholder="License plan ID"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
-        <div className="flex items-center gap-2 lg:col-span-4">
-          <button
-            type="submit"
-            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white"
-          >
-            Áp dụng bộ lọc
-          </button>
-          <Link
-            href="/admin/license-keys"
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Xóa lọc
-          </Link>
-          <span className="text-sm text-slate-500">Đã thu hồi: {revokedCount}</span>
-        </div>
-      </form>
+      </AdminFilterBar>
 
       {isAdvanced ? (
         <LicenseKeyBulkActions

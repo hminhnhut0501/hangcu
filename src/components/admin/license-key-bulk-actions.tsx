@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 
 type LicenseKeyRow = {
   id: string;
@@ -31,10 +32,21 @@ export function LicenseKeyBulkActions({ keys }: Props) {
   const [message, setMessage] = useState("");
 
   const selectedCount = selected.length;
+  const presets = [
+    { label: "Available", value: "available" },
+    { label: "Issued", value: "issued" },
+    { label: "Redeemed", value: "redeemed" },
+    { label: "Revoked", value: "revoked" }
+  ] as const;
+
   function toggle(id: string) {
     setSelected((current) =>
       current.includes(id) ? current.filter((value) => value !== id) : [...current, id]
     );
+  }
+
+  function selectPreset(preset: (typeof presets)[number]["value"]) {
+    setSelected(keys.filter((key) => key.status === preset).map((key) => key.id));
   }
 
   async function applyBulk() {
@@ -73,6 +85,19 @@ export function LicenseKeyBulkActions({ keys }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Chọn nhanh</span>
+          {presets.map((preset) => (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => selectPreset(preset.value)}
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         <label className="flex items-center gap-2 text-sm">
           <span className="font-medium text-slate-700">Trạng thái hàng loạt</span>
           <select
@@ -109,6 +134,7 @@ export function LicenseKeyBulkActions({ keys }: Props) {
         >
           Bỏ chọn
         </button>
+        <AdminStatusBadge label={`Đã chọn ${selectedCount}`} tone={selectedCount ? "blue" : "neutral"} />
         <p className="text-sm text-slate-600">{message}</p>
       </div>
 

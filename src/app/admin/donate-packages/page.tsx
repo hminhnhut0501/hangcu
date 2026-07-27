@@ -1,23 +1,37 @@
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { listDonatePackages } from "@/modules/donate-packages/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
-import { SupportPackageQuickRow } from "@/components/admin/support-package-quick-row";
-import { MoneyAmount } from "@/components/money/money-amount";
+import { AdminMoneyDisplay } from "@/components/admin/admin-money-display";
+import { SupportPackageEditDrawer } from "@/components/admin/support-package-edit-drawer";
+import { SupportPackageActions } from "@/components/admin/support-package-actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function AdminDonatePackagesPage() {
   const packages = await listDonatePackages();
+  const activeCount = packages.filter((pkg) => pkg.status === "active").length;
+  const hiddenCount = packages.filter((pkg) => pkg.status === "hidden").length;
+  const withVnd = packages.filter((pkg) => pkg.vndAmountMinor != null).length;
+  const withUsd = packages.filter((pkg) => pkg.usdAmountMinor != null).length;
 
   return (
     <section className="space-y-8">
-      <div>
-        <p className="text-sm font-medium text-blue-600">Flexible support</p>
-        <h2 className="mt-3 text-4xl font-semibold tracking-tight">Quản lý mức ủng hộ</h2>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600">
-          Quản lý các mức gợi ý cho phần ủng hộ tự do, tách biệt khỏi license.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Flexible support"
+        title="Quản lý mức ủng hộ"
+        description="Quản lý các mức gợi ý cho phần ủng hộ tự do, tách biệt khỏi license."
+      />
+      <AdminStatsRow
+        stats={[
+          { label: "Active", value: activeCount, tone: "emerald" },
+          { label: "Hidden", value: hiddenCount, tone: "amber" },
+          { label: "Có VNĐ", value: withVnd, tone: "blue" },
+          { label: "Có USD", value: withUsd, tone: "violet" }
+        ]}
+      />
       <SimpleAdminForm
         endpoint="/api/admin/donate-packages"
         submitLabel="Lưu gói"
@@ -55,13 +69,18 @@ export default async function AdminDonatePackagesPage() {
                 <td className="px-6 py-4 text-slate-600">{pkg.slug}</td>
                 <td className="px-6 py-4">
                   <div className="space-y-1">
-                    <div><MoneyAmount amount={pkg.currencyPrices.VND} currency="VND" locale="vi" /></div>
-                    <div className="text-xs text-slate-500"><MoneyAmount amount={pkg.currencyPrices.USD} currency="USD" locale="en" /></div>
+                    <div><AdminMoneyDisplay amount={pkg.vndAmountMinor} currency="VND" locale="vi" /></div>
+                    <div className="text-xs text-slate-500"><AdminMoneyDisplay amount={pkg.usdAmountMinor} currency="USD" locale="en" /></div>
                   </div>
                 </td>
-                <td className="px-6 py-4">{pkg.status}</td>
                 <td className="px-6 py-4">
-                  <SupportPackageQuickRow packageItem={pkg} />
+                  <AdminStatusBadge tone={pkg.status === "active" ? "emerald" : pkg.status === "hidden" ? "amber" : "neutral"} label={pkg.status} />
+                </td>
+                <td className="px-6 py-4">
+                  <div className="space-y-3">
+                    <SupportPackageEditDrawer packageItem={pkg} />
+                    <SupportPackageActions id={pkg.id} />
+                  </div>
                 </td>
               </tr>
             ))}

@@ -199,7 +199,7 @@ describe("integration api service", () => {
         planCode?: string;
       };
       expect(botPayload.planCode).toBe("HCV_30D");
-      expect(botPayload.licenseCode).toMatch(/^LIC-/);
+      expect(botPayload.licenseCode).toMatch(/^HANGCU-/);
       expect(botPayload.activationUrl).toContain("t.me");
       expect(botPayload.activationUrl).toContain("start=lic_");
       expect(Array.isArray(botPayload.groupIds)).toBe(true);

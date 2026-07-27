@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { listWebhookSummaries } from "@/modules/webhooks/service";
 import { FilterPills } from "@/components/admin/filter-pills";
-import { SummaryCard } from "@/components/admin/summary-card";
-
-const statusStyles: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  processed: "bg-emerald-100 text-emerald-800",
-  failed: "bg-rose-100 text-rose-800"
-};
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 
 const quickFilters = [
   { label: "Tất cả", href: "/admin/payments" },
@@ -22,7 +20,8 @@ function renderStatusBadge(value: string) {
     processed: "Đã xử lý",
     failed: "Lỗi"
   };
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{labelMap[value] ?? value}</span>;
+  const tone = value === "processed" ? "emerald" : value === "pending" ? "amber" : value === "failed" ? "rose" : "neutral";
+  return <AdminStatusBadge tone={tone} label={labelMap[value] ?? value} />;
 }
 
 export default async function AdminPaymentsPage({
@@ -54,21 +53,20 @@ export default async function AdminPaymentsPage({
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-blue-600">Bán hàng</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">Thanh toán</h2>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Xem event payment, chẩn đoán lỗi và retry thao tác liên quan cổng thanh toán ở một nơi.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard label="Event" value={filtered.length} />
-          <SummaryCard label="Chờ" value={pendingCount} tone="amber" />
-          <SummaryCard label="Lỗi" value={failedCount} tone="rose" />
-          <SummaryCard label="Đã xử lý" value={processedCount} tone="emerald" />
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Bán hàng"
+        title="Thanh toán"
+        description="Xem event payment, chẩn đoán lỗi và retry thao tác liên quan cổng thanh toán ở một nơi."
+      />
+
+      <AdminStatsRow
+        stats={[
+          { label: "Event", value: filtered.length },
+          { label: "Chờ", value: pendingCount, tone: "amber" },
+          { label: "Lỗi", value: failedCount, tone: "rose" },
+          { label: "Đã xử lý", value: processedCount, tone: "emerald" }
+        ]}
+      />
 
       <FilterPills
         pills={quickFilters.map((filter) => ({
@@ -77,7 +75,23 @@ export default async function AdminPaymentsPage({
         }))}
       />
 
-      <form className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] lg:grid-cols-4">
+      <AdminFilterBar
+        asForm
+        actions={
+          <>
+            <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+              Áp dụng bộ lọc
+            </button>
+            <Link
+              href="/admin/payments"
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Xóa lọc
+            </Link>
+            <span className="text-sm text-slate-500">Providers: {providerCount}</span>
+          </>
+        }
+      >
         <input
           name="q"
           defaultValue={typeof params.q === "string" ? params.q : ""}
@@ -96,19 +110,7 @@ export default async function AdminPaymentsPage({
           placeholder="Trạng thái xử lý"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
-        <div className="flex items-center gap-2 lg:col-span-4">
-          <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
-            Áp dụng bộ lọc
-          </button>
-          <Link
-            href="/admin/payments"
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Xóa lọc
-          </Link>
-          <span className="text-sm text-slate-500">Providers: {providerCount}</span>
-        </div>
-      </form>
+      </AdminFilterBar>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -125,8 +127,11 @@ export default async function AdminPaymentsPage({
           <tbody className="divide-y divide-slate-200">
             {filtered.length === 0 ? (
               <tr>
-                <td className="px-6 py-10 text-center text-slate-500" colSpan={6}>
-                  Chưa có event payment nào phù hợp. Hãy xóa lọc hoặc đổi provider.
+                <td className="px-6 py-10" colSpan={6}>
+                  <AdminEmptyState
+                    title="Không có event payment phù hợp"
+                    description="Hãy xóa bớt bộ lọc hoặc đổi provider / trạng thái xử lý."
+                  />
                 </td>
               </tr>
             ) : (
@@ -144,9 +149,7 @@ export default async function AdminPaymentsPage({
                     <p className="font-medium">{event.errorMessage ?? "Xem chi tiết"}</p>
                     <p className="text-xs text-slate-500">Nhận lúc: {event.receivedAt}</p>
                   </td>
-                  <td className="px-6 py-4">
-                    {renderStatusBadge(event.processingStatus)}
-                  </td>
+                  <td className="px-6 py-4">{renderStatusBadge(event.processingStatus)}</td>
                   <td className="px-6 py-4">{event.signatureValid ? "Hợp lệ" : "Không hợp lệ"}</td>
                   <td className="px-6 py-4">
                     <Link

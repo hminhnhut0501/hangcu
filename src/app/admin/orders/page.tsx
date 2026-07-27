@@ -1,17 +1,13 @@
+import { AdminFilterBar } from "@/components/admin/admin-filter-bar";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
+import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { OrderBulkActions } from "@/components/admin/order-bulk-actions";
 import Link from "next/link";
 import { listAllOrders } from "@/modules/orders/service";
-import { MoneyAmount } from "@/components/money/money-amount";
 import { formatCurrencyLabel } from "@/lib/money/format";
-
-const statusStyles: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  paid: "bg-emerald-100 text-emerald-800",
-  processing: "bg-blue-100 text-blue-800",
-  fulfilled: "bg-violet-100 text-violet-800",
-  failed: "bg-rose-100 text-rose-800",
-  cancelled: "bg-slate-100 text-slate-700"
-};
+import { AdminMoneyDisplay } from "@/components/admin/admin-money-display";
 
 const quickFilters = [
   { label: "Tất cả", href: "/admin/orders" },
@@ -22,7 +18,17 @@ const quickFilters = [
 ];
 
 function renderStatusBadge(value: string) {
-  return <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+  const tone =
+    value === "paid" || value === "fulfilled"
+      ? "emerald"
+      : value === "processing"
+        ? "blue"
+        : value === "pending"
+          ? "amber"
+          : value === "failed"
+            ? "rose"
+            : "neutral";
+  return <AdminStatusBadge tone={tone} label={value} />;
 }
 
 function formatProvider(order: { paymentProvider?: string | null; metadata?: Record<string, unknown> }) {
@@ -65,32 +71,35 @@ export default async function AdminOrdersPage({
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-medium text-blue-600">Bán hàng</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">Đơn hàng</h2>
-          <p className="mt-2 max-w-3xl text-sm text-slate-600">
-            Theo dõi đơn khách, kiểm tra trạng thái fulfillment và xử lý thủ công khi cần.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-medium text-slate-400">Đơn</p>
-            <p className="mt-2 text-2xl font-semibold">{filtered.length}</p>
-          </article>
-          <article className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-medium text-amber-700">Chờ payment</p>
-            <p className="mt-2 text-2xl font-semibold">{pendingCount}</p>
-          </article>
-          <article className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-medium text-rose-700">Lỗi</p>
-            <p className="mt-2 text-2xl font-semibold">{failedCount}</p>
-          </article>
-          <article className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-            <p className="text-xs font-medium text-slate-400">Chưa fulfillment</p>
-            <p className="mt-2 text-2xl font-semibold">{unfulfilledCount}</p>
-          </article>
-        </div>
+      <AdminPageHeader
+        eyebrow="Bán hàng"
+        title="Đơn hàng"
+        description="Theo dõi đơn khách, kiểm tra trạng thái fulfillment và xử lý thủ công khi cần."
+      />
+
+      <AdminStatsRow
+        stats={[
+          { label: "Đơn", value: filtered.length },
+          { label: "Chờ payment", value: pendingCount, tone: "amber" },
+          { label: "Lỗi", value: failedCount, tone: "rose" },
+          { label: "Chưa fulfillment", value: unfulfilledCount }
+        ]}
+      />
+
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Phím tắt</span>
+        <Link href="/admin/orders?paymentStatus=pending" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Chờ payment
+        </Link>
+        <Link href="/admin/orders?fulfillmentStatus=unfulfilled" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Chưa fulfillment
+        </Link>
+        <Link href="/admin/orders?status=failed" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Đơn lỗi
+        </Link>
+        <Link href="/admin/audit?entityType=order" className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white">
+          Mở audit
+        </Link>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -115,7 +124,22 @@ export default async function AdminOrdersPage({
         })}
       </div>
 
-      <form className="grid gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_10px_35px_rgba(15,23,42,0.05)] lg:grid-cols-4">
+      <AdminFilterBar
+        asForm
+        actions={
+          <>
+            <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+              Áp dụng bộ lọc
+            </button>
+            <Link
+              href="/admin/orders"
+              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Xóa lọc
+            </Link>
+          </>
+        }
+      >
         <input
           name="q"
           defaultValue={typeof params.q === "string" ? params.q : ""}
@@ -140,18 +164,7 @@ export default async function AdminOrdersPage({
           placeholder="Trạng thái fulfillment"
           className="rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500"
         />
-        <div className="flex items-center gap-2 lg:col-span-4">
-          <button type="submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
-            Áp dụng bộ lọc
-          </button>
-          <Link
-            href="/admin/orders"
-            className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Xóa lọc
-          </Link>
-        </div>
-      </form>
+      </AdminFilterBar>
 
       <OrderBulkActions
         orders={filtered.map((order) => ({
@@ -180,8 +193,11 @@ export default async function AdminOrdersPage({
           <tbody className="divide-y divide-slate-200">
             {filtered.length === 0 ? (
               <tr>
-                <td className="px-6 py-10 text-center text-slate-500" colSpan={6}>
-                  Chưa có đơn nào phù hợp.
+                <td className="px-6 py-10" colSpan={7}>
+                  <AdminEmptyState
+                    title="Không có đơn phù hợp"
+                    description="Thử bỏ bớt bộ lọc hoặc kiểm tra lại trạng thái payment / fulfillment."
+                  />
                 </td>
               </tr>
             ) : (
@@ -207,7 +223,7 @@ export default async function AdminOrdersPage({
                     </p>
                   </td>
                   <td className="px-6 py-4 font-medium">
-                    <MoneyAmount amount={order.totalMinor} currency={order.currency} locale="vi" />
+                    <AdminMoneyDisplay amount={order.totalMinor} currency={order.currency} locale="vi" />
                   </td>
                 </tr>
               ))

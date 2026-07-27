@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { AdminConfirmDialog } from "@/components/admin/admin-confirm-dialog";
 
-export function LicensePlanActions({ id }: { id: string }) {
+export function SupportPackageActions({ id }: { id: string }) {
   const router = useRouter();
 
   async function handleDelete() {
@@ -12,7 +12,7 @@ export function LicensePlanActions({ id }: { id: string }) {
     const token = csrfJson.data?.token;
     if (!token) throw new Error("Missing CSRF token");
 
-    const response = await fetch("/api/admin/license-plans", {
+    const response = await fetch("/api/admin/donate-packages", {
       method: "DELETE",
       headers: {
         "content-type": "application/json",
@@ -40,9 +40,9 @@ export function LicensePlanActions({ id }: { id: string }) {
           Xóa
         </button>
       }
-      title="Xóa license plan"
-      description="Xóa plan này sẽ ảnh hưởng tới dữ liệu liên quan. Hành động không thể hoàn tác."
-      confirmLabel="Xóa plan"
+      title="Xóa support package"
+      description="Xóa gói support này sẽ ảnh hưởng tới checkout và homepage. Hành động không thể hoàn tác."
+      confirmLabel="Xóa gói"
       cancelLabel="Hủy"
       tone="danger"
       onConfirm={handleDelete}

@@ -9,7 +9,7 @@ type Props = {
   title: string;
   endpoint: string;
   folder: string;
-  assetKey: string;
+  assetKey?: string;
   description: string;
   extraFields?: Array<{
     name: string;
@@ -17,11 +17,20 @@ type Props = {
     type?: string;
     placeholder?: string;
     defaultValue?: string;
+    options?: Array<{
+      label: string;
+      value: string;
+    }>;
+  }>;
+  hiddenFields?: Array<{
+    name: string;
+    value: string;
   }>;
   triggerLabel?: string;
+  onSuccess?: () => void | Promise<void>;
 };
 
-function ImageUploadFormInner({ title, endpoint, folder, assetKey, description, extraFields = [] }: Props) {
+function ImageUploadFormInner({ title, endpoint, folder, assetKey, description, extraFields = [], hiddenFields = [], onSuccess }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [url, setUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -56,6 +65,7 @@ function ImageUploadFormInner({ title, endpoint, folder, assetKey, description, 
       setUrl(json.data.publicUrl);
       setStatus("done");
       setMessage("Upload completed.");
+      await onSuccess?.();
     } catch (error) {
       setUrl(null);
       setStatus("error");
@@ -68,20 +78,37 @@ function ImageUploadFormInner({ title, endpoint, folder, assetKey, description, 
       <h3 className="text-lg font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-slate-600">{description}</p>
       <input type="hidden" name="folder" value={folder} />
-      <input type="hidden" name="assetKey" value={assetKey} />
+      {assetKey ? <input type="hidden" name="assetKey" value={assetKey} /> : null}
+      {hiddenFields.map((field) => (
+        <input key={field.name} type="hidden" name={field.name} value={field.value} />
+      ))}
       <AdminPanel className="mt-4 bg-slate-50/70 p-4 shadow-none">
         <input name="file" type="file" accept="image/*" className="block w-full text-sm" />
         <div className="mt-4 grid gap-3">
           {extraFields.map((field) => (
             <label key={field.name} className="block">
               <span className="text-sm font-medium text-slate-700">{field.label}</span>
-              <input
-                name={field.name}
-                type={field.type ?? "text"}
-                placeholder={field.placeholder}
-                defaultValue={field.defaultValue}
-                className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
-              />
+              {field.type === "select" ? (
+                <select
+                  name={field.name}
+                  defaultValue={field.defaultValue}
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
+                >
+                  {field.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  name={field.name}
+                  type={field.type ?? "text"}
+                  placeholder={field.placeholder}
+                  defaultValue={field.defaultValue}
+                  className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
+                />
+              )}
             </label>
           ))}
         </div>

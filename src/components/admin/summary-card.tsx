@@ -1,7 +1,7 @@
 type SummaryCardProps = {
   label: string;
   value: string | number;
-  tone?: "default" | "blue" | "emerald" | "amber" | "rose";
+  tone?: "default" | "blue" | "emerald" | "amber" | "rose" | "violet";
   className?: string;
 };
 
@@ -10,7 +10,8 @@ const toneStyles: Record<NonNullable<SummaryCardProps["tone"]>, string> = {
   blue: "border-blue-200 bg-blue-50 text-slate-950",
   emerald: "border-emerald-200 bg-emerald-50 text-slate-950",
   amber: "border-amber-200 bg-amber-50 text-slate-950",
-  rose: "border-rose-200 bg-rose-50 text-slate-950"
+  rose: "border-rose-200 bg-rose-50 text-slate-950",
+  violet: "border-violet-200 bg-violet-50 text-slate-950"
 };
 
 export function SummaryCard({ label, value, tone = "default", className = "" }: SummaryCardProps) {

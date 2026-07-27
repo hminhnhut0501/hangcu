@@ -1,17 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { LicenseKeyActionsForm } from "@/components/admin/license-key-actions-form";
 import { ModeSwitchHeader } from "@/components/admin/mode-switch-header";
 import { getLicenseKeyById } from "@/modules/license-keys/service";
-
-const statusStyles: Record<string, string> = {
-  available: "bg-slate-100 text-slate-700",
-  reserved: "bg-amber-100 text-amber-800",
-  issued: "bg-blue-100 text-blue-800",
-  redeemed: "bg-emerald-100 text-emerald-800",
-  expired: "bg-rose-100 text-rose-800",
-  revoked: "bg-zinc-100 text-zinc-800"
-};
 
 function formatDate(value: Date | string | null) {
   if (!value) return "N/A";
@@ -20,7 +14,17 @@ function formatDate(value: Date | string | null) {
 }
 
 function formatStatus(value: string) {
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+  const tone =
+    value === "redeemed"
+      ? "emerald"
+      : value === "issued"
+        ? "blue"
+        : value === "reserved" || value === "available"
+          ? "amber"
+          : value === "expired" || value === "revoked"
+            ? "rose"
+            : "neutral";
+  return <AdminStatusBadge tone={tone} label={value} />;
 }
 
 export default async function AdminLicenseKeyDetailPage({
@@ -42,29 +46,32 @@ export default async function AdminLicenseKeyDetailPage({
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-blue-600">Chi tiết license</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">****{key.codeLastFour}</h2>
-          <p className="text-sm text-slate-600">{key.id}</p>
-          <div className="flex flex-wrap gap-2">
-            {formatStatus(key.status)}
-            <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
-              {key.licensePlanId}
-            </span>
-          </div>
-        </div>
-        <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-          <p className="text-xs font-medium text-slate-400">Thao tác nhanh</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link
-              href={`/admin/license-keys?mode=${isAdvanced ? "advanced" : "basic"}`}
-              className="rounded-full border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
-            >
-              Về danh sách
-            </Link>
-          </div>
-        </div>
+      <AdminPageHeader
+        eyebrow="Chi tiết license"
+        title={`****${key.codeLastFour}`}
+        description={key.id}
+        actions={
+          <Link
+            href={`/admin/license-keys?mode=${isAdvanced ? "advanced" : "basic"}`}
+            className="rounded-full border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
+          >
+            Về danh sách
+          </Link>
+        }
+      />
+
+      <AdminStatsRow
+        stats={[
+          { label: "Gói", value: key.licensePlanId },
+          { label: "Đơn", value: key.orderId ?? "Không có" },
+          { label: "Đã cấp", value: formatDate(key.issuedAt) },
+          { label: "Hết hạn", value: formatDate(key.expiresAt) }
+        ]}
+      />
+
+      <div className="flex flex-wrap gap-2">
+        {formatStatus(key.status)}
+        <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">{key.licensePlanId}</span>
       </div>
 
       <ModeSwitchHeader

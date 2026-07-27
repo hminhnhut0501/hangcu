@@ -1,13 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { PaymentRetryButton } from "@/components/admin/payment-retry-button";
 import { getWebhookEvent } from "@/modules/webhooks/service";
-
-const statusStyles: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  processed: "bg-emerald-100 text-emerald-800",
-  failed: "bg-rose-100 text-rose-800"
-};
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "N/A";
@@ -19,7 +16,8 @@ function formatDate(value: Date | string | null | undefined) {
 }
 
 function formatBadge(value: string) {
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+  const tone = value === "processed" ? "emerald" : value === "pending" ? "amber" : value === "failed" ? "rose" : "neutral";
+  return <AdminStatusBadge tone={tone} label={value} />;
 }
 
 export default async function AdminPaymentDetailPage({
@@ -38,23 +36,39 @@ export default async function AdminPaymentDetailPage({
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-blue-600">Chi tiết payment</p>
-          <h2 className="mt-3 text-4xl font-semibold tracking-tight">{event.providerEventId}</h2>
-          <p className="text-sm text-slate-600">Provider: {event.provider} • Type: {event.eventType}</p>
-          <div className="flex flex-wrap gap-2">
-            {formatBadge(event.processingStatus)}
-            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${event.signatureValid ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}`}>
-              {event.signatureValid ? "signature hợp lệ" : "signature không hợp lệ"}
-            </span>
-          </div>
+      <AdminPageHeader
+        eyebrow="Chi tiết payment"
+        title={event.providerEventId}
+        description={`Provider: ${event.provider} • Type: ${event.eventType}`}
+        actions={
+          <Link
+            href="/admin/payments"
+            className="inline-flex rounded-full border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
+          >
+            Về danh sách
+          </Link>
+        }
+      />
+
+      <AdminStatsRow
+        stats={[
+          { label: "Provider", value: event.provider },
+          { label: "Event type", value: event.eventType },
+          { label: "State", value: event.processingStatus, tone: "amber" },
+          { label: "Signature", value: event.signatureValid ? "valid" : "invalid", tone: event.signatureValid ? "emerald" : "rose" }
+        ]}
+      />
+
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+        <div className="flex flex-wrap gap-2">
+          {formatBadge(event.processingStatus)}
+          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${event.signatureValid ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800"}`}>
+            {event.signatureValid ? "signature hợp lệ" : "signature không hợp lệ"}
+          </span>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+        <div className="mt-4 rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
           <p className="text-xs font-medium text-slate-400">Đơn liên quan</p>
-          <p className="mt-2 text-lg font-semibold">
-            {typeof payload.orderNumber === "string" ? payload.orderNumber : "Unknown"}
-          </p>
+          <p className="mt-2 text-lg font-semibold">{typeof payload.orderNumber === "string" ? payload.orderNumber : "Unknown"}</p>
           <div className="mt-3">
             <PaymentRetryButton
               provider={event.provider}

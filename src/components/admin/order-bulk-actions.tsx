@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 
 type OrderRow = {
   orderNumber: string;
@@ -28,10 +29,25 @@ export function OrderBulkActions({ orders }: Props) {
   const [status, setStatus] = useState("processing");
   const [message, setMessage] = useState("");
   const selectedCount = selected.length;
+  const presets = [
+    { label: "Pending", value: "pending" },
+    { label: "Paid", value: "paid" },
+    { label: "Processing", value: "processing" },
+    { label: "Fulfilled", value: "fulfilled" },
+    { label: "Failed", value: "failed" }
+  ] as const;
 
   function toggle(orderNumber: string) {
     setSelected((current) =>
       current.includes(orderNumber) ? current.filter((value) => value !== orderNumber) : [...current, orderNumber]
+    );
+  }
+
+  function selectPreset(preset: (typeof presets)[number]["value"]) {
+    setSelected(
+      orders
+        .filter((order) => order.status === preset || order.paymentStatus === preset || order.fulfillmentStatus === preset)
+        .map((order) => order.orderNumber)
     );
   }
 
@@ -70,6 +86,19 @@ export function OrderBulkActions({ orders }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Chọn nhanh</span>
+          {presets.map((preset) => (
+            <button
+              key={preset.value}
+              type="button"
+              onClick={() => selectPreset(preset.value)}
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-white"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         <label className="flex items-center gap-2 text-sm">
           <span className="font-medium text-slate-700">Trạng thái hàng loạt</span>
           <select
@@ -107,6 +136,7 @@ export function OrderBulkActions({ orders }: Props) {
         >
           Bỏ chọn
         </button>
+        <AdminStatusBadge label={`Đã chọn ${selectedCount}`} tone={selectedCount ? "blue" : "neutral"} />
         <p className="text-sm text-slate-600">{message}</p>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -24,6 +25,7 @@ import {
   Upload,
   Webhook
 } from "lucide-react";
+import { AdminCommandPalette } from "@/components/admin/admin-command-palette";
 
 type AdminPanelProps = {
   children: ReactNode;
@@ -217,6 +219,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
     }
   ] as const;
 
+  const commandActions = [
+    { label: "Tổng quan", description: "Mở dashboard vận hành", href: "/admin" as Route, group: "Điều hướng", keywords: ["dashboard", "overview"] },
+    { label: "Đơn hàng", description: "Xem đơn và bulk update", href: "/admin/orders" as Route, group: "Điều hướng", keywords: ["orders", "bulk", "payment"] },
+    { label: "Thanh toán", description: "Tra cứu payment events", href: "/admin/payments" as Route, group: "Điều hướng", keywords: ["payments", "gateway"] },
+    { label: "Gói license", description: "Sửa plan 30 ngày / lifetime", href: "/admin/license-plans" as Route, group: "Điều hướng", keywords: ["license", "plans", "price"] },
+    { label: "License keys", description: "Quản lý vòng đời key", href: "/admin/license-keys" as Route, group: "Điều hướng", keywords: ["keys", "revoke", "redeem"] },
+    { label: "Gói hỗ trợ", description: "Sửa support package và giá", href: "/admin/donate-packages" as Route, group: "Điều hướng", keywords: ["support", "packages", "donate"] },
+    { label: "Site settings", description: "Chỉnh nội dung homepage và footer", href: "/admin/site-settings" as Route, group: "Nội dung", keywords: ["content", "homepage"] },
+    { label: "Media", description: "Upload và quản lý ảnh/video", href: "/admin/media" as Route, group: "Nội dung", keywords: ["upload", "image", "video"] },
+    { label: "Audit log", description: "Tra soát thay đổi và export CSV", href: "/admin/audit" as Route, group: "Giám sát", keywords: ["audit", "log", "export"] },
+    { label: "Compliance", description: "Checklist merchant readiness", href: "/admin/compliance" as Route, group: "Giám sát", keywords: ["merchant", "policy"] },
+    { label: "Hardening", description: "Kiểm tra auth, CSRF, origin", href: "/admin/hardening" as Route, group: "Giám sát", keywords: ["security", "csrf", "auth"] },
+    { label: "Webhooks", description: "Retry và theo dõi webhook", href: "/admin/webhooks" as Route, group: "Giám sát", keywords: ["webhooks", "retry"] }
+  ] as const;
+
   const sidebarWidth = collapsed ? "lg:grid-cols-[88px_1fr]" : "lg:grid-cols-[280px_1fr]";
   const isActive = useMemo(
     () => (href: string) => pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`)),
@@ -243,12 +260,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   {collapsed ? "Mở" : "Thu"}
                 </button>
               </div>
-              <div className={`mt-4 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 ${collapsed ? "lg:hidden" : ""}`}>
-                <p className="font-semibold text-white">Phiên hiện tại</p>
-                <p className="mt-1">
-                  {sessionLoaded ? (session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session") : "Đang kiểm tra..."}
-                </p>
-              </div>
+            <div className={`mt-4 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 ${collapsed ? "lg:hidden" : ""}`}>
+              <p className="font-semibold text-white">Phiên hiện tại</p>
+              <p className="mt-1">
+                {sessionLoaded ? (session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session") : "Đang kiểm tra..."}
+              </p>
+            </div>
+            <AdminCommandPalette actions={commandActions} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
               {healthBadges.map((badge) => {

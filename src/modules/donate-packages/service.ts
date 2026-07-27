@@ -19,6 +19,10 @@ export async function getDonatePackageByCode(code: string) {
   return repository.findByCode(code);
 }
 
+export async function getDonatePackageById(id: string) {
+  return repository.findById(id);
+}
+
 export async function upsertDonatePackage(input: {
   id: string;
   code: string;
@@ -54,4 +58,8 @@ export async function upsertDonatePackage(input: {
       }
     }
   });
+}
+
+export async function deleteDonatePackage(id: string) {
+  return repository.delete(id);
 }

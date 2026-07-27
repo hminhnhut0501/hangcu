@@ -1,23 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { OrderStatusForm } from "@/components/admin/order-status-form";
 import { getOrderByOrderNumber } from "@/modules/orders/service";
 import { MoneyAmount } from "@/components/money/money-amount";
 import { formatCurrencyLabel } from "@/lib/money/format";
-
-const statusStyles: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800",
-  paid: "bg-emerald-100 text-emerald-800",
-  processing: "bg-blue-100 text-blue-800",
-  fulfilled: "bg-violet-100 text-violet-800",
-  failed: "bg-rose-100 text-rose-800",
-  cancelled: "bg-slate-100 text-slate-700",
-  unpaid: "bg-amber-100 text-amber-800",
-  refunded: "bg-slate-100 text-slate-700",
-  partially_refunded: "bg-slate-100 text-slate-700",
-  unfulfilled: "bg-amber-100 text-amber-800",
-  partially_fulfilled: "bg-blue-100 text-blue-800"
-};
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "N/A";
@@ -29,7 +18,17 @@ function formatDate(value: Date | string | null | undefined) {
 }
 
 function formatStatus(value: string) {
-  return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[value] ?? "bg-slate-100 text-slate-700"}`}>{value}</span>;
+  const tone =
+    value === "paid" || value === "fulfilled"
+      ? "emerald"
+      : value === "processing" || value === "partially_fulfilled"
+        ? "blue"
+        : value === "pending" || value === "unpaid" || value === "unfulfilled"
+          ? "amber"
+          : value === "failed"
+            ? "rose"
+            : "neutral";
+  return <AdminStatusBadge tone={tone} label={value} />;
 }
 
 function formatValue(value: unknown) {
@@ -80,37 +79,40 @@ export default async function AdminOrderDetailPage({
 
   return (
     <section className="space-y-8">
+      <AdminPageHeader
+        eyebrow="Chi tiết đơn"
+        title={order.orderNumber}
+        description={order.customerEmail}
+        actions={
+          <Link
+            href="/admin/orders"
+            className="inline-flex rounded-full border border-blue-200 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
+          >
+            Về danh sách
+          </Link>
+        }
+      />
+
+      <AdminStatsRow
+        stats={[
+          { label: "Tổng đơn", value: new Intl.NumberFormat("vi-VN", { style: "currency", currency: order.currency }).format(order.totalMinor / 100) },
+          { label: "Items", value: order.items.length },
+          { label: "Payment", value: order.paymentStatus, tone: "amber" },
+          { label: "Fulfillment", value: order.fulfillmentStatus, tone: "blue" }
+        ]}
+      />
+
       <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-blue-600">Chi tiết đơn</p>
-            <h2 className="text-4xl font-semibold tracking-tight">{order.orderNumber}</h2>
-            <p className="text-sm text-slate-600">{order.customerEmail}</p>
-            <div className="flex flex-wrap gap-2">
-              {formatStatus(order.status)}
-              {formatStatus(order.paymentStatus)}
-              {formatStatus(order.fulfillmentStatus)}
-            </div>
-            <div className="flex flex-wrap gap-2 text-sm text-slate-500">
-              <span className="rounded-full bg-slate-100 px-3 py-1">Nguồn: {order.source}</span>
-              <span className="rounded-full bg-slate-100 px-3 py-1">
-                Currency: {formatCurrencyLabel(order.currency, "vi") ?? order.currency}
-              </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1">Items: {order.items.length}</span>
-            </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Tổng đơn</p>
-              <p className="mt-2 text-2xl font-semibold">
-                <MoneyAmount amount={order.totalMinor} currency={order.currency} locale="vi" />
-              </p>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">Mã đơn</p>
-              <p className="mt-2 text-base font-semibold">{order.id}</p>
-            </div>
-          </div>
+        <div className="flex flex-wrap gap-2">
+          {formatStatus(order.status)}
+          {formatStatus(order.paymentStatus)}
+          {formatStatus(order.fulfillmentStatus)}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2 text-sm text-slate-500">
+          <span className="rounded-full bg-slate-100 px-3 py-1">Nguồn: {order.source}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">Currency: {formatCurrencyLabel(order.currency, "vi") ?? order.currency}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">Items: {order.items.length}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">Order ID: {order.id}</span>
         </div>
       </div>
 

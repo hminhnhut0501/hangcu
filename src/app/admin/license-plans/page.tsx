@@ -1,15 +1,21 @@
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminStatsRow } from "@/components/admin/admin-stats-row";
+import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
 import { listLicensePlans } from "@/modules/license-plans/service";
 import { SimpleAdminForm } from "@/components/admin/simple-form";
 import { LicensePlanActions } from "@/components/admin/license-plan-actions";
-import { LicensePlanQuickRow } from "@/components/admin/license-plan-quick-row";
-import { MoneyAmount } from "@/components/money/money-amount";
+import { AdminMoneyDisplay } from "@/components/admin/admin-money-display";
+import { LicensePlanEditDrawer } from "@/components/admin/license-plan-edit-drawer";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default async function AdminLicensePlansPage({ searchParams }: { searchParams?: Promise<{ mode?: string }> }) {
+export default async function AdminLicensePlansPage() {
   const plans = await listLicensePlans();
+  const activeCount = plans.filter((plan) => plan.status === "active").length;
+  const hiddenCount = plans.filter((plan) => plan.status === "hidden").length;
+  const lifetimeCount = plans.filter((plan) => plan.isLifetime).length;
+  const regularCount = plans.filter((plan) => !plan.isLifetime).length;
 
   return (
     <section className="space-y-8">
@@ -17,6 +23,14 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
         eyebrow="License plans"
         title="Quản lý license plans"
         description="Sửa nhanh giá, trạng thái và thứ tự ngay trong dòng. Mở drawer khi cần sửa sâu hơn."
+      />
+      <AdminStatsRow
+        stats={[
+          { label: "Active", value: activeCount, tone: "emerald" },
+          { label: "Hidden", value: hiddenCount, tone: "amber" },
+          { label: "30 ngày", value: regularCount, tone: "blue" },
+          { label: "Lifetime", value: lifetimeCount, tone: "violet" }
+        ]}
       />
       <SimpleAdminForm
         endpoint="/api/admin/license-plans"
@@ -61,15 +75,17 @@ export default async function AdminLicensePlansPage({ searchParams }: { searchPa
                 <td className="px-6 py-4">{plan.name}</td>
                 <td className="px-6 py-4">
                   <div className="flex flex-wrap gap-2">
-                    <MoneyAmount amount={plan.currencyPrices.VND} currency="VND" locale="vi" kind="catalog" />
+                    <AdminMoneyDisplay amount={plan.currencyPrices.VND} currency="VND" locale="vi" kind="catalog" />
                     <span>/</span>
-                    <MoneyAmount amount={plan.currencyPrices.USD} currency="USD" locale="en" kind="catalog" />
+                    <AdminMoneyDisplay amount={plan.currencyPrices.USD} currency="USD" locale="en" kind="catalog" />
                   </div>
                 </td>
-                <td className="px-6 py-4">{plan.status}</td>
+                <td className="px-6 py-4">
+                  <AdminStatusBadge tone={plan.status === "active" ? "emerald" : plan.status === "hidden" ? "amber" : "neutral"} label={plan.status} />
+                </td>
                 <td className="px-6 py-4">
                   <div className="space-y-3">
-                    <LicensePlanQuickRow plan={plan} />
+                    <LicensePlanEditDrawer plan={plan} isAdvanced={false} />
                     <div className="flex items-center gap-3">
                       <LicensePlanActions id={plan.id} />
                     </div>
