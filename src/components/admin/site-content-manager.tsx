@@ -296,7 +296,7 @@ function OverviewCard({
     <AdminPanel className="space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">{label}</p>
+          <p className="text-xs font-medium text-blue-600">{label}</p>
           <h3 className="mt-3 text-xl font-semibold text-slate-950">{title}</h3>
           <p className="mt-2 text-sm text-slate-600">{text}</p>
         </div>
@@ -517,13 +517,13 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
         <div className="space-y-6">
           <AdminPanel className="overflow-hidden p-0">
             <div className="border-b border-slate-200 px-6 py-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Preview</p>
+          <p className="text-xs font-medium text-blue-600">Preview</p>
               <h3 className="mt-3 text-2xl font-semibold text-slate-950">Xem trước homepage</h3>
               <p className="mt-2 text-sm text-slate-600">Preview đọc trực tiếp từ cùng một nguồn dữ liệu.</p>
             </div>
             <div className="space-y-5 p-6">
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-600">{settings.heroEyebrowEn}</p>
+                <p className="text-xs font-medium text-blue-600">{settings.heroEyebrowEn}</p>
                 <h4 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{settings.heroTitleEn}</h4>
                 <p className="mt-3 text-sm leading-6 text-slate-600">{settings.heroDescriptionEn}</p>
                 <div className="mt-5 flex flex-wrap gap-3">
@@ -547,7 +547,7 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Sections</p>
+                  <p className="text-xs font-medium text-slate-400">Sections</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-600">
                     <li>• {settings.featuresSectionTitleEn}</li>
                     <li>• {settings.demoSectionTitleEn}</li>
@@ -556,7 +556,7 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
                   </ul>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">System</p>
+                  <p className="text-xs font-medium text-slate-400">System</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-600">
                     <li>• Navigation: {navVisibleCount} mục hiện</li>
                     <li>• Blocks: {blockVisibleCount}/4 bật</li>
@@ -571,7 +571,7 @@ export function SiteContentManager({ initialSettings, source, errorMessage = nul
 
           <AdminPanel className="space-y-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Gợi ý</p>
+              <p className="text-xs font-medium text-blue-600">Gợi ý</p>
               <h3 className="mt-3 text-xl font-semibold text-slate-950">Mẹo chỉnh nhanh</h3>
             </div>
             <div className="grid gap-3 text-sm text-slate-600">

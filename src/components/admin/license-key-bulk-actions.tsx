@@ -86,7 +86,7 @@ export function LicenseKeyBulkActions({ keys }: Props) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Chọn nhanh</span>
+          <span className="text-xs font-medium text-slate-400">Chọn nhanh</span>
           {presets.map((preset) => (
             <button
               key={preset.value}

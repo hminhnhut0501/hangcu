@@ -75,7 +75,7 @@ function CompactRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2.5">
-      <p className="text-xs font-medium uppercase tracking-[0.22em] text-slate-500">{label}</p>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       <div className="text-right text-sm font-medium text-slate-950">{value}</div>
     </div>
   );
@@ -208,7 +208,7 @@ export function CheckoutPaymentForm({
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 1" : "Step 1"}</p>
+                <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 1" : "Step 1"}</p>
                 <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chọn kiểu thanh toán" : "Choose payment type"}</h3>
               </div>
             </div>
@@ -223,7 +223,7 @@ export function CheckoutPaymentForm({
             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
+                  <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
                   <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chọn gói" : "Choose a plan"}</h3>
                 </div>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">{licenseOptions.length}</span>
@@ -249,7 +249,7 @@ export function CheckoutPaymentForm({
             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
+                  <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
                   <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Chọn mức" : "Choose a tier"}</h3>
                 </div>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">{supportOptions.length}</span>
@@ -274,7 +274,7 @@ export function CheckoutPaymentForm({
           {mode === "custom" ? (
             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
+                <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
                 <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập số tiền" : "Enter amount"}</h3>
               </div>
               <label className="block">
@@ -294,7 +294,7 @@ export function CheckoutPaymentForm({
           <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 3" : "Step 3"}</p>
+                <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 3" : "Step 3"}</p>
                 <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập email" : "Email"}</h3>
               </div>
               <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">{locale === "vi" ? "Gửi key" : "Receipt"}</span>
@@ -311,7 +311,7 @@ export function CheckoutPaymentForm({
           <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Bước 4" : "Step 4"}</p>
+                <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 4" : "Step 4"}</p>
                 <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Cổng thanh toán" : "Gateway"}</h3>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">{currentCurrency}</span>
@@ -351,7 +351,7 @@ export function CheckoutPaymentForm({
 
         <aside className="border-t border-slate-200 bg-slate-50 p-5 lg:sticky lg:top-6 lg:self-start lg:border-l lg:border-t-0 lg:bg-white">
           <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{locale === "vi" ? "Tóm tắt" : "Summary"}</p>
+            <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Tóm tắt" : "Summary"}</p>
             <div className="mt-3 space-y-2">
               <CompactRow label={locale === "vi" ? "Gói" : "Plan"} value={selectedOption?.name ?? "-"} />
               <CompactRow
@@ -367,7 +367,7 @@ export function CheckoutPaymentForm({
 
           {orderSummary.orderNumber || orderSummary.checkoutId || orderSummary.customerRef ? (
             <div className="mt-3 rounded-[1.5rem] border border-blue-200 bg-blue-50 p-4 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-blue-500">{locale === "vi" ? "Bot" : "Bot"}</p>
+              <p className="text-xs font-medium text-blue-500">{locale === "vi" ? "Bot" : "Bot"}</p>
               <div className="mt-3 flex flex-wrap gap-2 text-xs text-blue-900">
                 {orderSummary.orderNumber ? <span className="rounded-full bg-white px-3 py-1 ring-1 ring-blue-100">#{orderSummary.orderNumber}</span> : null}
                 {orderSummary.checkoutId ? <span className="rounded-full bg-white px-3 py-1 ring-1 ring-blue-100">{orderSummary.checkoutId}</span> : null}

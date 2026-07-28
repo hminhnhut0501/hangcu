@@ -42,7 +42,7 @@ export default async function PricingPage() {
                   <h2 className="mt-2 text-2xl font-semibold text-slate-950">{vi ? plan.nameVi : plan.nameEn}</h2>
                   <p className="mt-2 text-slate-600">{plan.description}</p>
                   <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">{vi ? "Giá chính" : "Primary price"}</p>
+                    <p className="text-xs font-medium text-slate-500">{vi ? "Giá chính" : "Primary price"}</p>
                     <p className="mt-2 text-3xl font-semibold text-slate-950">
                       <MoneyAmount amount={primaryAmount} currency={primaryCurrency} locale={locale} kind="catalog" />
                     </p>

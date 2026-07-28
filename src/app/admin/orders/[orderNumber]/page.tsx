@@ -41,7 +41,7 @@ function formatValue(value: unknown) {
 function EvidenceRow({ label, value }: { label: string; value: unknown }) {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_35px_rgba(15,23,42,0.04)]">
-      <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-400">{label}</p>
+      <p className="text-xs font-medium text-slate-400">{label}</p>
       <p className="mt-2 text-sm font-semibold text-slate-950">{formatValue(value)}</p>
     </div>
   );

@@ -419,12 +419,12 @@ export function MediaManager({ initialSettings, initialAssets, initialProducts }
             <AdminPanel className="space-y-4 bg-slate-50/70 p-4 shadow-none">
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Đang chọn</p>
+                  <p className="text-xs font-medium text-slate-400">Đang chọn</p>
                   <p className="mt-2 text-sm font-medium text-slate-950">{selectedAsset?.assetKey ?? "Chưa chọn asset"}</p>
                   <p className="mt-1 text-xs text-slate-500">{selectedAsset?.category ?? "Hero / logo / banner / favicon"}</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Ghi chú</p>
+                  <p className="text-xs font-medium text-slate-400">Ghi chú</p>
                   <p className="mt-2 text-sm text-slate-600">Sau khi upload, danh sách và hero preview sẽ refresh ngay.</p>
                 </div>
               </div>

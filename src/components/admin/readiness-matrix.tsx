@@ -56,7 +56,7 @@ export function ReadinessMatrix({ title, eyebrow, description, summary, items, a
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summary.map((card) => (
           <AdminPanel key={card.label} className={`space-y-3 ${summaryToneStyles[card.tone ?? "default"]}`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{card.label}</p>
+            <p className="text-xs font-medium text-slate-400">{card.label}</p>
             <p className="text-2xl font-semibold text-slate-950">{card.value}</p>
           </AdminPanel>
         ))}
@@ -97,7 +97,7 @@ export function ReadinessMatrix({ title, eyebrow, description, summary, items, a
       <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
         <AdminPanel className="space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Review packet</p>
+            <p className="text-xs font-medium text-blue-600">Review packet</p>
             <h3 className="mt-3 text-xl font-semibold text-slate-950">Bộ hồ sơ nộp merchant</h3>
             <p className="mt-2 text-sm text-slate-600">Chuẩn bị sẵn nội dung để gửi cho provider hoặc reviewer.</p>
           </div>
@@ -111,7 +111,7 @@ export function ReadinessMatrix({ title, eyebrow, description, summary, items, a
 
         <AdminPanel className="space-y-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Quick links</p>
+            <p className="text-xs font-medium text-blue-600">Quick links</p>
             <h3 className="mt-3 text-xl font-semibold text-slate-950">Nhảy nhanh sang màn cần sửa</h3>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

@@ -86,9 +86,7 @@ export function AdminCommandPalette({ actions }: Props) {
           <Command className="h-4 w-4" />
           Lệnh nhanh
         </span>
-        <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-300">
-          Ctrl K
-        </span>
+        <span className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[10px] font-semibold text-slate-300">Ctrl K</span>
       </button>
 
       <dialog
@@ -117,7 +115,7 @@ export function AdminCommandPalette({ actions }: Props) {
             <div className="space-y-6">
               {Object.entries(grouped).map(([group, items]) => (
                 <div key={group} className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{group}</p>
+                  <p className="text-xs font-medium text-slate-400">{group}</p>
                   <div className="grid gap-3">
                     {items.map((action) => (
                       <button

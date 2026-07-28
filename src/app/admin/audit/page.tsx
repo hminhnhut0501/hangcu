@@ -96,7 +96,7 @@ function AuditRowDrawer({ log }: { log: AuditLog }) {
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {summaryItems.map((item) => (
             <AdminPanel key={item.label} className="space-y-1 bg-slate-50">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
+              <p className="text-xs font-medium text-slate-400">{item.label}</p>
               <p className="break-all text-sm font-medium text-slate-900">{item.value}</p>
             </AdminPanel>
           ))}
@@ -203,7 +203,7 @@ export default async function AdminAuditPage({
         <AdminPanel className="space-y-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Bộ lọc nhanh</p>
+              <p className="text-xs font-medium text-blue-600">Bộ lọc nhanh</p>
               <h3 className="mt-2 text-xl font-semibold text-slate-950">Nhảy nhanh sang nhóm log</h3>
             </div>
             <p className="text-xs text-slate-500">{filtered.length} log đang khớp</p>
@@ -236,7 +236,7 @@ export default async function AdminAuditPage({
           <div className="grid gap-3 sm:grid-cols-2">
             {actionSummary.map((action) => (
               <AdminPanel key={action.label} className="space-y-1 bg-slate-50 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">{action.label}</p>
+                <p className="text-xs font-medium text-slate-400">{action.label}</p>
                 <p className="text-2xl font-semibold text-slate-950">{action.count}</p>
               </AdminPanel>
             ))}
@@ -246,7 +246,7 @@ export default async function AdminAuditPage({
         <AdminPanel className="space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">Bằng chứng</p>
+              <p className="text-xs font-medium text-blue-600">Bằng chứng</p>
               <h3 className="mt-2 text-xl font-semibold text-slate-950">Gói nhanh cho support</h3>
             </div>
             <p className="text-xs text-slate-500">Copy hoặc tải CSV</p>
@@ -333,7 +333,7 @@ export default async function AdminAuditPage({
         <div className="border-b border-slate-200 px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Danh sách log</p>
+              <p className="text-xs font-medium text-slate-400">Danh sách log</p>
               <h3 className="mt-2 text-lg font-semibold text-slate-950">Mở từng dòng để xem payload</h3>
             </div>
             <p className="text-sm text-slate-500">{filtered.length} kết quả</p>
@@ -391,7 +391,7 @@ export default async function AdminAuditPage({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <AdminPanel className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Tra soát</p>
+          <p className="text-xs font-medium text-slate-400">Tra soát</p>
           <h3 className="text-xl font-semibold text-slate-950">Cách đọc log nhanh</h3>
           <p className="text-sm leading-7 text-slate-600">
             Ưu tiên nhìn entityType, entityId và before/after payload để biết thay đổi nào đã làm lệch giá, trạng thái đơn hoặc
@@ -399,7 +399,7 @@ export default async function AdminAuditPage({
           </p>
         </AdminPanel>
         <AdminPanel className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Đối soát</p>
+          <p className="text-xs font-medium text-slate-400">Đối soát</p>
           <h3 className="text-xl font-semibold text-slate-950">Khi support cần bằng chứng</h3>
           <p className="text-sm leading-7 text-slate-600">
             Dùng export CSV hoặc mở drawer từng dòng để chứng minh order đã đổi gì, ai đổi và khi nào. Điều này đặc biệt hữu ích
