@@ -20,6 +20,8 @@ const schema = z.object({
   status: z.enum(["active", "hidden", "archived"]).optional(),
   sortOrder: z.coerce.number().int().nonnegative().optional(),
   entitlementTags: z.string().optional()
+  ,
+  vipGroupIds: z.string().optional()
 });
 
 export async function GET() {
@@ -56,7 +58,10 @@ export async function POST(request: Request) {
       sortOrder: parsed.data.sortOrder ?? existing?.sortOrder,
       entitlementTags: parsed.data.entitlementTags
         ? parsed.data.entitlementTags.split(",").map((tag) => tag.trim()).filter(Boolean)
-        : existing?.entitlementTags
+        : existing?.entitlementTags,
+      vipGroupIds: parsed.data.vipGroupIds
+        ? parsed.data.vipGroupIds.split(/[\n,]/).map((value) => value.trim()).filter(Boolean)
+        : ((existing?.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined)?.groupIds ?? undefined)
     });
     await writeAuditLog({
       ...getAdminMutationContext(),

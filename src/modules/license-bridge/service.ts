@@ -6,6 +6,7 @@ import { createOrder, getOrderByOrderNumber, listAllOrders, updateOrder } from "
 import { licensePlansSeed } from "@/lib/license/mock-data";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { getLicensePlanByCode, getLicensePlanById, listLicensePlans } from "@/modules/license-plans/service";
+import { getSiteContentSettings, resolvePreferredPaymentGateway } from "@/modules/site-settings/service";
 import {
   createLicenseKey,
   getLicenseKeyEntitlements,
@@ -54,22 +55,53 @@ function buildPaymentSessionId(orderId: string, orderNumber: string) {
 export function resolveCheckoutPlanCode(planCode: string) {
   const normalized = String(planCode || "").trim().toUpperCase();
   const aliases: Record<string, string> = {
-    FULL_1M: "HCV_30D",
-    FULL_LIFE: "HCV_LIFETIME"
+    HCV_30D: "FULL_1M",
+    HCV_LIFETIME: "FULL_LIFE",
+    "HCV-LIC-30": "FULL_1M",
+    "HCV-LIC-LIFE": "FULL_LIFE"
   };
   if (aliases[normalized]) {
     return aliases[normalized];
   }
   const groupDurationMatch = normalized.match(/^G\d+:(1M|LIFE)$/);
   if (groupDurationMatch) {
-    return groupDurationMatch[1] === "1M" ? "HCV_30D" : "HCV_LIFETIME";
+    return groupDurationMatch[1] === "1M" ? "FULL_1M" : "FULL_LIFE";
   }
   return normalized;
 }
 
+function getPlanCodeCandidates(planCode: string) {
+  const normalized = String(planCode || "").trim().toUpperCase();
+  const canonical = resolveCheckoutPlanCode(normalized);
+  const candidates = [canonical, normalized];
+  if (canonical === "FULL_1M") {
+    candidates.push("HCV_30D");
+  }
+  if (canonical === "FULL_LIFE") {
+    candidates.push("HCV_LIFETIME");
+  }
+  return [...new Set(candidates)];
+}
+
+function buildCheckoutProviderCandidates(input: {
+  currency: "VND" | "USD";
+  preferredProvider?: string | null;
+}) {
+  const defaults = input.currency === "USD"
+    ? ["creem", "paypal", "lemonsqueezy", "manual", "sandbox"]
+    : ["payos", "manual", "sandbox"];
+  const preferred = String(input.preferredProvider ?? "").trim().toLowerCase();
+  return [...new Set([preferred, ...defaults].filter((value): value is string => Boolean(value)))];
+}
+
 function findSeedPlanByCode(code: string) {
-  const normalized = String(code || "").trim().toUpperCase();
-  return licensePlansSeed.find((plan) => plan.code === normalized) ?? null;
+  for (const candidate of getPlanCodeCandidates(code)) {
+    const plan = licensePlansSeed.find((entry) => entry.code === candidate);
+    if (plan) {
+      return plan;
+    }
+  }
+  return null;
 }
 
 function buildBotActivationUrl(licenseCode: string) {
@@ -338,13 +370,17 @@ export async function createLicenseCheckout(input: unknown) {
   const requestedPlanCode = String(parsed.vipPlanCode || parsed.planCode || "").trim().toUpperCase();
   const botPayment =
     (parsed.amountMinor != null && !requestedPlanCode) ||
-    integrationSource === "" ||
     integrationSource === "bot_checkout" ||
     integrationSource.startsWith("bot_") ||
     integrationSource === "prive_bot" ||
     integrationSource.startsWith("prive_bot_");
   const canonicalPlanCode = resolveCheckoutPlanCode(requestedPlanCode);
-  const dbPlan = botPayment ? null : await getLicensePlanByCode(canonicalPlanCode);
+  const planCodeCandidates = getPlanCodeCandidates(requestedPlanCode);
+  const dbPlan = botPayment
+    ? null
+    : (await Promise.all(planCodeCandidates.map((candidate) => getLicensePlanByCode(candidate)))).find(
+        (candidate): candidate is NonNullable<Awaited<ReturnType<typeof getLicensePlanByCode>>> => Boolean(candidate)
+      );
   const seedPlan = botPayment ? null : findSeedPlanByCode(canonicalPlanCode);
   const plan = botPayment ? {
     id: `bot-payment-${parsed.orderId}`,
@@ -395,13 +431,15 @@ export async function createLicenseCheckout(input: unknown) {
     metadata: {
       telegramUserId: parsed.telegramUserId ?? null,
       customerRef: parsed.customerRef ?? null,
-      ...(botPayment ? {} : { planCode: plan.code, vipPlanCode: String(parsed.vipPlanCode || requestedPlanCode), requestedPlanCode }),
+      ...(botPayment
+        ? { requestedPlanCode: requestedPlanCode || null, vipPlanCode: requestedPlanCode || null }
+        : { planCode: plan.code, vipPlanCode: String(parsed.vipPlanCode || requestedPlanCode), requestedPlanCode }),
       locale: parsed.locale ?? "vi",
       currency: parsed.currency,
       ...(botPayment ? {} : { activationCode: licenseCode, licenseCode }),
       paymentSessionId,
       checkoutKind: "bot",
-      paymentProvider: parsed.currency === "VND" ? "payos" : "sandbox",
+      paymentProvider: null,
       source: botPayment ? "bot_payment" : "prive_bot",
       integrationSource: botPayment ? "bot_checkout" : (parsed.source ?? "direct_license"),
       orderId: parsed.orderId
@@ -435,43 +473,65 @@ export async function createLicenseCheckout(input: unknown) {
   console.info(`[license-checkout] order_created orderNumber=${order.orderNumber} orderId=${order.id} mode=${botPayment ? "BOT_PAYMENT" : "DIRECT_LICENSE"} price=${resolvedPrice}`);
   const returnUrl = buildReturnUrl({ orderNumber: order.orderNumber, returnUrl: parsed.returnUrl });
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
-  const provider = parsed.currency === "VND" ? "payos" : "sandbox";
-  console.info(
-    `[license-checkout] creating_checkout orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} returnUrl=${returnUrl} cancelUrl=${cancelUrl}`
-  );
-  const checkout = await createPaymentCheckout({
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    amountMinor: order.totalMinor,
-    currency: order.currency,
-    customerEmail: order.customerEmail,
-    provider,
-    returnUrl,
-    cancelUrl
-  }).catch(async (error) => {
-    console.error(
-      `[license-checkout] create_checkout_failed orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} error=${error instanceof Error ? error.message : String(error)}`
-    );
-    const fallbackProvider = "sandbox" as const;
-    console.info(
-      `[license-checkout] retry_checkout orderNumber=${order.orderNumber} orderId=${order.id} provider=${fallbackProvider} amount=${order.totalMinor} currency=${order.currency}`
-    );
-    return createPaymentCheckout({
-      orderId: order.id,
-      orderNumber: order.orderNumber,
-      amountMinor: order.totalMinor,
-      currency: order.currency,
-      customerEmail: order.customerEmail,
-      provider: fallbackProvider,
-      returnUrl,
-      cancelUrl
-    });
+  const siteSettings = await getSiteContentSettings().catch(() => null);
+  const preferredGateway = siteSettings ? resolvePreferredPaymentGateway(siteSettings, parsed.currency) : null;
+  const providerCandidates = buildCheckoutProviderCandidates({
+    currency: parsed.currency,
+    preferredProvider: preferredGateway?.provider ?? null
   });
+  let checkout: Awaited<ReturnType<typeof createPaymentCheckout>> | null = null;
+  let selectedProvider: string | null = null;
+  let lastError: unknown = null;
+  for (const provider of providerCandidates) {
+    try {
+      console.info(
+        `[license-checkout] creating_checkout orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} returnUrl=${returnUrl} cancelUrl=${cancelUrl}`
+      );
+      checkout = await createPaymentCheckout({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        amountMinor: order.totalMinor,
+        currency: order.currency,
+        customerEmail: order.customerEmail,
+        provider: provider as "manual" | "sandbox" | "stripe" | "paypal" | "lemonsqueezy" | "payos" | "creem",
+        returnUrl,
+        cancelUrl,
+        metadata: {
+          providerCandidate: provider,
+          paymentGatewayProvider: preferredGateway?.provider ?? null,
+          paymentGatewayLabel: preferredGateway ? (parsed.locale === "en" ? preferredGateway.labelEn : preferredGateway.labelVi) : null,
+          planCode: requestedPlanCode || null,
+          requestedPlanCode: requestedPlanCode || null,
+          creemProductId: null
+        }
+      });
+      selectedProvider = provider;
+      break;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `[license-checkout] create_checkout_failed orderNumber=${order.orderNumber} orderId=${order.id} provider=${provider} amount=${order.totalMinor} currency=${order.currency} error=${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  if (!checkout || !selectedProvider) {
+    throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Checkout creation failed"));
+  }
 
   await updateOrder(order.orderNumber, {
+    paymentProvider: selectedProvider,
+    providerCheckoutId: checkout.providerCheckoutId ?? null,
+    providerOrderId: checkout.providerPaymentId ?? null,
+    providerPaymentId: checkout.providerPaymentId ?? null,
+    paymentReceiptUrl: checkout.checkoutUrl,
+    paymentRecordedAt: new Date().toISOString(),
+    lastPaymentEventAt: new Date().toISOString(),
     metadata: {
       ...order.metadata,
-      paymentProvider: provider,
+      paymentProvider: selectedProvider,
+      paymentGatewayProvider: preferredGateway?.provider ?? selectedProvider,
+      paymentGatewayLabel: preferredGateway ? (parsed.locale === "en" ? preferredGateway.labelEn : preferredGateway.labelVi) : selectedProvider,
       paymentCheckoutUrl: checkout.checkoutUrl,
       providerCheckoutId: checkout.providerCheckoutId,
       telegramUserId: parsed.telegramUserId ?? null,
@@ -499,8 +559,8 @@ export async function createLicenseCheckout(input: unknown) {
     ...(botPayment ? {} : { activationCode: licenseCode, activation_code: licenseCode, licenseCode, license_code: licenseCode }),
     paymentSessionId,
     payment_session_id: paymentSessionId,
-    paymentProvider: provider,
-    payment_provider: provider,
+    paymentProvider: selectedProvider,
+    payment_provider: selectedProvider,
     telegramUserId: parsed.telegramUserId ?? null,
     telegram_user_id: parsed.telegramUserId ?? null,
     customerRef: parsed.customerRef ?? null,

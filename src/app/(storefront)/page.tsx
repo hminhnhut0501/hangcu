@@ -10,6 +10,8 @@ import { MoneyAmount } from "@/components/money/money-amount";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const mainPlanCodes = new Set(["FULL_1M", "FULL_LIFE", "HCV_30D", "HCV_LIFETIME", "HCV-LIC-30", "HCV-LIC-LIFE"]);
+
 type Locale = "vi" | "en";
 
 type FeatureCard = {
@@ -208,7 +210,7 @@ export default async function HomePage() {
     {
       name: locale === "vi" ? "30 ngày" : "30-day license",
       price: (() => {
-        const plan = licensePlans.find((item) => item.code === "HCV_30D" || item.code === "HCV-LIC-30" || item.durationDays === 30 || !item.isLifetime);
+        const plan = licensePlans.find((item) => mainPlanCodes.has(item.code) || item.durationDays === 30 || !item.isLifetime);
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
@@ -222,7 +224,7 @@ export default async function HomePage() {
     {
       name: locale === "vi" ? "Trọn đời" : "Lifetime license",
       price: (() => {
-        const plan = licensePlans.find((item) => item.code === "HCV_LIFETIME" || item.code === "HCV-LIC-LIFE" || item.isLifetime);
+        const plan = licensePlans.find((item) => mainPlanCodes.has(item.code) || item.isLifetime);
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
@@ -459,7 +461,7 @@ export default async function HomePage() {
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
-                    href={`/checkout?planCode=${encodeURIComponent(index === 0 ? "HCV-LIC-30" : "HCV-LIC-LIFE")}`}
+                    href={`/checkout?planCode=${encodeURIComponent(index === 0 ? "FULL_1M" : "FULL_LIFE")}`}
                     className={`inline-flex rounded-full px-4 py-2 text-sm font-medium ${
                       index === 0 ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-slate-950 text-white hover:bg-slate-800"
                     }`}

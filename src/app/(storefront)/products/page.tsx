@@ -8,9 +8,11 @@ import { MoneyAmount } from "@/components/money/money-amount";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const mainPlanCodes = new Set(["FULL_1M", "FULL_LIFE", "HCV_30D", "HCV_LIFETIME", "HCV-LIC-30", "HCV-LIC-LIFE"]);
+
 export default async function ProductsPage() {
   const plans = (await listLicensePlans())
-    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .filter((plan) => plan.status === "active" && (mainPlanCodes.has(plan.code) || plan.durationDays === 30 || plan.isLifetime))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const locale = await getStorefrontLocale();
   const supportPackages = (await listDonatePackages())

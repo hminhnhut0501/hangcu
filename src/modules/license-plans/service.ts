@@ -42,8 +42,22 @@ export async function upsertLicensePlan(input: {
   status?: "active" | "hidden" | "archived";
   sortOrder?: number;
   entitlementTags?: string[];
+  vipGroupIds?: string[];
 }) {
   const existing = await getLicensePlanById(input.id);
+  const vipGroupIds = Array.isArray(input.vipGroupIds)
+    ? input.vipGroupIds.map((value) => String(value).trim()).filter(Boolean)
+    : undefined;
+  const existingVipGroupPolicy = existing?.metadata?.vipGroupPolicy as { groupIds?: unknown[] } | undefined;
+  const existingVipGroupIds = Array.isArray(existingVipGroupPolicy?.groupIds)
+    ? existingVipGroupPolicy.groupIds.map((value) => String(value).trim()).filter(Boolean)
+    : [];
+  const vipGroupPolicy =
+    vipGroupIds !== undefined
+      ? { ...(existingVipGroupPolicy ?? {}), groupIds: vipGroupIds }
+      : existingVipGroupIds.length > 0
+        ? { ...(existingVipGroupPolicy ?? {}), groupIds: existingVipGroupIds }
+        : undefined;
   return repository.save({
     id: input.id,
     code: input.code,
@@ -59,7 +73,10 @@ export async function upsertLicensePlan(input: {
     status: input.status ?? existing?.status ?? "active",
     sortOrder: input.sortOrder ?? existing?.sortOrder ?? 1,
     entitlementTags: input.entitlementTags ?? existing?.entitlementTags ?? ["app_access"],
-    metadata: existing?.metadata ?? {}
+    metadata: {
+      ...(existing?.metadata ?? {}),
+      ...(vipGroupPolicy ? { vipGroupPolicy } : {})
+    }
   });
 }
 

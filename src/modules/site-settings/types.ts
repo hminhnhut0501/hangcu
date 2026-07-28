@@ -33,7 +33,7 @@ export type SiteHeroChip = {
 };
 
 export type SitePaymentGateway = {
-  provider: "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual";
+  provider: "payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual";
   labelVi: string;
   labelEn: string;
   currencies: Array<"VND" | "USD">;

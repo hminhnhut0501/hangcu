@@ -15,7 +15,7 @@ type CheckoutOption = {
 };
 
 type PaymentGateway = {
-  provider: "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual";
+  provider: "payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual";
   labelVi: string;
   labelEn: string;
   currencies: Array<"VND" | "USD">;
@@ -64,7 +64,7 @@ export function CheckoutPaymentForm({
   initialEmail,
   orderSummary
 }: Props) {
-  const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual">("payos");
+  const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual">("payos");
   const [mode, setMode] = useState<"license" | "support" | "custom">(initialMode ?? (supportOptions.some((option) => option.slug === initialSelectedSlug) ? "support" : "license"));
   const [selectedSlug, setSelectedSlug] = useState(
     initialSelectedSlug ?? licenseOptions[0]?.slug ?? supportOptions[0]?.slug ?? ""
@@ -87,6 +87,10 @@ export function CheckoutPaymentForm({
   const selectedCurrency = mode === "custom" ? "VND" : selectedOption?.currency?.toUpperCase() ?? null;
   const currentCurrency: "VND" | "USD" = selectedCurrency === "USD" ? "USD" : "VND";
   const visibleGateways = paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currentCurrency));
+  const modeGateways =
+    mode === "custom"
+      ? visibleGateways.filter((gateway) => gateway.provider !== "creem")
+      : visibleGateways;
   const currentCurrencyLabel = currentCurrency === "VND" ? (locale === "vi" ? "VNĐ" : "VND") : "USD";
   const currencyTitle =
     currentCurrency === "VND"
@@ -106,15 +110,17 @@ export function CheckoutPaymentForm({
         : "Only USD gateways are shown for the selected package.";
 
   React.useEffect(() => {
-    if (visibleGateways.some((gateway) => gateway.provider === provider)) return;
+    if (modeGateways.some((gateway) => gateway.provider === provider)) return;
     const preferred =
       currentCurrency === "USD"
-        ? visibleGateways.find((gateway) => gateway.provider === "paypal") ?? visibleGateways[0]
-        : visibleGateways.find((gateway) => gateway.provider === "payos") ?? visibleGateways[0];
+        ? modeGateways.find((gateway) => gateway.provider === "creem") ??
+          modeGateways.find((gateway) => gateway.provider === "paypal") ??
+          modeGateways[0]
+        : modeGateways.find((gateway) => gateway.provider === "payos") ?? modeGateways[0];
     if (preferred) {
       setProvider(preferred.provider);
     }
-  }, [currentCurrency, provider, visibleGateways]);
+  }, [currentCurrency, modeGateways, provider]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -262,7 +268,7 @@ export function CheckoutPaymentForm({
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {(["VND", "USD"] as const).map((currency) => {
-              const gateways = paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currency));
+              const gateways = modeGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currency));
               const highlighted = currency === currentCurrency;
               return (
                 <div
@@ -418,10 +424,10 @@ export function CheckoutPaymentForm({
           <span className="text-sm font-medium text-slate-700">{locale === "vi" ? "Phương thức thanh toán" : "Payment method"}</span>
           <select
             value={provider}
-            onChange={(event) => setProvider(event.target.value as "payos" | "paypal" | "lemonsqueezy" | "sandbox" | "manual")}
+            onChange={(event) => setProvider(event.target.value as "payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual")}
             className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"
           >
-            {visibleGateways.map((gateway) => (
+            {modeGateways.map((gateway) => (
               <option key={gateway.provider} value={gateway.provider}>
                 {locale === "vi" ? gateway.labelVi : gateway.labelEn}
                 {" ("}
@@ -440,6 +446,9 @@ export function CheckoutPaymentForm({
               : locale === "vi"
                 ? "Các gói USD sẽ đi qua nhóm gateway USD đã bật."
                 : "USD packages route through the enabled USD gateways."}
+            {mode === "custom" && currentCurrency === "USD"
+              ? ` ${locale === "vi" ? "Creem bị ẩn ở chế độ ủng hộ tự do để tránh lệch số tiền." : "Creem is hidden in custom support mode to avoid amount mismatches."}`
+              : null}
           </p>
         </label>
       </div>

@@ -168,6 +168,13 @@ const defaultSettings: SiteContentSettings = {
       visible: true
     },
     {
+      provider: "creem",
+      labelVi: "Creem",
+      labelEn: "Creem",
+      currencies: ["USD"],
+      visible: true
+    },
+    {
       provider: "sandbox",
       labelVi: "Sandbox",
       labelEn: "Sandbox",

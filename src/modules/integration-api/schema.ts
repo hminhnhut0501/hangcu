@@ -36,6 +36,7 @@ export const checkoutRequestSchema = integrationBaseSchema.extend({
   cancelUrl: z.string().url().optional()
   ,source: z.string().min(1).optional()
   ,paymentSessionId: z.string().min(1).optional()
+  ,vipGroupIds: z.string().optional()
 });
 
 export type RedeemLicenseKeyInput = z.infer<typeof redeemLicenseKeyRequestSchema>;

@@ -35,7 +35,7 @@ const heroChipSchema = z.object({
 });
 
 const paymentGatewaySchema = z.object({
-  provider: z.enum(["payos", "paypal", "lemonsqueezy", "sandbox", "manual"]),
+  provider: z.enum(["payos", "paypal", "lemonsqueezy", "creem", "sandbox", "manual"]),
   labelVi: z.string().min(1),
   labelEn: z.string().min(1),
   currencies: z.array(z.enum(["VND", "USD"])).min(1),

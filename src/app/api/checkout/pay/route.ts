@@ -5,6 +5,7 @@ import { getCurrentPriceForProduct } from "@/modules/prices/service";
 import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
+import { resolveCreemProductIdFromConfig } from "@/modules/creem-config/service";
 
 const schema = checkoutFormSchema.extend({
   productSlug: z.string().min(1).optional(),
@@ -16,7 +17,7 @@ const schema = checkoutFormSchema.extend({
   currency: z.enum(["VND", "USD"]).optional(),
   customerRef: z.string().min(1).optional(),
   checkoutId: z.string().min(1).optional(),
-  provider: z.enum(["payos", "paypal", "lemonsqueezy", "sandbox", "manual"])
+  provider: z.enum(["payos", "paypal", "lemonsqueezy", "creem", "sandbox", "manual"])
 });
 
 function generatePayosOrderCode() {
@@ -124,10 +125,10 @@ export async function POST(request: Request) {
     });
   }
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
-  if (["paypal", "lemonsqueezy"].includes(parsed.data.provider) && order.currency !== "USD") {
+  if (["paypal", "lemonsqueezy", "creem"].includes(parsed.data.provider) && order.currency !== "USD") {
     return Response.json({
       success: false,
-      error: { code: "INVALID_CURRENCY", message: "PayPal và Lemon Squeezy chỉ hỗ trợ thanh toán USD." }
+      error: { code: "INVALID_CURRENCY", message: parsed.data.provider === "creem" ? "Creem chỉ hỗ trợ thanh toán USD." : "PayPal và Lemon Squeezy chỉ hỗ trợ thanh toán USD." }
     }, { status: 400 });
   }
   const returnUrl = `${appBaseUrl}/checkout?status=success&order=${encodeURIComponent(order.orderNumber)}`;
@@ -151,6 +152,25 @@ export async function POST(request: Request) {
   const metadataProviderCheckoutId = String(order.metadata?.providerCheckoutId ?? "").trim() || null;
   const metadataPayosOrderCode = String(order.metadata?.payosOrderCode ?? "").trim() || null;
   const metadataProviderPaymentId = String(order.metadata?.providerPaymentId ?? "").trim() || null;
+  if (parsed.data.provider === "creem" && !parsed.data.planCode) {
+    return Response.json({
+      success: false,
+      error: {
+        code: "CREEM_CUSTOM_SUPPORT_NOT_SUPPORTED",
+        message: "Creem hiện chỉ được bật cho gói cố định, chưa dùng cho ủng hộ tự do."
+      }
+    }, { status: 400 });
+  }
+  const creemProductId = parsed.data.provider === "creem" ? await resolveCreemProductIdFromConfig(parsed.data.planCode ?? order.metadata?.planCode as string | undefined) : "";
+  if (parsed.data.provider === "creem" && !creemProductId) {
+    return Response.json({
+      success: false,
+      error: {
+        code: "CREEM_PRODUCT_NOT_CONFIGURED",
+        message: "Chưa cấu hình product Creem cho gói này."
+      }
+    }, { status: 400 });
+  }
   const payosOrderCode =
     parsed.data.provider === "payos"
       ? metadataPayosOrderCode || String(generatePayosOrderCode())
@@ -181,7 +201,10 @@ export async function POST(request: Request) {
     provider: parsed.data.provider,
     returnUrl,
     cancelUrl,
-    metadata: payosOrderCode ? { payosOrderCode } : undefined
+    metadata: {
+      ...(payosOrderCode ? { payosOrderCode } : {}),
+      ...(creemProductId ? { creemProductId, planCode: parsed.data.planCode ?? order.metadata?.planCode ?? null } : {})
+    }
   });
 
   await updateOrder(order.orderNumber, {

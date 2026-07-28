@@ -21,6 +21,7 @@ type LicensePlan = {
   status: "active" | "hidden" | "archived";
   sortOrder: number;
   entitlementTags: string[];
+  metadata: Record<string, unknown>;
 };
 
 type Props = {
@@ -45,7 +46,14 @@ export function LicensePlanEditDrawer({ plan, isAdvanced }: Props) {
         { name: "isLifetime", label: "Trọn đời", type: "checkbox", defaultValue: plan.isLifetime ? "true" : "" },
         { name: "status", label: "Trạng thái", defaultValue: plan.status },
         { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(plan.sortOrder) },
-        { name: "entitlementTags", label: "Entitlement tags", defaultValue: plan.entitlementTags.join(",") }
+        { name: "entitlementTags", label: "Entitlement tags", defaultValue: plan.entitlementTags.join(",") },
+        {
+          name: "vipGroupIds",
+          label: "Telegram group IDs",
+          type: "textarea",
+          rows: 4,
+          defaultValue: String((plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined)?.groupIds?.join("\n") ?? "")
+        }
       ]
     : [
         { name: "id", label: "ID", defaultValue: plan.id },
@@ -56,7 +64,14 @@ export function LicensePlanEditDrawer({ plan, isAdvanced }: Props) {
         { name: "vndPrice", label: "Giá thanh toán VNĐ", type: "number", defaultValue: String(plan.currencyPrices.VND ?? "") },
         { name: "usdPrice", label: "Giá thanh toán USD", type: "number", defaultValue: String(plan.currencyPrices.USD ?? "") },
         { name: "status", label: "Trạng thái", defaultValue: plan.status },
-        { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(plan.sortOrder) }
+        { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: String(plan.sortOrder) },
+        {
+          name: "vipGroupIds",
+          label: "Telegram group IDs",
+          type: "textarea",
+          rows: 3,
+          defaultValue: String((plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined)?.groupIds?.join("\n") ?? "")
+        }
       ];
 
   return (

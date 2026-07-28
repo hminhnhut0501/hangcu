@@ -30,9 +30,9 @@ describe("integration api service", () => {
   });
 
   it("maps bot group plan tokens to canonical checkout plan codes", () => {
-    expect(resolveCheckoutPlanCode("G1:1M")).toBe("HCV_30D");
-    expect(resolveCheckoutPlanCode("G4:LIFE")).toBe("HCV_LIFETIME");
-    expect(resolveCheckoutPlanCode("FULL_1M")).toBe("HCV_30D");
+    expect(resolveCheckoutPlanCode("G1:1M")).toBe("FULL_1M");
+    expect(resolveCheckoutPlanCode("G4:LIFE")).toBe("FULL_LIFE");
+    expect(resolveCheckoutPlanCode("FULL_1M")).toBe("FULL_1M");
   });
 
   it("creates checkout payloads with entitlement metadata", async () => {

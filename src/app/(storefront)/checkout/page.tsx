@@ -13,6 +13,8 @@ import { licensePlansSeed } from "@/lib/license/mock-data";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+const mainPlanCodes = new Set(["FULL_1M", "FULL_LIFE", "HCV_30D", "HCV_LIFETIME", "HCV-LIC-30", "HCV-LIC-LIFE"]);
+
 type CheckoutSearchParams = {
   order?: string | string[];
   planCode?: string | string[];
@@ -74,10 +76,10 @@ export default async function CheckoutPage({
   const selectedPackage = selectedPackageSlug ? await getDonatePackageBySlug(selectedPackageSlug).catch(() => null) : null;
   const selectedPackageView = selectedPackage ? mapDonatePackageToViewModel(selectedPackage, locale) : null;
   const catalogPlans = (await listLicensePlans())
-    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .filter((plan) => plan.status === "active" && (mainPlanCodes.has(plan.code) || plan.durationDays === 30 || plan.isLifetime))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const fallbackPlans = licensePlansSeed
-    .filter((plan) => plan.status === "active" && (plan.code === "HCV_30D" || plan.code === "HCV_LIFETIME" || plan.durationDays === 30 || plan.isLifetime))
+    .filter((plan) => plan.status === "active" && (mainPlanCodes.has(plan.code) || plan.durationDays === 30 || plan.isLifetime))
     .sort((a, b) => a.sortOrder - b.sortOrder);
   const licenseSourcePlans = catalogPlans.length > 0 ? catalogPlans : fallbackPlans;
   const licenseProducts = licenseSourcePlans.map((plan) => ({

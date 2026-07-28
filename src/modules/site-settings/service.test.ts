@@ -1,0 +1,147 @@
+import { describe, expect, it } from "vitest";
+import { resolvePreferredPaymentGateway } from "./service";
+
+describe("resolvePreferredPaymentGateway", () => {
+  it("prefers Creem for USD when available", () => {
+    const gateway = resolvePreferredPaymentGateway(
+      {
+        id: "global",
+        siteNameVi: "A",
+        siteNameEn: "A",
+        heroEyebrowVi: "A",
+        heroEyebrowEn: "A",
+        heroTitleVi: "A",
+        heroTitleEn: "A",
+        heroDescriptionVi: "A",
+        heroDescriptionEn: "A",
+        heroSecondaryTextVi: "A",
+        heroSecondaryTextEn: "A",
+        featuresSectionLabelVi: "A",
+        featuresSectionLabelEn: "A",
+        featuresSectionTitleVi: "A",
+        featuresSectionTitleEn: "A",
+        featuresSectionDescriptionVi: "A",
+        featuresSectionDescriptionEn: "A",
+        demoSectionLabelVi: "A",
+        demoSectionLabelEn: "A",
+        demoSectionTitleVi: "A",
+        demoSectionTitleEn: "A",
+        demoSectionDescriptionVi: "A",
+        demoSectionDescriptionEn: "A",
+        plansSectionLabelVi: "A",
+        plansSectionLabelEn: "A",
+        plansSectionTitleVi: "A",
+        plansSectionTitleEn: "A",
+        plansSectionDescriptionVi: "A",
+        plansSectionDescriptionEn: "A",
+        faqSectionLabelVi: "A",
+        faqSectionLabelEn: "A",
+        faqSectionTitleVi: "A",
+        faqSectionTitleEn: "A",
+        heroPrimaryCtaLabelVi: "A",
+        heroPrimaryCtaLabelEn: "A",
+        heroPrimaryCtaHref: "/",
+        heroSecondaryCtaLabelVi: "A",
+        heroSecondaryCtaLabelEn: "A",
+        heroSecondaryCtaHref: "/",
+        heroImagePath: null,
+        heroImageAltVi: null,
+        heroImageAltEn: null,
+        announcementTextVi: "A",
+        announcementTextEn: "A",
+        announcementVisible: true,
+        showFeaturedPlansSection: true,
+        showDonateSection: true,
+        showFaqSection: true,
+        navigation: [],
+        footerNoteVi: "A",
+        footerNoteEn: "A",
+        faqItems: [],
+        heroChips: [],
+        featureCards: [],
+        workflowSteps: [],
+        planHighlights: [],
+        paymentGateways: [
+          { provider: "payos", labelVi: "PayOS", labelEn: "PayOS", currencies: ["VND"], visible: true },
+          { provider: "paypal", labelVi: "PayPal", labelEn: "PayPal", currencies: ["USD"], visible: true },
+          { provider: "creem", labelVi: "Creem", labelEn: "Creem", currencies: ["USD"], visible: true }
+        ],
+        updatedAt: new Date().toISOString()
+      },
+      "USD"
+    );
+
+    expect(gateway?.provider).toBe("creem");
+  });
+
+  it("prefers PayOS for VND when available", () => {
+    const gateway = resolvePreferredPaymentGateway(
+      {
+        id: "global",
+        siteNameVi: "A",
+        siteNameEn: "A",
+        heroEyebrowVi: "A",
+        heroEyebrowEn: "A",
+        heroTitleVi: "A",
+        heroTitleEn: "A",
+        heroDescriptionVi: "A",
+        heroDescriptionEn: "A",
+        heroSecondaryTextVi: "A",
+        heroSecondaryTextEn: "A",
+        featuresSectionLabelVi: "A",
+        featuresSectionLabelEn: "A",
+        featuresSectionTitleVi: "A",
+        featuresSectionTitleEn: "A",
+        featuresSectionDescriptionVi: "A",
+        featuresSectionDescriptionEn: "A",
+        demoSectionLabelVi: "A",
+        demoSectionLabelEn: "A",
+        demoSectionTitleVi: "A",
+        demoSectionTitleEn: "A",
+        demoSectionDescriptionVi: "A",
+        demoSectionDescriptionEn: "A",
+        plansSectionLabelVi: "A",
+        plansSectionLabelEn: "A",
+        plansSectionTitleVi: "A",
+        plansSectionTitleEn: "A",
+        plansSectionDescriptionVi: "A",
+        plansSectionDescriptionEn: "A",
+        faqSectionLabelVi: "A",
+        faqSectionLabelEn: "A",
+        faqSectionTitleVi: "A",
+        faqSectionTitleEn: "A",
+        heroPrimaryCtaLabelVi: "A",
+        heroPrimaryCtaLabelEn: "A",
+        heroPrimaryCtaHref: "/",
+        heroSecondaryCtaLabelVi: "A",
+        heroSecondaryCtaLabelEn: "A",
+        heroSecondaryCtaHref: "/",
+        heroImagePath: null,
+        heroImageAltVi: null,
+        heroImageAltEn: null,
+        announcementTextVi: "A",
+        announcementTextEn: "A",
+        announcementVisible: true,
+        showFeaturedPlansSection: true,
+        showDonateSection: true,
+        showFaqSection: true,
+        navigation: [],
+        footerNoteVi: "A",
+        footerNoteEn: "A",
+        faqItems: [],
+        heroChips: [],
+        featureCards: [],
+        workflowSteps: [],
+        planHighlights: [],
+        paymentGateways: [
+          { provider: "sandbox", labelVi: "Sandbox", labelEn: "Sandbox", currencies: ["VND", "USD"], visible: true },
+          { provider: "payos", labelVi: "PayOS", labelEn: "PayOS", currencies: ["VND"], visible: true }
+        ],
+        updatedAt: new Date().toISOString()
+      },
+      "VND"
+    );
+
+    expect(gateway?.provider).toBe("payos");
+  });
+});

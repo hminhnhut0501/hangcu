@@ -12,6 +12,7 @@ export const revalidate = 0;
 
 export default async function AdminLicensePlansPage() {
   const plans = await listLicensePlans();
+  const groupCount = plans.filter((plan) => Array.isArray((plan.metadata?.vipGroupPolicy as { groupIds?: unknown[] } | undefined)?.groupIds) && ((plan.metadata?.vipGroupPolicy as { groupIds?: unknown[] } | undefined)?.groupIds?.length ?? 0) > 0).length;
   const activeCount = plans.filter((plan) => plan.status === "active").length;
   const hiddenCount = plans.filter((plan) => plan.status === "hidden").length;
   const lifetimeCount = plans.filter((plan) => plan.isLifetime).length;
@@ -29,7 +30,8 @@ export default async function AdminLicensePlansPage() {
           { label: "Active", value: activeCount, tone: "emerald" },
           { label: "Hidden", value: hiddenCount, tone: "amber" },
           { label: "30 ngày", value: regularCount, tone: "blue" },
-          { label: "Lifetime", value: lifetimeCount, tone: "violet" }
+          { label: "Lifetime", value: lifetimeCount, tone: "violet" },
+          { label: "VIP groups", value: groupCount, tone: "default" }
         ]}
       />
       <SimpleAdminForm
@@ -54,7 +56,8 @@ export default async function AdminLicensePlansPage() {
           { name: "isLifetime", label: "Trọn đời", type: "checkbox", defaultValue: "" },
           { name: "status", label: "Trạng thái", defaultValue: "active" },
           { name: "sortOrder", label: "Thứ tự", type: "number", defaultValue: "1" },
-          { name: "entitlementTags", label: "Entitlement tags", defaultValue: "app_access,vip_group_access" }
+          { name: "entitlementTags", label: "Entitlement tags", defaultValue: "app_access,vip_group_access" },
+          { name: "vipGroupIds", label: "Telegram group IDs", type: "textarea", rows: 3, defaultValue: "group_1\ngroup_2" }
         ]}
       />
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
@@ -64,6 +67,7 @@ export default async function AdminLicensePlansPage() {
               <th className="px-6 py-4 font-medium">Code</th>
               <th className="px-6 py-4 font-medium">Tên</th>
               <th className="px-6 py-4 font-medium">Giá</th>
+              <th className="px-6 py-4 font-medium">Telegram groups</th>
               <th className="px-6 py-4 font-medium">Trạng thái</th>
               <th className="px-6 py-4 font-medium">Thao tác</th>
             </tr>
@@ -79,6 +83,12 @@ export default async function AdminLicensePlansPage() {
                     <span>/</span>
                     <AdminMoneyDisplay amount={plan.currencyPrices.USD} currency="USD" locale="en" kind="catalog" />
                   </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-slate-600">
+                  {(() => {
+                    const groupIds = (plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined)?.groupIds ?? [];
+                    return groupIds.length > 0 ? `${groupIds.length} group(s)` : "—";
+                  })()}
                 </td>
                 <td className="px-6 py-4">
                   <AdminStatusBadge tone={plan.status === "active" ? "emerald" : plan.status === "hidden" ? "amber" : "neutral"} label={plan.status} />
