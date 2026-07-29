@@ -164,6 +164,7 @@ export function CheckoutPaymentForm({
       const payload: Record<string, string> = { provider, email };
 
       if (mode === "license" && selectedLicense) {
+        payload.productSlug = selectedLicense.slug;
         payload.planCode = selectedLicense.code;
         payload.plan = selectedLicense.name;
         payload.amountMinor = String(selectedLicense.amountMinor);
@@ -171,6 +172,7 @@ export function CheckoutPaymentForm({
       }
 
       if (mode === "support" && selectedSupport) {
+        payload.productSlug = selectedSupport.slug;
         payload.planCode = selectedSupport.code;
         payload.plan = selectedSupport.name;
         payload.amountMinor = String(Math.round(customAmountMinor ?? selectedSupport.amountMinor));
