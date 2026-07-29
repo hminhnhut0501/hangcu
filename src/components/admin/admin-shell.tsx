@@ -167,6 +167,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         { label: "Media", href: "/admin/media" },
         { label: "Cài đặt site", href: "/admin/site-settings" },
         { label: "Creem", href: "/admin/creem" },
+        { label: "PayPal", href: "/admin/paypal" },
         { label: "Webhooks", href: "/admin/webhooks" },
         { label: "Nhật ký", href: "/admin/audit" },
         { label: "Thống kê", href: "/admin/analytics" },
@@ -189,6 +190,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     "/admin/media": Upload,
     "/admin/site-settings": FileCog,
     "/admin/creem": CircleDollarSign,
+    "/admin/paypal": CircleDollarSign,
     "/admin/webhooks": Webhook,
     "/admin/compliance": ShieldCheck,
     "/admin/hardening": ShieldAlert
@@ -230,6 +232,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { label: "Gói hỗ trợ", description: "Sửa support package và giá", href: "/admin/donate-packages" as Route, group: "Điều hướng", keywords: ["support", "packages", "donate"] },
     { label: "Site settings", description: "Chỉnh nội dung homepage và footer", href: "/admin/site-settings" as Route, group: "Nội dung", keywords: ["content", "homepage"] },
     { label: "Creem", description: "Cấu hình API và mapping product Creem", href: "/admin/creem" as Route, group: "Thanh toán", keywords: ["creem", "payment", "product", "mapping"] },
+    { label: "PayPal", description: "Cấu hình API và webhook PayPal", href: "/admin/paypal" as Route, group: "Thanh toán", keywords: ["paypal", "payment", "webhook"] },
     { label: "Media", description: "Upload và quản lý ảnh/video", href: "/admin/media" as Route, group: "Nội dung", keywords: ["upload", "image", "video"] },
     { label: "Audit log", description: "Tra soát thay đổi và export CSV", href: "/admin/audit" as Route, group: "Giám sát", keywords: ["audit", "log", "export"] },
     { label: "Compliance", description: "Checklist merchant readiness", href: "/admin/compliance" as Route, group: "Giám sát", keywords: ["merchant", "policy"] },

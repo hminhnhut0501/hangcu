@@ -7,20 +7,24 @@ import type {
   RefundResult,
   VerifiedPaymentEvent
 } from "./base";
+import { getPayPalConfig } from "@/modules/paypal-config/service";
 
 export class PayPalPaymentProvider implements PaymentProvider {
   readonly name = "paypal";
 
-  private get baseUrl() {
-    return (process.env.PAYPAL_API_BASE_URL ||
-      (process.env.PAYPAL_ENV === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com")).replace(/\/$/, "");
+  private async baseUrl() {
+    const config = await getPayPalConfig();
+    const explicit = process.env.PAYPAL_API_BASE_URL?.trim();
+    const base = explicit || (config.environment === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com");
+    return base.replace(/\/$/, "");
   }
 
   private async accessToken() {
-    const clientId = process.env.PAYPAL_CLIENT_ID?.trim();
-    const clientSecret = process.env.PAYPAL_CLIENT_SECRET?.trim();
+    const config = await getPayPalConfig();
+    const clientId = config.clientId;
+    const clientSecret = config.clientSecret;
     if (!clientId || !clientSecret) throw new Error("PayPal credentials are not configured");
-    const response = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
+    const response = await fetch(`${await this.baseUrl()}/v1/oauth2/token`, {
       method: "POST",
       headers: {
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
@@ -38,7 +42,7 @@ export class PayPalPaymentProvider implements PaymentProvider {
 
   private async api(path: string, init: RequestInit = {}) {
     const token = await this.accessToken();
-    const response = await fetch(`${this.baseUrl}${path}`, {
+    const response = await fetch(`${await this.baseUrl()}${path}`, {
       ...init,
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...(init.headers || {}) },
       cache: "no-store"
@@ -80,7 +84,7 @@ export class PayPalPaymentProvider implements PaymentProvider {
   }
 
   async verifyWebhook(request: Request): Promise<VerifiedPaymentEvent> {
-    const webhookId = process.env.PAYPAL_WEBHOOK_ID?.trim();
+    const webhookId = (await getPayPalConfig()).webhookId;
     if (!webhookId) throw new Error("PAYPAL_WEBHOOK_ID is not configured");
     const rawPayload = await request.clone().text();
     const payload = JSON.parse(rawPayload) as Record<string, unknown>;
