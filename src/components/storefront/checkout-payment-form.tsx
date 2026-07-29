@@ -149,7 +149,14 @@ export function CheckoutPaymentForm({
         throw new Error(locale === "vi" ? "Vui lòng nhập email." : "Please enter your email.");
       }
 
-      const customAmountMinor = mode === "custom" || isSupportOption ? Number(customAmount) : null;
+      const customAmountMinor =
+        mode === "custom"
+          ? Number(customAmount)
+          : isSupportOption
+            ? customAmount.trim() === ""
+              ? selectedSupport?.amountMinor ?? null
+              : Number(customAmount)
+            : null;
       if ((mode === "custom" || isSupportOption) && (customAmountMinor == null || !Number.isFinite(customAmountMinor) || customAmountMinor <= 0)) {
         throw new Error(locale === "vi" ? "Vui lòng nhập số tiền hợp lệ." : "Please enter a valid amount.");
       }
