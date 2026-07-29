@@ -22,8 +22,8 @@ export function PayPalConfigForm() {
   async function save() {
     setMessage("");
     const csrf = await fetch("/api/admin/csrf").then((response) => response.json());
-    const response = await fetch("/api/admin/paypal", { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": csrf.data?.token || "" }, body: JSON.stringify(config) });
-    const json = await response.json();
+    const response = await fetch("/api/admin/paypal", { method: "POST", credentials: "include", headers: { "content-type": "application/json", "x-csrf-token": csrf.data?.token || "" }, body: JSON.stringify(config) });
+    const json = await response.json().catch(() => ({}));
     setMessage(response.ok ? "Đã lưu cấu hình PayPal." : json.error?.message || "Lưu thất bại.");
     if (response.ok) setConfig({ ...json.data, clientId: "", clientSecret: "", webhookId: "" });
   }

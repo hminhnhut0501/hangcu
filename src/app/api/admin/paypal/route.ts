@@ -25,7 +25,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  await requireAdminMutationAccess("admin");
+  try {
+    await requireAdminMutationAccess("admin");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Forbidden";
+    const isCsrf = message.toLowerCase().includes("csrf");
+    return Response.json({
+      success: false,
+      error: {
+        code: isCsrf ? "INVALID_CSRF" : "FORBIDDEN",
+        message: isCsrf ? "Phiên bảo mật đã hết hạn. Hãy tải lại trang và thử lại." : "Bạn cần quyền admin để lưu cấu hình PayPal."
+      }
+    }, { status: isCsrf ? 403 : 403 });
+  }
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
   const client = getSupabaseServiceClient();
