@@ -1,6 +1,7 @@
 import { generateRandomToken } from "@/lib/crypto/hash";
 import { hashToken, hmacSha256 } from "@/lib/crypto/hash";
 import { writeSystemAuditLog } from "@/modules/audit/service";
+import { sendTransactionalEmail } from "@/lib/email/service";
 import { getAdminMutationContext } from "@/modules/admin-auth/context";
 import { createOrder, getOrderByOrderNumber, listAllOrders, updateOrder } from "@/modules/orders/service";
 import { licensePlansSeed } from "@/lib/license/mock-data";
@@ -867,6 +868,32 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       licenseKeyId: issued.id
     }
   });
+
+  if (!order.metadata?.emailDeliveredAt && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(order.customerEmail)) {
+    const planName = String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code);
+    const expiryText = issued.expiresAt ? issued.expiresAt.toISOString() : "Lifetime / Trọn đời";
+    try {
+      const emailResult = await sendTransactionalEmail({
+        to: order.customerEmail,
+        subject: `License của bạn - ${order.orderNumber}`,
+        text: `Thanh toán thành công.\n\nGói: ${planName}\nLicense key: ${activationCode}\nHạn sử dụng: ${expiryText}\n\nMã đơn: ${order.orderNumber}`,
+        html: `<h2>Thanh toán thành công</h2><p>Gói: <strong>${planName}</strong></p><p>License key: <strong>${activationCode}</strong></p><p>Hạn sử dụng: <strong>${expiryText}</strong></p><p>Mã đơn: ${order.orderNumber}</p><p>Vui lòng giữ email này để kích hoạt license.</p>`
+      });
+      await updateOrder(order.orderNumber, {
+        metadata: {
+          ...order.metadata,
+          emailDeliveredAt: new Date().toISOString(),
+          emailDeliveryProvider: emailResult.provider,
+          emailDeliveryMessageId: emailResult.messageId
+        }
+      });
+      console.info(`[license-email] delivered orderNumber=${order.orderNumber} provider=${emailResult.provider}`);
+    } catch (error) {
+      console.error(`[license-email] failed orderNumber=${order.orderNumber} error=${error instanceof Error ? error.message : String(error)}`);
+    }
+  } else if (order.metadata?.emailDeliveredAt) {
+    console.info(`[license-email] skip orderNumber=${order.orderNumber} reason=already_delivered`);
+  }
 
   const activationUrl = buildBotActivationUrl(activationCode);
   const vipGroupPolicy = plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined;

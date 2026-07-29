@@ -35,7 +35,8 @@ export async function POST(request: Request) {
   }
 
   let order;
-  if (parsed.data.orderNumber || parsed.data.planCode || parsed.data.amountMinor != null || parsed.data.checkoutId) {
+  const isBotCheckout = Boolean(parsed.data.orderNumber || parsed.data.checkoutId || parsed.data.customerRef);
+  if (isBotCheckout) {
     const existingOrder = parsed.data.orderNumber ? await getOrderByOrderNumber(parsed.data.orderNumber) : null;
     const amountMinor = parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0;
     const currency = parsed.data.currency ?? "VND";
@@ -47,8 +48,23 @@ export async function POST(request: Request) {
         error: { code: "INVALID_REQUEST", message: "Request is invalid." }
       }, { status: 400 });
     }
-    order = await createOrder({
-      customerEmail: `${parsed.data.customerRef ?? orderNumber}@hangcu.local`,
+    const customerEmail = parsed.data.email?.trim() || `${parsed.data.customerRef ?? orderNumber}@hangcu.local`;
+    if (existingOrder) {
+      order = await updateOrder(existingOrder.orderNumber, {
+        customerEmail,
+        currency,
+        metadata: {
+          ...existingOrder.metadata,
+          ...(parsed.data.email ? { customerEmail } : {}),
+          planCode: parsed.data.planCode ?? existingOrder.metadata?.planCode ?? null,
+          planName: parsed.data.plan ?? existingOrder.metadata?.planName ?? planName,
+          amountMinor,
+          currency
+        }
+      });
+    } else {
+      order = await createOrder({
+      customerEmail,
       currency,
       source: "bot_checkout",
       notes: null,
@@ -86,7 +102,8 @@ export async function POST(request: Request) {
           }
         }
       ]
-    });
+      });
+    }
   } else {
     if (!parsed.data.productSlug || !parsed.data.email) {
       return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
@@ -123,6 +140,9 @@ export async function POST(request: Request) {
         }
       ]
     });
+  }
+  if (!order) {
+    return Response.json({ success: false, error: { code: "ORDER_NOT_FOUND", message: "Order could not be prepared." } }, { status: 404 });
   }
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
   if (["paypal", "lemonsqueezy", "creem"].includes(parsed.data.provider) && order.currency !== "USD") {
