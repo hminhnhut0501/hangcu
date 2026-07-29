@@ -1,0 +1,27 @@
+-- Keep the admin site-content form and the Supabase schema in sync.
+-- These columns were introduced by the content editor after the base table.
+alter table if exists site_settings
+  add column if not exists features_section_label_vi text not null default '',
+  add column if not exists features_section_label_en text not null default '',
+  add column if not exists features_section_title_vi text not null default '',
+  add column if not exists features_section_title_en text not null default '',
+  add column if not exists features_section_description_vi text not null default '',
+  add column if not exists features_section_description_en text not null default '',
+  add column if not exists demo_section_label_vi text not null default '',
+  add column if not exists demo_section_label_en text not null default '',
+  add column if not exists demo_section_title_vi text not null default '',
+  add column if not exists demo_section_title_en text not null default '',
+  add column if not exists demo_section_description_vi text not null default '',
+  add column if not exists demo_section_description_en text not null default '',
+  add column if not exists plans_section_label_vi text not null default '',
+  add column if not exists plans_section_label_en text not null default '',
+  add column if not exists plans_section_title_vi text not null default '',
+  add column if not exists plans_section_title_en text not null default '',
+  add column if not exists plans_section_description_vi text not null default '',
+  add column if not exists plans_section_description_en text not null default '',
+  add column if not exists faq_section_label_vi text not null default '',
+  add column if not exists faq_section_label_en text not null default '',
+  add column if not exists faq_section_title_vi text not null default '',
+  add column if not exists faq_section_title_en text not null default '',
+  add column if not exists faq_section_description_vi text not null default '',
+  add column if not exists faq_section_description_en text not null default '';

@@ -10,8 +10,6 @@ import { MoneyAmount } from "@/components/money/money-amount";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const mainPlanCodes = new Set(["FULL_1M", "FULL_LIFE", "HCV_30D", "HCV_LIFETIME", "HCV-LIC-30", "HCV-LIC-LIFE"]);
-
 type Locale = "vi" | "en";
 
 type FeatureCard = {
@@ -210,7 +208,11 @@ export default async function HomePage() {
     {
       name: locale === "vi" ? "30 ngày" : "30-day license",
       price: (() => {
-        const plan = licensePlans.find((item) => mainPlanCodes.has(item.code) || item.durationDays === 30 || !item.isLifetime);
+        const plan =
+          licensePlans.find((item) => item.code === "FULL_1M") ??
+          licensePlans.find((item) => item.code === "HCV_30D") ??
+          licensePlans.find((item) => item.durationDays === 30 && !item.isLifetime) ??
+          licensePlans.find((item) => !item.isLifetime);
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
@@ -224,7 +226,10 @@ export default async function HomePage() {
     {
       name: locale === "vi" ? "Trọn đời" : "Lifetime license",
       price: (() => {
-        const plan = licensePlans.find((item) => mainPlanCodes.has(item.code) || item.isLifetime);
+        const plan =
+          licensePlans.find((item) => item.code === "FULL_LIFE") ??
+          licensePlans.find((item) => item.code === "HCV_LIFETIME") ??
+          licensePlans.find((item) => item.isLifetime);
         if (!plan) return null;
         const amount = locale === "vi" ? plan.currencyPrices.VND : plan.currencyPrices.USD;
         const currency = locale === "vi" ? "VND" : "USD";
