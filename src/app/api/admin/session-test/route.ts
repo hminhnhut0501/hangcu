@@ -9,6 +9,9 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: "Not found." } }, { status: 404 });
+  }
   const payload = await request.json().catch(() => ({}));
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
   response.cookies.set("admin_session", encodeAdminSession(parsed.data.adminId, parsed.data.role), {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     path: "/"
   });
 
@@ -37,11 +40,14 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ success: false, error: { code: "NOT_FOUND", message: "Not found." } }, { status: 404 });
+  }
   const response = NextResponse.json({ success: true });
   response.cookies.set("admin_session", "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     path: "/",
     maxAge: 0
   });

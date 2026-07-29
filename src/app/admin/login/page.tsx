@@ -6,7 +6,8 @@ export default async function AdminLoginPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const nextUrl = typeof params.next === "string" && params.next.trim() ? params.next : "/admin";
+  const requestedNext = typeof params.next === "string" ? params.next.trim() : "";
+  const nextUrl = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/admin";
   return (
     <AdminLoginForm nextUrl={nextUrl} />
   );

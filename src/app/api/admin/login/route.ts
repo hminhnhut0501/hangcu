@@ -64,6 +64,15 @@ export async function POST(request: Request) {
 
   const adminId = parsed.data.username;
   const role = getLoginRole();
+  let sessionToken: string;
+  try {
+    sessionToken = encodeAdminSession(adminId, role);
+  } catch {
+    return NextResponse.json(
+      { success: false, error: { code: "LOGIN_NOT_CONFIGURED", message: "Admin session security is not configured." } },
+      { status: 503 }
+    );
+  }
   const response = NextResponse.json({
     success: true,
     data: {
@@ -72,11 +81,12 @@ export async function POST(request: Request) {
     }
   });
 
-  response.cookies.set("admin_session", encodeAdminSession(adminId, role), {
+  response.cookies.set("admin_session", sessionToken, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/"
+    path: "/",
+    maxAge: Math.max(900, Number(process.env.ADMIN_SESSION_TTL_SECONDS ?? 28800))
   });
 
   return response;

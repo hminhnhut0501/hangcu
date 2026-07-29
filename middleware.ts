@@ -6,12 +6,15 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasLocaleCookie = Boolean(request.cookies.get("lang")?.value);
 
-  if (pathname.startsWith("/api") || pathname.startsWith("/_next")) {
+  if (pathname.startsWith("/_next")) {
     return NextResponse.next();
   }
 
   const isAdminPath = pathname === "/admin" || pathname.startsWith("/admin/");
-  const isAuthPath = pathname === "/admin/login" || pathname === "/admin/login-test";
+  const isAdminApiPath = pathname.startsWith("/api/admin/");
+  const isAuthPath = pathname === "/admin/login" || (pathname === "/admin/login-test" && process.env.NODE_ENV !== "production");
+  const isPublicAdminApiPath = ["/api/admin/login", "/api/admin/logout", "/api/admin/session", "/api/admin/csrf"].includes(pathname)
+    || (pathname === "/api/admin/session-test" && process.env.NODE_ENV !== "production");
 
   if (isAdminPath && !isAuthPath) {
     const sessionCookie = request.cookies.get("admin_session")?.value;
@@ -21,6 +24,17 @@ export function middleware(request: NextRequest) {
       url.searchParams.set("next", pathname + request.nextUrl.search);
       return NextResponse.redirect(url);
     }
+  }
+
+  if (isAdminApiPath && !isPublicAdminApiPath && !request.cookies.get("admin_session")?.value) {
+    return NextResponse.json(
+      { success: false, error: { code: "UNAUTHORIZED", message: "Admin login required." } },
+      { status: 401 }
+    );
+  }
+
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
   }
 
   if (!hasLocaleCookie && !isAdminSubdomain) {

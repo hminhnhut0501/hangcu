@@ -102,6 +102,9 @@ export function AdminLoginForm({ nextUrl }: Props) {
             <li>
               `ADMIN_LOGIN_ROLE`: role sau khi đăng nhập, mặc định là <code>content_manager</code>
             </li>
+            <li>
+              `ADMIN_SESSION_SECRET`: chuỗi bí mật dài, bắt buộc trên production để ký session
+            </li>
           </ul>
           <p className="mt-5 text-sm text-slate-600">
             Trên Vercel, bạn set các biến này trong <code>Project Settings → Environment Variables</code> cho

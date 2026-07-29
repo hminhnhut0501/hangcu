@@ -16,6 +16,7 @@ import {
   FileCog,
   LayoutDashboard,
   ListChecks,
+  LogOut,
   PlugZap,
   ShoppingCart,
   ShieldAlert,
@@ -148,6 +149,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
     };
   }, [pathname, router]);
 
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST", credentials: "include" });
+    setSession(null);
+    router.replace("/admin/login");
+    router.refresh();
+  }
+
   const navSections: NavSection[] = [
     {
       title: "Vận hành",
@@ -272,6 +280,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 {sessionLoaded ? (session ? `${session.adminId} · ${session.role}` : "Chưa có admin_session") : "Đang kiểm tra..."}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Đăng xuất"
+              className={`mt-2 flex items-center gap-2 rounded-2xl border border-rose-300/20 bg-rose-500/10 px-3 py-2 text-xs font-semibold text-rose-100 transition hover:bg-rose-500/20 ${collapsed ? "justify-center lg:px-2" : ""}`}
+            >
+              <LogOut className="h-3.5 w-3.5 shrink-0" />
+              <span className={collapsed ? "hidden lg:hidden" : ""}>Đăng xuất</span>
+            </button>
             <AdminCommandPalette actions={commandActions} />
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2">
