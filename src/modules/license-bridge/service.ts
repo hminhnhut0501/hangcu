@@ -16,6 +16,7 @@ import {
 import { integrationErrors } from "@/modules/integration-api/errors";
 import { getIntegrationSecret, verifyIntegrationRequest } from "@/modules/integration-api/service";
 import { listLicenseKeys, updateLicenseKeyById } from "@/modules/license-keys/service";
+import { enqueuePaymentCallback, markPaymentCallback } from "@/modules/payment-callback-outbox/service";
 import { licenseCheckoutSchema, licenseRevokeSchema, licenseStatusSchema, licenseVerifySchema } from "./schema";
 
 function buildBotResponseUrl(url: string | undefined, orderNumber: string, fallbackPath = "/checkout") {
@@ -154,6 +155,11 @@ function buildBotCallbackUrl() {
   return `${normalized}/license-delivery`;
 }
 
+function buildBotPaymentStatusCallbackUrl() {
+  const explicit = process.env.LICENSE_BOT_PAYMENT_STATUS_URL?.trim() || process.env.BOT_PAYMENT_STATUS_URL?.trim();
+  return (explicit || buildBotCallbackUrl()).replace(/\/$/, "");
+}
+
 function signBotCallbackPayload(payload: Record<string, unknown>) {
   const secret =
     process.env.LICENSE_BOT_CALLBACK_SECRET?.trim() ||
@@ -183,7 +189,7 @@ async function notifyBotPaymentStatus(input: {
   paymentProvider?: string | null;
   paymentSessionId?: string | null;
 }) {
-  const baseUrl = buildBotCallbackUrl();
+  const baseUrl = buildBotPaymentStatusCallbackUrl();
   if (!baseUrl) return null;
   const timestamp = Math.floor(Date.now() / 1000);
   const nonce = generateRandomToken(16);
@@ -202,6 +208,12 @@ async function notifyBotPaymentStatus(input: {
   };
   const signature = signBotCallbackPayload(payload);
   if (!signature) return null;
+  await enqueuePaymentCallback({
+    botOrderId: input.botOrderId,
+    webOrderId: input.orderId,
+    orderNumber: input.orderNumber,
+    payload: { ...payload, signature }
+  });
   const body = JSON.stringify({ ...payload, signature });
   let lastError: unknown = null;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -213,6 +225,7 @@ async function notifyBotPaymentStatus(input: {
       });
       if (!response.ok) throw new Error(`Bot payment callback failed: ${response.status} ${await response.text().catch(() => "")}`);
       console.info(`[payment-callback] delivered botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt}`);
+      await markPaymentCallback({ botOrderId: input.botOrderId, status: "delivered" });
       return response.json().catch(() => null);
     } catch (error) {
       lastError = error;
@@ -220,6 +233,7 @@ async function notifyBotPaymentStatus(input: {
       if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
     }
   }
+  await markPaymentCallback({ botOrderId: input.botOrderId, status: "failed", error: lastError instanceof Error ? lastError.message : String(lastError ?? "callback failed") });
   throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Bot payment callback failed"));
 }
 
@@ -475,10 +489,12 @@ export async function createLicenseCheckout(input: unknown) {
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
   const siteSettings = await getSiteContentSettings().catch(() => null);
   const preferredGateway = siteSettings ? resolvePreferredPaymentGateway(siteSettings, parsed.currency) : null;
-  const providerCandidates = buildCheckoutProviderCandidates({
-    currency: parsed.currency,
-    preferredProvider: preferredGateway?.provider ?? null
-  });
+  const providerCandidates = botPayment
+    ? [preferredGateway?.provider ?? (parsed.currency === "VND" ? "payos" : "paypal")]
+    : buildCheckoutProviderCandidates({
+        currency: parsed.currency,
+        preferredProvider: preferredGateway?.provider ?? null
+      });
   let checkout: Awaited<ReturnType<typeof createPaymentCheckout>> | null = null;
   let selectedProvider: string | null = null;
   let lastError: unknown = null;
@@ -719,6 +735,7 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
       });
     } catch (error) {
       console.error(`[payment-callback] failed botOrderId=${botOrderId} orderNumber=${order.orderNumber} error=${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
     return { orderNumber: order.orderNumber, botOrderId, status: "paid", callbackMode: "status_only" };
   }

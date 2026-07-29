@@ -1,5 +1,5 @@
 import { PayOSPaymentProvider } from "@/providers/payments/payos";
-import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
+import { getWebhookEvent, recordWebhookEvent, updateWebhookStatus } from "@/modules/webhooks/service";
 import { writeSystemAuditLog } from "@/modules/audit/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
 import { getOrderByMetadataKey, updateOrder } from "@/modules/orders/service";
@@ -84,17 +84,23 @@ export async function POST(request: Request) {
     return Response.json({ success: true, duplicate: true });
   }
 
-  await recordWebhookEvent({
-    id: crypto.randomUUID(),
-    provider: "payos",
-    providerEventId: event.providerEventId,
-    eventType: event.eventType,
-    payload: JSON.parse(event.rawPayload),
-    signatureValid: true,
-    processingStatus: "processed",
-    errorMessage: null,
-    processedAt: new Date()
-  });
+  if (existingEvent?.processingStatus === "failed") {
+    console.info(`[payos-webhook] retrying failed eventId=${event.providerEventId}`);
+  }
+
+  if (!existingEvent) {
+    await recordWebhookEvent({
+      id: crypto.randomUUID(),
+      provider: "payos",
+      providerEventId: event.providerEventId,
+      eventType: event.eventType,
+      payload: JSON.parse(event.rawPayload),
+      signatureValid: true,
+      processingStatus: "pending",
+      errorMessage: null,
+      processedAt: null
+    });
+  }
 
   if (orderCode) {
     const providerPaymentId = String(payload.data?.orderCode ?? payload.data?.paymentLinkId ?? "");
@@ -122,7 +128,15 @@ export async function POST(request: Request) {
     console.info(
       `[payos-webhook] dispatch license issue eventId=${event.providerEventId} orderCode=${orderCode} paymentLinkId=${paymentLinkId || "n/a"} linkedOrder=${linkedOrder?.orderNumber || "none"}`
     );
-    await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
+    try {
+      await issueLicenseFromPaidOrder(linkedOrder?.orderNumber ?? orderCode);
+      await updateWebhookStatus("payos", event.providerEventId, "processed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await updateWebhookStatus("payos", event.providerEventId, "failed", message);
+      console.error(`[payos-webhook] processing_failed eventId=${event.providerEventId} linkedOrder=${linkedOrder?.orderNumber || "none"} error=${message}`);
+      return Response.json({ success: false, error: "processing_failed" }, { status: 500 });
+    }
   }
 
   await writeSystemAuditLog({

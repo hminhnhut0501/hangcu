@@ -20,6 +20,7 @@ export interface WebhookRepository {
   list(): Promise<PaymentEvent[]>;
   findByProviderEventId(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
   create(event: PaymentEvent): Promise<PaymentEvent>;
+  updateStatus(provider: string, providerEventId: string, status: PaymentEvent["processingStatus"], errorMessage?: string | null): Promise<PaymentEvent | null>;
   retry(provider: string, providerEventId: string): Promise<PaymentEvent | null>;
 }
 
@@ -41,6 +42,15 @@ export class InMemoryWebhookRepository implements WebhookRepository {
     return event;
   }
 
+  async updateStatus(provider: string, providerEventId: string, status: PaymentEvent["processingStatus"], errorMessage: string | null = null) {
+    const event = paymentEvents.find((entry) => entry.provider === provider && entry.providerEventId === providerEventId);
+    if (!event) return null;
+    event.processingStatus = status;
+    event.errorMessage = errorMessage;
+    event.processedAt = status === "processed" ? new Date() : event.processedAt;
+    return event;
+  }
+
   async retry(provider: string, providerEventId: string): Promise<PaymentEvent | null> {
     const event = paymentEvents.find(
       (entry) => entry.provider === provider && entry.providerEventId === providerEventId
@@ -54,6 +64,7 @@ export class InMemoryWebhookRepository implements WebhookRepository {
     event.processedAt = new Date();
     return event;
   }
+
 }
 
 export class SupabaseWebhookRepository implements WebhookRepository {
@@ -179,6 +190,25 @@ export class SupabaseWebhookRepository implements WebhookRepository {
       processingStatus: data.processing_status,
       errorMessage: data.error_message ?? null,
       processedAt: data.processed_at ? new Date(data.processed_at) : null
+    };
+  }
+
+  async updateStatus(provider: string, providerEventId: string, status: PaymentEvent["processingStatus"], errorMessage: string | null = null) {
+    if (!this.client) return new InMemoryWebhookRepository().updateStatus(provider, providerEventId, status, errorMessage);
+    const { data, error } = await this.client.from("payment_events").update({
+      processing_status: status,
+      error_message: errorMessage,
+      processed_at: status === "processed" ? new Date().toISOString() : null
+    }).eq("provider", provider).eq("provider_event_id", providerEventId).select("*").maybeSingle();
+    if (error) {
+      if (isMissingSupabaseTableError(error, "payment_events")) return new InMemoryWebhookRepository().updateStatus(provider, providerEventId, status, errorMessage);
+      throw error;
+    }
+    if (!data) return null;
+    return {
+      id: data.id, provider: data.provider, providerEventId: data.provider_event_id, eventType: data.event_type,
+      payload: data.payload ?? {}, signatureValid: data.signature_valid, processingStatus: data.processing_status,
+      errorMessage: data.error_message ?? null, processedAt: data.processed_at ? new Date(data.processed_at) : null
     };
   }
 }

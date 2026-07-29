@@ -26,6 +26,10 @@ export async function recordWebhookEvent(event: PaymentEvent) {
   return webhookRepository.create(event);
 }
 
+export async function updateWebhookStatus(provider: string, providerEventId: string, status: PaymentEvent["processingStatus"], errorMessage: string | null = null) {
+  return webhookRepository.updateStatus(provider, providerEventId, status, errorMessage);
+}
+
 export async function retryWebhook(provider: string, providerEventId: string) {
   const event = await webhookRepository.retry(provider, providerEventId);
   if (event) {
