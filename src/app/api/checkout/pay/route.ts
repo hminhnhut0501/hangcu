@@ -2,6 +2,7 @@ import { z } from "zod";
 import { generateRandomToken } from "@/lib/crypto/hash";
 import { getProductBySlug } from "@/modules/products/service";
 import { getCurrentPriceForProduct } from "@/modules/prices/service";
+import { getLicensePlanByCode } from "@/modules/license-plans/service";
 import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
@@ -108,8 +109,31 @@ export async function POST(request: Request) {
     if (!parsed.data.productSlug || !parsed.data.email) {
       return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
     }
-    const product = await getProductBySlug(parsed.data.productSlug);
-    const price = await getCurrentPriceForProduct(product.id);
+    let product;
+    try {
+      product = await getProductBySlug(parsed.data.productSlug);
+    } catch (error) {
+      const licensePlan = await getLicensePlanByCode(parsed.data.planCode ?? parsed.data.productSlug);
+      if (!licensePlan) throw error;
+      const currency = licensePlan.currencyPrices.VND != null ? "VND" : "USD";
+      const amountMinor = currency === "VND"
+        ? Math.round(licensePlan.currencyPrices.VND ?? 0)
+        : Math.round((licensePlan.currencyPrices.USD ?? 0) * 100);
+      product = {
+        id: licensePlan.id,
+        slug: licensePlan.code,
+        sku: licensePlan.code,
+        name: licensePlan.name,
+        shortDescription: licensePlan.description,
+        status: licensePlan.status,
+        downloadLimit: 0,
+        downloadExpiryDays: 0,
+        licensePrice: { currency, amountMinor }
+      };
+    }
+    const price = "licensePrice" in product
+      ? product.licensePrice
+      : await getCurrentPriceForProduct(product.id);
     order = await createOrder({
       customerEmail: parsed.data.email,
       currency: price.currency,
