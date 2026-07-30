@@ -8,6 +8,8 @@ import { getDonatePackageBySlug, listDonatePackages } from "@/modules/donate-pac
 import { mapDonatePackageToViewModel } from "@/modules/donate-packages/view-model";
 import { getSiteContentSettings } from "@/modules/site-settings/service";
 import { licensePlansSeed } from "@/lib/license/mock-data";
+import { getLicenseKeyForOrder } from "@/modules/license-keys/service";
+import { LicenseFulfillmentProgress } from "@/components/storefront/license-fulfillment-progress";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -65,6 +67,12 @@ export default async function CheckoutPage({
   const status = normalizeCheckoutStatus(firstValue(resolvedSearchParams.status) ?? firstValue(resolvedSearchParams.code));
   const returnedOrderCode = firstValue(resolvedSearchParams.orderCode);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
+  const issuedLicense = order ? await getLicenseKeyForOrder(order.id) : null;
+  const licenseCode = String(issuedLicense?.metadata?.activation_code ?? "").trim() ||
+    String(issuedLicense?.encryptedCode ?? "").replace(/^encrypted:/, "").trim();
+  const activationUrl = licenseCode
+    ? `${process.env.BOT_NEW_URL?.replace(/\/$/, "") || `https://t.me/${String(process.env.BOT_USERNAME || "").replace(/^@/, "")}` || "https://t.me"}?start=lic_${encodeURIComponent(licenseCode)}`
+    : "";
   const resolvedOrderLabel = order?.items?.[0]?.productName ?? (order?.metadata?.planName as string | undefined) ?? null;
   const resolvedCustomerRef = customerRef ?? (order?.metadata?.customerRef as string | undefined) ?? null;
   const resolvedPlanCode = planLabel ?? (order?.metadata?.planCode as string | undefined) ?? null;
@@ -151,13 +159,20 @@ export default async function CheckoutPage({
         {status === "paid" ? (
           <div className="max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
             <p className="text-sm font-medium text-emerald-700">
-              {locale === "vi" ? "Đã ghi nhận thanh toán" : "Payment recorded"}
+              {issuedLicense ? (locale === "vi" ? "Thanh toán thành công" : "Payment successful") : (locale === "vi" ? "Đã ghi nhận thanh toán" : "Payment recorded")}
             </p>
             <p className="mt-2 text-sm leading-6 text-emerald-900">
-              {locale === "vi"
-                ? "Hệ thống đã nhận trạng thái thanh toán thành công. Bot sẽ tiếp tục cấp quyền khi webhook đồng bộ xong."
-                : "The system has received the successful payment status. The bot will fulfill the order once the webhook sync completes."}
+              {issuedLicense
+                ? (locale === "vi" ? "License đã được cấp. Email sẽ được gửi sau để bạn lưu lại thông tin." : "Your license has been issued. An email will follow with a copy of the details.")
+                : (locale === "vi" ? "Thanh toán đã nhận. License đang được cấp, vui lòng tải lại trang sau vài giây." : "Payment received. Your license is being issued; refresh this page in a few seconds.")}
             </p>
+            {issuedLicense ? (
+              <div className="mt-4 space-y-2 rounded-xl border border-emerald-200 bg-white/70 p-4 text-sm text-emerald-950">
+                <p><strong>{locale === "vi" ? "License code:" : "License code:"}</strong> <code className="font-semibold">{licenseCode}</code></p>
+                <p><strong>{locale === "vi" ? "Hết hạn:" : "Expires:"}</strong> {issuedLicense.expiresAt?.toISOString() ?? (locale === "vi" ? "Trọn đời" : "Lifetime")}</p>
+                {activationUrl ? <p><a className="font-semibold underline" href={activationUrl}>{locale === "vi" ? "Kích hoạt license" : "Activate license"}</a></p> : null}
+              </div>
+            ) : <LicenseFulfillmentProgress locale={locale} />}
             {returnedOrderCode ? (
               <p className="mt-2 text-xs text-emerald-700">
                 {locale === "vi" ? "Mã thanh toán:" : "Payment code:"} <code>{returnedOrderCode}</code>

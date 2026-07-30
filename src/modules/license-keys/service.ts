@@ -50,6 +50,10 @@ export async function getLicenseKeyStatus(code: string) {
   return repository.findByHash(hashLicenseKey(normalized));
 }
 
+export async function getLicenseKeyForOrder(orderId: string) {
+  return (await repository.list()).find((entry) => entry.orderId === orderId) ?? null;
+}
+
 export async function redeemLicenseKey(input: {
   code: string;
   externalUserId: string;

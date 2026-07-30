@@ -873,34 +873,38 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
   const vipGroupPolicy = plan.metadata?.vipGroupPolicy as { groupIds?: string[] } | undefined;
   const groupIds = Array.isArray(vipGroupPolicy?.groupIds) ? vipGroupPolicy.groupIds : [];
 
-  try {
-    const planName = String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code);
-    await notifyBotLicenseIssued({
-      orderId: order.id,
-      botOrderId: String(order.metadata?.orderId ?? ""),
-      correlationId: String(order.metadata?.correlationId ?? `bot:${order.metadata?.orderId ?? ""}`),
-      orderNumber: order.orderNumber,
-      telegramUserId,
-      customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
-      planCode: plan.code,
-      vipPlanCode: String(order.metadata?.requestedPlanCode ?? order.metadata?.vipPlanCode ?? ""),
-      planName,
-      currency: order.currency,
-      amountMinor: order.totalMinor,
-      expiresAt: issued.expiresAt?.toISOString() ?? null,
-      licenseCode: activationCode,
-      activationUrl,
-      groupIds,
-      entitlements: plan.entitlementTags,
-      locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi",
-      checkoutKind: String(order.metadata?.checkoutKind ?? "license"),
-      paymentSessionId: String(order.metadata?.paymentSessionId ?? ""),
-      paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? ""),
-      source: String(order.metadata?.source ?? order.source ?? ""),
-      integrationSource: String(order.metadata?.integrationSource ?? "")
-    });
-  } catch (error) {
-    console.log(`⚠️ Bot callback failed for order ${order.orderNumber}: ${error instanceof Error ? error.message : String(error)}`);
+  if (isBotCheckout || isNeutralBotPayment) {
+    try {
+      const planName = String(order.metadata?.planName ?? order.items[0]?.productName ?? plan.code);
+      await notifyBotLicenseIssued({
+        orderId: order.id,
+        botOrderId: String(order.metadata?.orderId ?? ""),
+        correlationId: String(order.metadata?.correlationId ?? `bot:${order.metadata?.orderId ?? ""}`),
+        orderNumber: order.orderNumber,
+        telegramUserId,
+        customerRef: order.metadata?.customerRef ? String(order.metadata.customerRef) : null,
+        planCode: plan.code,
+        vipPlanCode: String(order.metadata?.requestedPlanCode ?? order.metadata?.vipPlanCode ?? ""),
+        planName,
+        currency: order.currency,
+        amountMinor: order.totalMinor,
+        expiresAt: issued.expiresAt?.toISOString() ?? null,
+        licenseCode: activationCode,
+        activationUrl,
+        groupIds,
+        entitlements: plan.entitlementTags,
+        locale: String(order.metadata?.locale ?? "vi") === "en" ? "en" : "vi",
+        checkoutKind: String(order.metadata?.checkoutKind ?? "license"),
+        paymentSessionId: String(order.metadata?.paymentSessionId ?? ""),
+        paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? ""),
+        source: String(order.metadata?.source ?? order.source ?? ""),
+        integrationSource: String(order.metadata?.integrationSource ?? "")
+      });
+    } catch (error) {
+      console.log(`⚠️ Bot callback failed for order ${order.orderNumber}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  } else {
+    console.info(`[license-delivery] skip orderNumber=${order.orderNumber} reason=storefront_checkout`);
   }
 
   // Email is secondary delivery. Never delay the license callback on Resend.
