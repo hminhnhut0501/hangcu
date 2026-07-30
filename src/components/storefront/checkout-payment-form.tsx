@@ -40,6 +40,7 @@ type Props = {
     amountMinor?: number | null;
     currency?: string | null;
   };
+  botCheckout?: boolean;
 };
 
 function ChipButton({
@@ -98,9 +99,10 @@ export function CheckoutPaymentForm({
   initialSelectedSlug,
   initialMode,
   initialEmail,
-  orderSummary
+  orderSummary,
+  botCheckout = false
 }: Props) {
-  const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual">("payos");
+  const [provider, setProvider] = useState<"payos" | "paypal" | "lemonsqueezy" | "creem" | "sandbox" | "manual">(botCheckout ? "paypal" : "payos");
   const [mode, setMode] = useState<"license" | "support" | "custom">(
     initialMode ?? (supportOptions.some((option) => option.slug === initialSelectedSlug) ? "support" : "license")
   );
@@ -134,7 +136,9 @@ export function CheckoutPaymentForm({
   );
   // Creem is not enabled for production checkout yet. Keep the backend contract
   // intact, but do not expose the provider in the customer-facing flow.
-  const visibleGateways = gateways.filter((gateway) => gateway.provider !== "creem");
+  const visibleGateways = gateways
+    .filter((gateway) => gateway.provider !== "creem")
+    .filter((gateway) => !botCheckout || gateway.provider === "paypal");
 
   React.useEffect(() => {
     if (visibleGateways.some((gateway) => gateway.provider === provider)) return;
@@ -155,7 +159,7 @@ export function CheckoutPaymentForm({
       if (mode !== "custom" && !selectedOption) {
         throw new Error(locale === "vi" ? "Vui lòng chọn một gói." : "Please choose a package.");
       }
-      if (!email.trim()) {
+      if (!botCheckout && !email.trim()) {
         throw new Error(locale === "vi" ? "Vui lòng nhập email." : "Please enter your email.");
       }
 
@@ -224,7 +228,7 @@ export function CheckoutPaymentForm({
     <form onSubmit={submit} className="overflow-hidden rounded-[2.25rem] border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.06)]">
       <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <div className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
-          <div className="space-y-3">
+          <div className={`space-y-3 ${botCheckout ? "hidden" : ""}`}>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 1" : "Step 1"}</p>
@@ -239,7 +243,7 @@ export function CheckoutPaymentForm({
           </div>
 
           {mode === "license" ? (
-            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div className={`rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
@@ -265,7 +269,7 @@ export function CheckoutPaymentForm({
           ) : null}
 
           {mode === "support" ? (
-            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div className={`rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
@@ -291,7 +295,7 @@ export function CheckoutPaymentForm({
           ) : null}
 
           {mode === "custom" ? (
-            <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+            <div className={`rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
               <div className="mb-4">
                 <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 2" : "Step 2"}</p>
                 <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập số tiền" : "Enter amount"}</h3>
@@ -310,7 +314,7 @@ export function CheckoutPaymentForm({
             </div>
           ) : null}
 
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-5">
+          <div className={`rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 3" : "Step 3"}</p>
@@ -327,7 +331,7 @@ export function CheckoutPaymentForm({
             />
           </div>
 
-          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+          <div className={`rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 4" : "Step 4"}</p>
@@ -359,7 +363,7 @@ export function CheckoutPaymentForm({
               disabled={loading}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
             >
-              {loading ? (locale === "vi" ? "Đang chuyển..." : "Redirecting...") : locale === "vi" ? "Thanh toán ngay" : "Continue to payment"}
+              {loading ? (locale === "vi" ? "Đang chuyển..." : "Redirecting...") : botCheckout ? "PayPal" : locale === "vi" ? "Thanh toán ngay" : "Continue to payment"}
               <ChevronRight className="h-4 w-4" />
             </button>
             <p className="text-sm text-slate-500">{locale === "vi" ? "Tự khớp theo tiền tệ." : "Auto-matched by currency."}</p>

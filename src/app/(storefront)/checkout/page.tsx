@@ -59,6 +59,7 @@ export default async function CheckoutPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
+  const botCheckout = planCode === "BOT_PAYMENT";
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
   const amountMinorQuery = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const amountMinorParam = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
@@ -162,11 +163,13 @@ export default async function CheckoutPage({
               {issuedLicense ? (locale === "vi" ? "Thanh toán thành công" : "Payment successful") : (locale === "vi" ? "Đã ghi nhận thanh toán" : "Payment recorded")}
             </p>
             <p className="mt-2 text-sm leading-6 text-emerald-900">
-              {issuedLicense
+              {botCheckout
+                ? (locale === "vi" ? "Thanh toán thành công và đơn đang được xử lý. Vui lòng quay lại bot Telegram để nhận liên kết gói VIP." : "Payment successful and your order is being processed. Return to the Telegram bot to receive your VIP access link.")
+                : issuedLicense
                 ? (locale === "vi" ? "License đã được cấp. Email sẽ được gửi sau để bạn lưu lại thông tin." : "Your license has been issued. An email will follow with a copy of the details.")
                 : (locale === "vi" ? "Thanh toán đã nhận. License đang được cấp, vui lòng tải lại trang sau vài giây." : "Payment received. Your license is being issued; refresh this page in a few seconds.")}
             </p>
-            {issuedLicense ? (
+            {issuedLicense && !botCheckout ? (
               <div className="mt-4 space-y-2 rounded-xl border border-emerald-200 bg-white/70 p-4 text-sm text-emerald-950">
                 <p><strong>{locale === "vi" ? "License code:" : "License code:"}</strong> <code className="font-semibold">{licenseCode}</code></p>
                 <p><strong>{locale === "vi" ? "Hết hạn:" : "Expires:"}</strong> {issuedLicense.expiresAt?.toISOString() ?? (locale === "vi" ? "Trọn đời" : "Lifetime")}</p>
@@ -212,6 +215,7 @@ export default async function CheckoutPage({
             amountMinor: amountMinorParam ?? order?.totalMinor ?? null,
             currency: firstValue(resolvedSearchParams.currency) ?? order?.currency ?? null
           }}
+          botCheckout={botCheckout}
         />
       </section>
     </main>
