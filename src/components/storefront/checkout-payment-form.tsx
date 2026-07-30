@@ -118,6 +118,15 @@ export function CheckoutPaymentForm({
   const selectedLicense = licenseOptions.find((option) => option.slug === selectedSlug) ?? licenseOptions[0] ?? null;
   const selectedSupport = supportOptions.find((option) => option.slug === selectedSlug) ?? supportOptions[0] ?? null;
   const isSupportOption = selectedOption?.kind === "support";
+  const isBotCheckout = orderSummary.planCode === "BOT_PAYMENT" &&
+    typeof orderSummary.amountMinor === "number" &&
+    Boolean(orderSummary.currency);
+  const summaryName = isBotCheckout ? orderSummary.planLabel ?? "Bot payment" : selectedOption?.name ?? "-";
+  const summaryAmount = isBotCheckout && orderSummary.amountMinor != null && orderSummary.currency
+    ? <MoneyAmount amount={orderSummary.amountMinor} currency={orderSummary.currency} locale={locale} />
+    : selectedOption
+      ? <MoneyAmount amount={selectedOption.amountMinor} currency={selectedOption.currency} locale={locale} />
+      : "-";
   const currentCurrency: "VND" | "USD" = mode === "custom" ? "VND" : selectedOption?.currency?.toUpperCase() === "USD" ? "USD" : "VND";
   const gateways = useMemo(
     () => paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currentCurrency)),
@@ -363,10 +372,10 @@ export function CheckoutPaymentForm({
           <div className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Tóm tắt" : "Summary"}</p>
             <div className="mt-3 space-y-2">
-              <CompactRow label={locale === "vi" ? "Gói" : "Plan"} value={selectedOption?.name ?? "-"} />
+              <CompactRow label={locale === "vi" ? "Gói" : "Plan"} value={summaryName} />
               <CompactRow
                 label={locale === "vi" ? "Giá" : "Price"}
-                value={selectedOption ? <MoneyAmount amount={selectedOption.amountMinor} currency={selectedOption.currency} locale={locale} /> : "-"}
+                value={summaryAmount}
               />
               <CompactRow
                 label={locale === "vi" ? "Cổng" : "Gateway"}
