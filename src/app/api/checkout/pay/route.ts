@@ -115,7 +115,8 @@ export async function POST(request: Request) {
     } catch (error) {
       const licensePlan = await getLicensePlanByCode(parsed.data.planCode ?? parsed.data.productSlug);
       if (!licensePlan) throw error;
-      const currency = licensePlan.currencyPrices.VND != null ? "VND" : "USD";
+      const requestedCurrency = parsed.data.currency;
+      const currency = requestedCurrency ?? (licensePlan.currencyPrices.VND != null ? "VND" : "USD");
       const amountMinor = currency === "VND"
         ? Math.round(licensePlan.currencyPrices.VND ?? 0)
         : Math.round((licensePlan.currencyPrices.USD ?? 0) * 100);
