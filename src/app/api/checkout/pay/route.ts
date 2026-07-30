@@ -49,7 +49,11 @@ export async function POST(request: Request) {
         error: { code: "INVALID_REQUEST", message: "Request is invalid." }
       }, { status: 400 });
     }
-    const customerEmail = parsed.data.email?.trim() || `${parsed.data.customerRef ?? orderNumber}@hangcu.local`;
+    const telegramRef = String(parsed.data.customerRef ?? "")
+      .replace(/^tg:/i, "")
+      .replace(/[^0-9]/g, "");
+    const fallbackEmail = telegramRef ? `${telegramRef}@gmail.com` : `${orderNumber.toLowerCase()}@gmail.com`;
+    const customerEmail = parsed.data.email?.trim() || fallbackEmail;
     if (existingOrder) {
       order = await updateOrder(existingOrder.orderNumber, {
         customerEmail,
