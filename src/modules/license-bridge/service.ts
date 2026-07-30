@@ -48,6 +48,12 @@ function buildLicenseCode() {
   return `HANGCU-${part()}-${part()}-${part()}`;
 }
 
+function ensureHangcuLicenseCode(value: unknown) {
+  const normalized = String(value ?? "").trim().toUpperCase();
+  if (!normalized) return buildLicenseCode();
+  return normalized.startsWith("HANGCU-") ? normalized : `HANGCU-${normalized}`;
+}
+
 function buildPaymentSessionId(orderId: string, orderNumber: string) {
   const suffix = generateRandomToken(10).replace(/[^a-zA-Z0-9]/g, "").slice(0, 10).toUpperCase();
   const prefix = String(orderNumber || orderId || "session").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
@@ -793,7 +799,8 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
     return null;
   }
 
-  const activationCode = String(order.metadata?.activationCode ?? buildLicenseCode());
+  const activationCode = ensureHangcuLicenseCode(order.metadata?.activationCode);
+  console.info(`[license-issue] license_generated orderNumber=${order.orderNumber} codePrefix=HANGCU codeLastFour=${activationCode.slice(-4)}`);
   const telegramUserId = resolveTelegramUserId(order);
   console.info(
     `[license-issue] telegram_resolve orderNumber=${order.orderNumber} telegramUserId=${telegramUserId ?? "n/a"} source=${order.metadata?.telegramUserId ? "metadata.telegramUserId" : order.metadata?.customerRef ? "metadata.customerRef" : order.customerEmail ? "customerEmail" : order.notes ? "notes" : "none"}`
