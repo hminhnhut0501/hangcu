@@ -579,6 +579,8 @@ export async function createLicenseCheckout(input: unknown) {
     ...(botPayment ? {} : { planCode: plan.code, plan_code: plan.code }),
     locale: parsed.locale ?? "vi",
     currency: parsed.currency,
+    amountMinor: order.totalMinor,
+    amount: parsed.currency === "USD" ? order.totalMinor / 100 : order.totalMinor,
     ...(botPayment ? {} : { activationCode: licenseCode, activation_code: licenseCode, licenseCode, license_code: licenseCode }),
     paymentSessionId,
     payment_session_id: paymentSessionId,
