@@ -90,7 +90,7 @@ function buildCheckoutProviderCandidates(input: {
   preferredProvider?: string | null;
 }) {
   const defaults = input.currency === "USD"
-    ? ["creem", "paypal", "lemonsqueezy", "manual", "sandbox"]
+    ? ["paypal", "lemonsqueezy", "manual", "sandbox"]
     : ["payos", "manual", "sandbox"];
   const preferred = String(input.preferredProvider ?? "").trim().toLowerCase();
   return [...new Set([preferred, ...defaults].filter((value): value is string => Boolean(value)))];
@@ -490,8 +490,14 @@ export async function createLicenseCheckout(input: unknown) {
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
   const siteSettings = await getSiteContentSettings().catch(() => null);
   const preferredGateway = siteSettings ? resolvePreferredPaymentGateway(siteSettings, parsed.currency) : null;
+  // Bot checkout has a stable provider policy. A stale admin preference must
+  // not route the bot to an inactive gateway such as Creem.
+  const botPreferredProvider =
+    preferredGateway?.provider && preferredGateway.provider !== "creem"
+      ? preferredGateway.provider
+      : null;
   const providerCandidates = botPayment
-    ? [preferredGateway?.provider ?? (parsed.currency === "VND" ? "payos" : "paypal")]
+    ? [botPreferredProvider ?? (parsed.currency === "VND" ? "payos" : "paypal")]
     : buildCheckoutProviderCandidates({
         currency: parsed.currency,
         preferredProvider: preferredGateway?.provider ?? null
