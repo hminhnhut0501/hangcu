@@ -123,14 +123,15 @@ export function CheckoutPaymentForm({
     () => paymentGateways.filter((gateway) => gateway.visible && gateway.currencies.includes(currentCurrency)),
     [currentCurrency, paymentGateways]
   );
-  const visibleGateways = mode === "custom" ? gateways.filter((gateway) => gateway.provider !== "creem") : gateways;
+  // Creem is not enabled for production checkout yet. Keep the backend contract
+  // intact, but do not expose the provider in the customer-facing flow.
+  const visibleGateways = gateways.filter((gateway) => gateway.provider !== "creem");
 
   React.useEffect(() => {
     if (visibleGateways.some((gateway) => gateway.provider === provider)) return;
     const preferred =
       currentCurrency === "USD"
-        ? visibleGateways.find((gateway) => gateway.provider === "creem") ??
-          visibleGateways.find((gateway) => gateway.provider === "paypal") ??
+        ? visibleGateways.find((gateway) => gateway.provider === "paypal") ??
           visibleGateways[0]
         : visibleGateways.find((gateway) => gateway.provider === "payos") ?? visibleGateways[0];
     if (preferred) setProvider(preferred.provider);
