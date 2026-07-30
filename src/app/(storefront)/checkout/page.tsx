@@ -29,6 +29,7 @@ type CheckoutSearchParams = {
   orderCode?: string | string[];
   code?: string | string[];
   package?: string | string[];
+  locale?: string | string[];
 };
 
 function firstValue(value: string | string[] | undefined) {
@@ -60,6 +61,7 @@ export default async function CheckoutPage({
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
   const botCheckout = planCode === "BOT_PAYMENT";
+  const checkoutLocale = botCheckout ? "en" : locale;
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
   const amountMinorQuery = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const amountMinorParam = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
@@ -198,7 +200,7 @@ export default async function CheckoutPage({
         ) : null}
 
         <CheckoutPaymentForm
-          locale={locale}
+          locale={checkoutLocale}
           licenseOptions={licenseProducts}
           supportOptions={supportOptions}
           paymentGateways={siteSettings.paymentGateways}

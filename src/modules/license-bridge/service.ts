@@ -490,14 +490,9 @@ export async function createLicenseCheckout(input: unknown) {
   const cancelUrl = buildCancelUrl({ orderNumber: order.orderNumber, cancelUrl: parsed.cancelUrl });
   const siteSettings = await getSiteContentSettings().catch(() => null);
   const preferredGateway = siteSettings ? resolvePreferredPaymentGateway(siteSettings, parsed.currency) : null;
-  // Bot checkout has a stable provider policy. A stale admin preference must
-  // not route the bot to an inactive gateway such as Creem.
-  const botPreferredProvider =
-    preferredGateway?.provider && preferredGateway.provider !== "creem"
-      ? preferredGateway.provider
-      : null;
+  // Bot checkout is intentionally isolated from storefront gateway settings.
   const providerCandidates = botPayment
-    ? [botPreferredProvider ?? (parsed.currency === "VND" ? "payos" : "paypal")]
+    ? ["paypal"]
     : buildCheckoutProviderCandidates({
         currency: parsed.currency,
         preferredProvider: preferredGateway?.provider ?? null
