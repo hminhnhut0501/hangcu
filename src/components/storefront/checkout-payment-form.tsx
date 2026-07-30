@@ -159,7 +159,7 @@ export function CheckoutPaymentForm({
       if (mode !== "custom" && !selectedOption) {
         throw new Error(locale === "vi" ? "Vui lòng chọn một gói." : "Please choose a package.");
       }
-      if (!botCheckout && !email.trim()) {
+      if (!email.trim()) {
         throw new Error(locale === "vi" ? "Vui lòng nhập email." : "Please enter your email.");
       }
 
@@ -314,11 +314,11 @@ export function CheckoutPaymentForm({
             </div>
           ) : null}
 
-          <div className={`rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
+          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-4 sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-medium text-slate-400">{locale === "vi" ? "Bước 3" : "Step 3"}</p>
-                <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập email" : "Email"}</h3>
+                <h3 className="mt-2 text-sm font-semibold text-slate-950">{locale === "vi" ? "Nhập email" : "Email for PayPal receipt"}</h3>
               </div>
               <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 ring-1 ring-slate-200">{locale === "vi" ? "Gửi key" : "Receipt"}</span>
             </div>
@@ -326,9 +326,13 @@ export function CheckoutPaymentForm({
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              required
               className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none ring-0 focus:border-blue-500"
-              placeholder={locale === "vi" ? "Email nhận license" : "Receipt email"}
+              placeholder={locale === "vi" ? "Email nhận license" : "Enter the email used for payment and receipt"}
             />
+            <p className="mt-2 text-xs text-slate-500">
+              {locale === "vi" ? "Email được lưu cùng đơn để đối soát thanh toán." : "Use the email associated with PayPal so the order can be verified later."}
+            </p>
           </div>
 
           <div className={`rounded-[1.75rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 ${botCheckout ? "hidden" : ""}`}>
