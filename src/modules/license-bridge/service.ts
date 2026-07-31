@@ -195,6 +195,7 @@ async function notifyBotPaymentStatus(input: {
   amountMinor: number;
   paymentProvider?: string | null;
   paymentSessionId?: string | null;
+  background?: boolean;
 }) {
   const baseUrl = buildBotPaymentStatusCallbackUrl();
   if (!baseUrl) return null;
@@ -222,26 +223,35 @@ async function notifyBotPaymentStatus(input: {
     payload: { ...payload, signature }
   });
   const body = JSON.stringify({ ...payload, signature });
-  let lastError: unknown = null;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const response = await fetch(baseUrl, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body
-      });
-      if (!response.ok) throw new Error(`Bot payment callback failed: ${response.status} ${await response.text().catch(() => "")}`);
-      console.info(`[payment-callback] delivered botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt}`);
-      await markPaymentCallback({ botOrderId: input.botOrderId, status: "delivered" });
-      return response.json().catch(() => null);
-    } catch (error) {
-      lastError = error;
-      console.error(`[payment-callback] retry botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt} error=${error instanceof Error ? error.message : String(error)}`);
-      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+  const deliver = async () => {
+    let lastError: unknown = null;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        const response = await fetch(baseUrl, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body
+        });
+        if (!response.ok) throw new Error(`Bot payment callback failed: ${response.status} ${await response.text().catch(() => "")}`);
+        console.info(`[payment-callback] delivered botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt}`);
+        await markPaymentCallback({ botOrderId: input.botOrderId, status: "delivered" });
+        return response.json().catch(() => null);
+      } catch (error) {
+        lastError = error;
+        console.error(`[payment-callback] retry botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt} error=${error instanceof Error ? error.message : String(error)}`);
+        if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      }
     }
+    await markPaymentCallback({ botOrderId: input.botOrderId, status: "failed", error: lastError instanceof Error ? lastError.message : String(lastError ?? "callback failed") });
+    throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Bot payment callback failed"));
+  };
+  if (input.background) {
+    void deliver().catch((error) => {
+      console.error(`[payment-callback] background_failed botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} error=${error instanceof Error ? error.message : String(error)}`);
+    });
+    return { queued: true };
   }
-  await markPaymentCallback({ botOrderId: input.botOrderId, status: "failed", error: lastError instanceof Error ? lastError.message : String(lastError ?? "callback failed") });
-  throw lastError instanceof Error ? lastError : new Error(String(lastError ?? "Bot payment callback failed"));
+  return deliver();
 }
 
 function botCallbackSecretFingerprint() {
@@ -741,7 +751,8 @@ export async function issueLicenseFromPaidOrder(orderNumber: string) {
         currency: order.currency,
         amountMinor: order.totalMinor,
         paymentProvider: String(order.metadata?.paymentProvider ?? order.metadata?.provider ?? "payos"),
-        paymentSessionId: String(order.metadata?.paymentSessionId ?? "")
+        paymentSessionId: String(order.metadata?.paymentSessionId ?? ""),
+        background: true
       });
     } catch (error) {
       console.error(`[payment-callback] failed botOrderId=${botOrderId} orderNumber=${order.orderNumber} error=${error instanceof Error ? error.message : String(error)}`);
