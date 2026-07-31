@@ -71,8 +71,6 @@ export default async function CheckoutPage({
   const resolvedSearchParams = (await searchParams) ?? {};
   const orderNumber = firstValue(resolvedSearchParams.order);
   const planCode = firstValue(resolvedSearchParams.planCode);
-  const botCheckout = planCode === "BOT_PAYMENT";
-  const checkoutLocale = botCheckout ? "en" : locale;
   const planLabel = firstValue(resolvedSearchParams.plan) ?? planCode;
   const amountMinorQuery = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
   const amountMinorParam = parseAmountMinor(firstValue(resolvedSearchParams.amountMinor));
@@ -81,6 +79,18 @@ export default async function CheckoutPage({
   const status = normalizeCheckoutStatus(firstValue(resolvedSearchParams.status) ?? firstValue(resolvedSearchParams.code));
   const returnedOrderCode = firstValue(resolvedSearchParams.orderCode);
   const order = orderNumber ? await getOrderByOrderNumber(orderNumber) : null;
+  // Payment providers often return only `order`; recover bot mode from the
+  // persisted order so the success page does not fall back to storefront UI.
+  const orderIntegrationSource = String(
+    order?.metadata?.integrationSource ?? order?.source ?? ""
+  ).trim().toLowerCase();
+  const botCheckout = planCode === "BOT_PAYMENT" ||
+    orderIntegrationSource === "bot_checkout" ||
+    orderIntegrationSource === "prive_bot" ||
+    orderIntegrationSource.startsWith("bot_") ||
+    orderIntegrationSource.startsWith("prive_bot_") ||
+    String(order?.metadata?.planCode ?? "").trim().toUpperCase() === "BOT_PAYMENT";
+  const checkoutLocale = botCheckout ? "en" : locale;
   const issuedLicense = order ? await getLicenseKeyForOrder(order.id) : null;
   const licenseCode = String(issuedLicense?.metadata?.activation_code ?? "").trim() ||
     String(issuedLicense?.encryptedCode ?? "").replace(/^encrypted:/, "").trim();
