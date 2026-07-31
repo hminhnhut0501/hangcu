@@ -43,6 +43,17 @@ function parseAmountMinor(value: string | undefined) {
   return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
 }
 
+function formatSummaryAmount(amountMinor: number | null, currency: string | null) {
+  if (amountMinor == null || !currency) return "-";
+  const normalizedCurrency = currency.toUpperCase();
+  const amount = normalizedCurrency === "USD" ? amountMinor / 100 : amountMinor;
+  return new Intl.NumberFormat(normalizedCurrency === "USD" ? "en-US" : "vi-VN", {
+    style: "currency",
+    currency: normalizedCurrency === "USD" ? "USD" : "VND",
+    maximumFractionDigits: normalizedCurrency === "USD" ? 2 : 0
+  }).format(amount);
+}
+
 function normalizeCheckoutStatus(value: string | undefined) {
   const status = String(value || "").trim().toUpperCase();
   if (["PAID", "SUCCESS", "SUCCEEDED", "COMPLETED", "00"].includes(status)) return "paid";
@@ -161,23 +172,61 @@ export default async function CheckoutPage({
 
         {status === "paid" ? (
           <div className="max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-            <p className="text-sm font-medium text-emerald-700">
-              {issuedLicense ? (locale === "vi" ? "Thanh toán thành công" : "Payment successful") : (locale === "vi" ? "Đã ghi nhận thanh toán" : "Payment recorded")}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-emerald-900">
-              {botCheckout
-                ? (locale === "vi" ? "Thanh toán thành công và đơn đang được xử lý. Vui lòng quay lại bot Telegram để nhận liên kết gói VIP." : "Payment successful and your order is being processed. Return to the Telegram bot to receive your VIP access link.")
-                : issuedLicense
-                ? (locale === "vi" ? "License đã được cấp. Email sẽ được gửi sau để bạn lưu lại thông tin." : "Your license has been issued. An email will follow with a copy of the details.")
-                : (locale === "vi" ? "Thanh toán đã nhận. License đang được cấp, vui lòng tải lại trang sau vài giây." : "Payment received. Your license is being issued; refresh this page in a few seconds.")}
-            </p>
+            {botCheckout ? (
+              <div className="space-y-5">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-2xl text-white shadow-sm">✓</div>
+                  <div>
+                    <p className="text-lg font-semibold text-emerald-950">Payment successful</p>
+                    <p className="mt-1 text-sm leading-6 text-emerald-800">Your payment was received. The VIP access will be delivered in Telegram.</p>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-xl border border-emerald-200 bg-white/75 p-3">
+                    <p className="text-xs text-emerald-700">Plan</p>
+                    <p className="mt-1 truncate text-sm font-semibold text-emerald-950">{summaryPlan || "-"}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200 bg-white/75 p-3">
+                    <p className="text-xs text-emerald-700">Order</p>
+                    <p className="mt-1 truncate text-sm font-semibold text-emerald-950">{orderNumber || "-"}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200 bg-white/75 p-3">
+                    <p className="text-xs text-emerald-700">Amount</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-950">{formatSummaryAmount(summaryAmountMinor, summaryAmountCurrency)}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200 bg-white/75 p-3">
+                    <p className="text-xs text-emerald-700">Status</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-950">Processing delivery</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-100/60 p-4">
+                  <div className="flex items-center gap-3 text-sm font-semibold text-emerald-950">
+                    <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-500" />
+                    License and VIP links are being prepared
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-emerald-800">Please return to the Telegram bot. It will send your license activation link and VIP group links when delivery is complete.</p>
+                </div>
+                <p className="text-xs text-emerald-700">Keep this page open for a moment. You can safely close it after returning to Telegram.</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-emerald-700">
+                  {issuedLicense ? (locale === "vi" ? "Thanh toán thành công" : "Payment successful") : (locale === "vi" ? "Đã ghi nhận thanh toán" : "Payment recorded")}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-emerald-900">
+                  {issuedLicense
+                    ? (locale === "vi" ? "License đã được cấp. Email sẽ được gửi sau để bạn lưu lại thông tin." : "Your license has been issued. An email will follow with a copy of the details.")
+                    : (locale === "vi" ? "Thanh toán đã nhận. License đang được cấp, vui lòng tải lại trang sau vài giây." : "Payment received. Your license is being issued; refresh this page in a few seconds.")}
+                </p>
+              </>
+            )}
             {issuedLicense && !botCheckout ? (
               <div className="mt-4 space-y-2 rounded-xl border border-emerald-200 bg-white/70 p-4 text-sm text-emerald-950">
                 <p><strong>{locale === "vi" ? "License code:" : "License code:"}</strong> <code className="font-semibold">{licenseCode}</code></p>
                 <p><strong>{locale === "vi" ? "Hết hạn:" : "Expires:"}</strong> {issuedLicense.expiresAt?.toISOString() ?? (locale === "vi" ? "Trọn đời" : "Lifetime")}</p>
                 {activationUrl ? <p><a className="font-semibold underline" href={activationUrl}>{locale === "vi" ? "Kích hoạt license" : "Activate license"}</a></p> : null}
               </div>
-            ) : <LicenseFulfillmentProgress locale={locale} />}
+            ) : !botCheckout ? <LicenseFulfillmentProgress locale={locale} /> : null}
             {returnedOrderCode ? (
               <p className="mt-2 text-xs text-emerald-700">
                 {locale === "vi" ? "Mã thanh toán:" : "Payment code:"} <code>{returnedOrderCode}</code>
@@ -199,7 +248,7 @@ export default async function CheckoutPage({
           </div>
         ) : null}
 
-        <CheckoutPaymentForm
+        {!(botCheckout && status === "paid") ? <CheckoutPaymentForm
           locale={checkoutLocale}
           licenseOptions={licenseProducts}
           supportOptions={supportOptions}
@@ -218,7 +267,7 @@ export default async function CheckoutPage({
             currency: firstValue(resolvedSearchParams.currency) ?? order?.currency ?? null
           }}
           botCheckout={botCheckout}
-        />
+        /> : null}
       </section>
     </main>
   );
