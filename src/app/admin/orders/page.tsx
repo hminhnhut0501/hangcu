@@ -38,6 +38,14 @@ function formatProvider(order: { paymentProvider?: string | null; metadata?: Rec
   );
 }
 
+function displaySource(value: string) {
+  const source = value.toLowerCase();
+  if (source === "bot_support_reconciliation" || source === "telegram_checkout" || source === "bot_checkout" || source === "prive_bot") {
+    return "Đơn hỗ trợ";
+  }
+  return value;
+}
+
 export default async function AdminOrdersPage({
   searchParams
 }: {
@@ -207,7 +215,7 @@ export default async function AdminOrdersPage({
                     <Link href={`/admin/orders/${order.orderNumber}`} className="font-medium text-blue-700 hover:underline">
                       {order.orderNumber}
                     </Link>
-                    <p className="text-xs text-slate-500">Nguồn: {order.source}</p>
+                    <p className="text-xs text-slate-500">Loại đơn: {displaySource(order.source)}</p>
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-medium">{order.customerEmail}</p>

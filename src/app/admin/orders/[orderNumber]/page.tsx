@@ -11,10 +11,33 @@ import { formatCurrencyLabel } from "@/lib/money/format";
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return "N/A";
   const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "N/A";
   return new Intl.DateTimeFormat("vi-VN", {
-    dateStyle: "medium",
-    timeStyle: "short"
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
   }).format(date);
+}
+
+function displaySource(value: string) {
+  const source = value.toLowerCase();
+  if (source === "bot_support_reconciliation" || source === "telegram_checkout") return "Đơn hỗ trợ";
+  if (source === "bot_checkout" || source === "prive_bot") return "Đơn hỗ trợ";
+  return value;
+}
+
+function displayFulfillment(value: string | null | undefined) {
+  if (!value || value === "telegram_delivery") return "Digital delivery";
+  if (value === "auto_email") return "Email delivery";
+  return value;
+}
+
+function displaySku(value: string) {
+  return value === "SUPPORT_TELEGRAM" ? "SUPPORT" : value;
 }
 
 function formatStatus(value: string) {
@@ -33,6 +56,7 @@ function formatStatus(value: string) {
 
 function formatValue(value: unknown) {
   if (value == null || value === "") return "N/A";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) return formatDate(value);
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
@@ -68,7 +92,7 @@ export default async function AdminOrderDetailPage({
   ];
 
   const deliveryRefs = [
-    { label: "Fulfillment method", value: order.fulfillmentMethod ?? "auto_email" },
+    { label: "Fulfillment method", value: displayFulfillment(order.fulfillmentMethod) },
     { label: "Delivered at", value: order.deliveredAt },
     { label: "License key IDs", value: order.deliveryLicenseKeyIds.length > 0 ? order.deliveryLicenseKeyIds.join(", ") : "N/A" },
     { label: "Proof", value: order.deliveryProof },
@@ -109,7 +133,7 @@ export default async function AdminOrderDetailPage({
           {formatStatus(order.fulfillmentStatus)}
         </div>
         <div className="mt-4 flex flex-wrap gap-2 text-sm text-slate-500">
-          <span className="rounded-full bg-slate-100 px-3 py-1">Nguồn: {order.source}</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1">Loại đơn: {displaySource(order.source)}</span>
           <span className="rounded-full bg-slate-100 px-3 py-1">Currency: {formatCurrencyLabel(order.currency, "vi") ?? order.currency}</span>
           <span className="rounded-full bg-slate-100 px-3 py-1">Items: {order.items.length}</span>
           <span className="rounded-full bg-slate-100 px-3 py-1">Order ID: {order.id}</span>
@@ -120,7 +144,7 @@ export default async function AdminOrderDetailPage({
         <EvidenceRow label="Tạo lúc" value={order.metadata.createdAt as string | undefined} />
         <EvidenceRow label="Cập nhật lúc" value={order.metadata.updatedAt as string | undefined} />
         <EvidenceRow label="Payment provider" value={order.paymentProvider ?? order.metadata.paymentProvider ?? "N/A"} />
-        <EvidenceRow label="Fulfillment" value={order.fulfillmentMethod ?? "auto_email"} />
+        <EvidenceRow label="Fulfillment" value={displayFulfillment(order.fulfillmentMethod)} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -144,9 +168,9 @@ export default async function AdminOrderDetailPage({
                   <tr key={`${order.orderNumber}-${item.productId}`}>
                     <td className="px-6 py-4">
                       <p className="font-medium">{item.productName}</p>
-                      <p className="text-xs text-slate-500">{item.productId}</p>
+                      <p className="text-xs text-slate-500">{displaySku(item.productId)}</p>
                     </td>
-                    <td className="px-6 py-4">{item.sku}</td>
+                    <td className="px-6 py-4">{displaySku(item.sku)}</td>
                     <td className="px-6 py-4">{item.quantity}</td>
                     <td className="px-6 py-4">
                       <MoneyAmount amount={item.totalAmountMinor} currency={order.currency} locale="vi" />
