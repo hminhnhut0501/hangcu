@@ -12,7 +12,8 @@ const evidenceSchema = z.object({
   paypalOrderId: z.string().min(1),
   paypalCaptureId: z.string().optional().default(""),
   paypalPayerId: z.string().optional().default(""),
-  payerEmail: z.string().email().optional(),
+  // The bot may not have a payer email for a Telegram-native checkout.
+  payerEmail: z.union([z.string().email(), z.literal("")]).optional(),
   amountMinor: z.number().int().positive(),
   currency: z.literal("USD"),
   productType: z.literal("support").default("support"),
