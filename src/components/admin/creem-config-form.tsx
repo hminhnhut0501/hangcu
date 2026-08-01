@@ -10,12 +10,12 @@ export function CreemConfigForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetch("/api/admin/creem").then((response) => response.json()).then((json) => setConfig({ ...json.data, apiKey: "", webhookSecret: "" })).finally(() => setLoading(false)); }, []);
+  useEffect(() => { fetch("/api/admin/creem", { credentials: "include" }).then((response) => response.json()).then((json) => setConfig({ ...json.data, apiKey: "", webhookSecret: "" })).finally(() => setLoading(false)); }, []);
   function updateMapping(index: number, patch: Partial<Mapping>) { setConfig((current) => ({ ...current, productMappings: current.productMappings.map((item, itemIndex) => itemIndex === index ? { ...item, ...patch } : item) })); }
   async function save() {
     setMessage("");
-    const csrf = await fetch("/api/admin/csrf").then((response) => response.json());
-    const response = await fetch("/api/admin/creem", { method: "POST", headers: { "content-type": "application/json", "x-csrf-token": csrf.data?.token || "" }, body: JSON.stringify(config) });
+    const csrf = await fetch("/api/admin/csrf", { method: "GET", credentials: "include" }).then((response) => response.json());
+    const response = await fetch("/api/admin/creem", { method: "POST", credentials: "include", headers: { "content-type": "application/json", "x-csrf-token": csrf.data?.token || "" }, body: JSON.stringify(config) });
     const json = await response.json();
     setMessage(response.ok ? "Đã lưu cấu hình Creem." : json.error?.message || "Lưu thất bại.");
     if (response.ok) setConfig(json.data);
