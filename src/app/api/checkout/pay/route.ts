@@ -34,6 +34,13 @@ export async function POST(request: Request) {
   const payload = await request.json().catch(() => null);
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
+    console.warn("[checkout-pay] invalid_request stage=schema", JSON.stringify({
+      keys: payload && typeof payload === "object" ? Object.keys(payload as Record<string, unknown>).sort() : [],
+      provider: payload && typeof payload === "object" ? (payload as Record<string, unknown>).provider ?? "n/a" : "n/a",
+      orderId: payload && typeof payload === "object" ? (payload as Record<string, unknown>).orderId ?? "n/a" : "n/a",
+      botOrderId: payload && typeof payload === "object" ? (payload as Record<string, unknown>).botOrderId ?? "n/a" : "n/a",
+      issues: parsed.error.issues.map((issue) => ({ path: issue.path, code: issue.code, message: issue.message }))
+    }));
     return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
   }
 
@@ -52,6 +59,14 @@ export async function POST(request: Request) {
     const planName = parsed.data.plan ?? parsed.data.planCode ?? "Bot checkout";
     const orderNumber = botOrderNumber ?? parsed.data.checkoutId ?? `BOT-${Date.now()}`;
     if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
+      console.warn("[checkout-pay] invalid_request stage=amount", JSON.stringify({
+        orderNumber,
+        botOrderId: parsed.data.botOrderId ?? "n/a",
+        provider: parsed.data.provider,
+        planCode: requestedPlanCode || "n/a",
+        amountMinor,
+        currency
+      }));
       return Response.json({
         success: false,
         error: { code: "INVALID_REQUEST", message: "Request is invalid." }
@@ -120,6 +135,11 @@ export async function POST(request: Request) {
     }
   } else {
     if (!parsed.data.productSlug || !parsed.data.email) {
+      console.warn("[checkout-pay] invalid_request stage=storefront_fields", JSON.stringify({
+        provider: parsed.data.provider,
+        productSlug: parsed.data.productSlug ?? "n/a",
+        hasEmail: Boolean(parsed.data.email)
+      }));
       return Response.json({ success: false, error: { code: "INVALID_REQUEST", message: "Request is invalid." } }, { status: 400 });
     }
     let product;
@@ -184,6 +204,12 @@ export async function POST(request: Request) {
   }
   const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ?? "";
   if (["paypal", "lemonsqueezy", "creem"].includes(parsed.data.provider) && order.currency !== "USD") {
+    console.warn("[checkout-pay] invalid_request stage=currency", JSON.stringify({
+      orderNumber: order.orderNumber,
+      provider: parsed.data.provider,
+      orderCurrency: order.currency,
+      requestedCurrency: parsed.data.currency ?? "n/a"
+    }));
     return Response.json({
       success: false,
       error: { code: "INVALID_CURRENCY", message: parsed.data.provider === "creem" ? "Creem chỉ hỗ trợ thanh toán USD." : "PayPal và Lemon Squeezy chỉ hỗ trợ thanh toán USD." }
