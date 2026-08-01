@@ -52,6 +52,18 @@ export async function POST(request: Request) {
     const requestedPlanCode = String(parsed.data.planCode ?? existingOrder?.metadata?.planCode ?? "").trim().toUpperCase();
     const fixedCreemPlan = parsed.data.provider === "creem" ? await resolveCreemPlanConfig(requestedPlanCode) : null;
     const creemPricing = fixedCreemPlan ? await getCreemProductPricing(fixedCreemPlan.productId).catch(() => null) : null;
+    if (parsed.data.provider === "creem") {
+      console.info("[creem-checkout] pricing_resolve", JSON.stringify({
+        orderNumber: parsed.data.botOrderId ?? parsed.data.orderNumber ?? "n/a",
+        requestedPlanCode: requestedPlanCode || "n/a",
+        mappedPlanCode: fixedCreemPlan?.planCode ?? "n/a",
+        productId: fixedCreemPlan?.productId ?? "n/a",
+        amountMinor: creemPricing?.amountMinor ?? 0,
+        currency: creemPricing?.currency ?? "n/a",
+        mapping: fixedCreemPlan ? "found" : "missing",
+        pricing: creemPricing ? "found" : "missing"
+      }));
+    }
     const amountMinor = parsed.data.provider === "creem"
       ? (creemPricing?.amountMinor ?? 0)
       : (parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0);

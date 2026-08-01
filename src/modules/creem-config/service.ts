@@ -47,17 +47,21 @@ export async function resolveCreemProductIdFromConfig(planCode?: string | null) 
   return mapping?.productId ?? "";
 }
 
+function normalizePlanAlias(value: string) {
+  return value.trim().toUpperCase().replace(/:/g, "_");
+}
+
 /**
  * Resolves one fixed Creem product and its expected price. There is deliberately
  * no default product: every paid plan must be mapped explicitly.
  */
 export async function resolveCreemPlanConfig(planCode?: string | null) {
-  const normalized = String(planCode ?? "").trim().toUpperCase();
+  const normalized = normalizePlanAlias(String(planCode ?? ""));
   if (!normalized) return null;
   const config = await getCreemConfig();
-  const canonical = normalized.replace(/^G\d+:(1M|LIFE)$/, (_, duration: string) => duration === "1M" ? "FULL_1M" : "FULL_LIFE");
-  const mapping = config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === normalized) ||
-    config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === canonical);
+  const canonical = normalized.replace(/^G\d+_(1M|LIFE)$/, (_, duration: string) => duration === "1M" ? "FULL_1M" : "FULL_LIFE");
+  const mapping = config.productMappings.find((item) => item.enabled && normalizePlanAlias(item.planCode) === normalized) ||
+    config.productMappings.find((item) => item.enabled && normalizePlanAlias(item.planCode) === canonical);
   if (!mapping?.productId) return null;
   return {
     planCode: canonical,
