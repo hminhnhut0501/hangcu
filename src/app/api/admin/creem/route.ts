@@ -3,7 +3,13 @@ import { requireAdminMutationAccess } from "@/modules/admin-auth/guard";
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
 import { getCreemConfig, maskSecret } from "@/modules/creem-config/service";
 
-const mappingSchema = z.object({ planCode: z.string().min(1), productId: z.string().min(1), enabled: z.boolean() });
+const mappingSchema = z.object({
+  planCode: z.string().trim().min(1),
+  productId: z.string().trim().min(1),
+  enabled: z.boolean(),
+  expectedAmountMinor: z.number().int().positive().optional(),
+  currency: z.literal("USD").optional()
+});
 const schema = z.object({
   apiKey: z.string().optional(),
   webhookSecret: z.string().optional(),

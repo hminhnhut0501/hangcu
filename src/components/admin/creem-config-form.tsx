@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Mapping = { planCode: string; productId: string; enabled: boolean };
+type Mapping = { planCode: string; productId: string; enabled: boolean; expectedAmountMinor?: number; currency?: "USD" };
 type Config = { apiKey: string; webhookSecret: string; configured: boolean; server: "test" | "prod"; productMappings: Mapping[] };
 
 export function CreemConfigForm() {
@@ -33,7 +33,7 @@ export function CreemConfigForm() {
     </div>
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between"><div><h2 className="text-xl font-semibold">Plan to Creem product mapping</h2><p className="text-sm text-slate-500">Mỗi planCode chỉ trỏ tới một productId Creem.</p></div><button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={() => setConfig({ ...config, productMappings: [...config.productMappings, { planCode: "", productId: "", enabled: true }] })}>Thêm mapping</button></div>
-      <div className="mt-4 space-y-3">{config.productMappings.map((item, index) => <div key={index} className="grid gap-3 md:grid-cols-[1fr_2fr_auto] items-center"><input className="rounded-xl border p-3" value={item.planCode} placeholder="FULL_1M" onChange={(e) => updateMapping(index, { planCode: e.target.value.toUpperCase() })} /><input className="rounded-xl border p-3" value={item.productId} placeholder="prod_..." onChange={(e) => updateMapping(index, { productId: e.target.value })} /><button type="button" className="text-sm text-rose-600" onClick={() => setConfig({ ...config, productMappings: config.productMappings.filter((_, itemIndex) => itemIndex !== index) })}>Xóa</button></div>)}</div>
+      <div className="mt-4 space-y-3">{config.productMappings.map((item, index) => <div key={index} className="grid gap-3 md:grid-cols-[1fr_2fr_1fr_auto] items-center"><input className="rounded-xl border p-3" value={item.planCode} placeholder="FULL_1M" onChange={(e) => updateMapping(index, { planCode: e.target.value.toUpperCase() })} /><input className="rounded-xl border p-3" value={item.productId} placeholder="prod_..." onChange={(e) => updateMapping(index, { productId: e.target.value })} /><input className="rounded-xl border p-3" type="number" min="0.01" step="0.01" value={typeof item.expectedAmountMinor === "number" ? item.expectedAmountMinor / 100 : ""} placeholder="USD (ví dụ 10.99)" onChange={(e) => updateMapping(index, { expectedAmountMinor: e.target.value ? Math.round(Number(e.target.value) * 100) : undefined, currency: "USD" })} /><button type="button" className="text-sm text-rose-600" onClick={() => setConfig({ ...config, productMappings: config.productMappings.filter((_, itemIndex) => itemIndex !== index) })}>Xóa</button></div>)}</div>
     </div>
     <button type="button" onClick={save} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white">Lưu cấu hình Creem</button>{message ? <p className="text-sm text-slate-600">{message}</p> : null}
   </section>;

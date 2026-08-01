@@ -6,7 +6,7 @@ import { getLicensePlanByCode } from "@/modules/license-plans/service";
 import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
-import { resolveCreemProductIdFromConfig } from "@/modules/creem-config/service";
+import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
 
 const schema = checkoutFormSchema.extend({
   productSlug: z.string().min(1).optional(),
@@ -210,14 +210,26 @@ export async function POST(request: Request) {
       }
     }, { status: 400 });
   }
-  const creemProductId = parsed.data.provider === "creem" ? await resolveCreemProductIdFromConfig(parsed.data.planCode ?? order.metadata?.planCode as string | undefined) : "";
-  if (parsed.data.provider === "creem" && !creemProductId) {
+  const creemPlanConfig = parsed.data.provider === "creem"
+    ? await resolveCreemPlanConfig(parsed.data.planCode ?? String(order.metadata?.planCode ?? ""))
+    : null;
+  const creemProductId = creemPlanConfig?.productId ?? "";
+  if (parsed.data.provider === "creem" && !creemPlanConfig) {
     return Response.json({
       success: false,
       error: {
         code: "CREEM_PRODUCT_NOT_CONFIGURED",
         message: "Chưa cấu hình product Creem cho gói này."
       }
+    }, { status: 400 });
+  }
+  if (parsed.data.provider === "creem" && (!creemPlanConfig?.expectedAmountMinor || order.currency !== "USD" || order.totalMinor !== creemPlanConfig.expectedAmountMinor)) {
+    console.warn(
+      `[creem-checkout] price_mismatch orderNumber=${order.orderNumber} planCode=${parsed.data.planCode ?? order.metadata?.planCode ?? "n/a"} orderAmountMinor=${order.totalMinor} expectedAmountMinor=${creemPlanConfig?.expectedAmountMinor ?? "n/a"} currency=${order.currency}`
+    );
+    return Response.json({
+      success: false,
+      error: { code: "CREEM_PRICE_MISMATCH", message: "Giá gói Creem không khớp cấu hình cố định." }
     }, { status: 400 });
   }
   const payosOrderCode =
@@ -252,7 +264,12 @@ export async function POST(request: Request) {
     cancelUrl,
     metadata: {
       ...(payosOrderCode ? { payosOrderCode } : {}),
-      ...(creemProductId ? { creemProductId, planCode: parsed.data.planCode ?? order.metadata?.planCode ?? null } : {})
+      ...(creemProductId ? {
+        creemProductId,
+        planCode: creemPlanConfig?.planCode ?? parsed.data.planCode ?? order.metadata?.planCode ?? null,
+        creemExpectedAmountMinor: creemPlanConfig?.expectedAmountMinor,
+        creemCurrency: "USD"
+      } : {})
     }
   });
 

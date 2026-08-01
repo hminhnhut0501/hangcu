@@ -2,6 +2,7 @@ import { constructWebhookEventEntity } from "creem/webhooks";
 import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
 import { getOrderByMetadataKey, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
+import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
 
 function getWebhookSecret() {
   const secret = process.env.CREEM_WEBHOOK_SECRET?.trim();
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
         amount?: number;
         currency?: string;
         status?: string;
-        product?: string;
+        product?: string | { id?: string };
         customer?: string;
       };
       customer?: { id?: string; email?: string };
@@ -55,6 +56,39 @@ export async function POST(request: Request) {
 
   if (existingEvent?.processingStatus === "processed") {
     return Response.json({ success: true, duplicate: true });
+  }
+
+  if (linkedOrder && payload.eventType === "checkout.completed" && payload.object?.order?.status === "paid") {
+    const metadataPlanCode = String(linkedOrder.metadata?.planCode ?? linkedOrder.items[0]?.sku ?? "");
+    const expected = await resolveCreemPlanConfig(metadataPlanCode);
+    const productValue = payload.object.order.product ?? payload.object.product;
+    const actualProductId = typeof productValue === "string" ? productValue : String(productValue?.id ?? "");
+    const actualAmountMinor = Number(payload.object.order.amount ?? 0);
+    const actualCurrency = String(payload.object.order.currency ?? linkedOrder.currency ?? "").toUpperCase();
+    const valid = Boolean(
+      expected &&
+      actualProductId && actualProductId === expected.productId &&
+      actualAmountMinor === expected.expectedAmountMinor &&
+      actualCurrency === "USD" &&
+      linkedOrder.totalMinor === expected.expectedAmountMinor
+    );
+    console.info(
+      `[creem-webhook] payment_validation orderNumber=${linkedOrder.orderNumber} planCode=${metadataPlanCode || "n/a"} productId=${actualProductId || "n/a"} expectedProductId=${expected?.productId || "n/a"} amountMinor=${actualAmountMinor} expectedAmountMinor=${expected?.expectedAmountMinor || "n/a"} currency=${actualCurrency} valid=${valid ? "yes" : "no"}`
+    );
+    if (!valid) {
+      await recordWebhookEvent({
+        id: crypto.randomUUID(),
+        provider: "creem",
+        providerEventId: payload.id,
+        eventType: payload.eventType,
+        payload,
+        signatureValid: true,
+        processingStatus: "failed",
+        errorMessage: "Creem product, amount, or currency did not match the fixed plan mapping.",
+        processedAt: null
+      });
+      return Response.json({ success: false, error: "Creem payment did not match the configured plan." }, { status: 400 });
+    }
   }
 
   await recordWebhookEvent({

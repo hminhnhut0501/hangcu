@@ -1,6 +1,14 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
+import { getLicensePlanByCode } from "@/modules/license-plans/service";
 
-export type CreemProductMapping = { planCode: string; productId: string; enabled: boolean };
+export type CreemProductMapping = {
+  planCode: string;
+  productId: string;
+  enabled: boolean;
+  /** Fixed USD amount in cents. Optional only for backwards-compatible legacy rows. */
+  expectedAmountMinor?: number;
+  currency?: "USD";
+};
 export type CreemConfig = {
   apiKey: string;
   webhookSecret: string;
@@ -15,7 +23,7 @@ function envMappings(): CreemProductMapping[] {
     ["SUPPORT_30", "CREEM_PRODUCT_ID_SUPPORT_30"],
     ["SUPPORT_PLUS", "CREEM_PRODUCT_ID_SUPPORT_PLUS"],
     ["SUPPORT_LIFE", "CREEM_PRODUCT_ID_SUPPORT_LIFE"]
-  ].map(([planCode, key]) => ({ planCode, productId: process.env[key]?.trim() ?? "", enabled: true })).filter((item) => item.productId);
+  ].map(([planCode, key]) => ({ planCode, productId: process.env[key]?.trim() ?? "", enabled: true, currency: "USD" as const })).filter((item) => item.productId);
 }
 
 export async function getCreemConfig(): Promise<CreemConfig> {
@@ -38,12 +46,34 @@ export async function getCreemConfig(): Promise<CreemConfig> {
 }
 
 export async function resolveCreemProductIdFromConfig(planCode?: string | null) {
+  const mapping = await resolveCreemPlanConfig(planCode);
+  return mapping?.productId ?? "";
+}
+
+/**
+ * Resolves one fixed Creem product and its expected price. There is deliberately
+ * no default product: every paid plan must be mapped explicitly.
+ */
+export async function resolveCreemPlanConfig(planCode?: string | null) {
   const normalized = String(planCode ?? "").trim().toUpperCase();
+  if (!normalized) return null;
   const config = await getCreemConfig();
   const canonical = normalized.replace(/^G\d+:(1M|LIFE)$/, (_, duration: string) => duration === "1M" ? "FULL_1M" : "FULL_LIFE");
-  return config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === normalized)?.productId ||
-    config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === canonical)?.productId ||
-    process.env.CREEM_PRODUCT_ID_DEFAULT?.trim() || "";
+  const mapping = config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === normalized) ||
+    config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === canonical);
+  if (!mapping?.productId) return null;
+  let expectedAmountMinor = Number(mapping.expectedAmountMinor);
+  if (!Number.isSafeInteger(expectedAmountMinor) || expectedAmountMinor <= 0) {
+    const plan = await getLicensePlanByCode(canonical);
+    const usd = plan?.currencyPrices.USD;
+    expectedAmountMinor = typeof usd === "number" && usd > 0 ? Math.round(usd * 100) : 0;
+  }
+  return {
+    planCode: canonical,
+    productId: mapping.productId.trim(),
+    expectedAmountMinor,
+    currency: "USD" as const
+  };
 }
 
 export function maskSecret(value: string) {
