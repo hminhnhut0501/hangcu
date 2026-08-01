@@ -40,6 +40,15 @@ export function isAllowedAdminOrigin(origin: string | null, host: string | null)
   }
 
   const normalizedOrigin = normalizeOrigin(origin ?? undefined);
+  // Accept the exact host serving the request as same-origin. This covers
+  // the production Vercel alias and custom domains without weakening CSRF
+  // protection to arbitrary origins.
+  if (normalizedOrigin && host) {
+    const requestOrigin = normalizeOrigin(`https://${host}`);
+    if (requestOrigin && normalizedOrigin === requestOrigin) {
+      return true;
+    }
+  }
   if (normalizedOrigin && allowedOrigins.has(normalizedOrigin)) {
     return true;
   }
