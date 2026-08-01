@@ -6,7 +6,7 @@ import { getLicensePlanByCode } from "@/modules/license-plans/service";
 import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
-import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
+import { getCreemConfig, resolveCreemPlanConfig } from "@/modules/creem-config/service";
 import { getCreemProductPricing } from "@/providers/payments/creem";
 
 const schema = checkoutFormSchema.extend({
@@ -51,8 +51,17 @@ export async function POST(request: Request) {
     const existingOrder = botOrderNumber ? await getOrderByOrderNumber(botOrderNumber) : null;
     const requestedPlanCode = String(parsed.data.planCode ?? existingOrder?.metadata?.planCode ?? "").trim().toUpperCase();
     const fixedCreemPlan = parsed.data.provider === "creem" ? await resolveCreemPlanConfig(requestedPlanCode) : null;
-    const creemPricing = fixedCreemPlan ? await getCreemProductPricing(fixedCreemPlan.productId).catch(() => null) : null;
+    let creemPricing = null;
+    let creemPricingError = "";
+    if (fixedCreemPlan) {
+      try {
+        creemPricing = await getCreemProductPricing(fixedCreemPlan.productId);
+      } catch (error) {
+        creemPricingError = error instanceof Error ? error.message : String(error);
+      }
+    }
     if (parsed.data.provider === "creem") {
+      const creemConfig = await getCreemConfig();
       console.info("[creem-checkout] pricing_resolve", JSON.stringify({
         orderNumber: parsed.data.botOrderId ?? parsed.data.orderNumber ?? "n/a",
         requestedPlanCode: requestedPlanCode || "n/a",
@@ -61,7 +70,10 @@ export async function POST(request: Request) {
         amountMinor: creemPricing?.amountMinor ?? 0,
         currency: creemPricing?.currency ?? "n/a",
         mapping: fixedCreemPlan ? "found" : "missing",
-        pricing: creemPricing ? "found" : "missing"
+        pricing: creemPricing ? "found" : "missing",
+        server: creemConfig.server,
+        apiKey: creemConfig.apiKey ? "set" : "missing",
+        error: creemPricingError || undefined
       }));
     }
     const amountMinor = parsed.data.provider === "creem"
