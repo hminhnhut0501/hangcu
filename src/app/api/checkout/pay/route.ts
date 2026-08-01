@@ -312,24 +312,42 @@ export async function POST(request: Request) {
     });
   }
 
-  const checkout = await createPaymentCheckout({
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    amountMinor: order.totalMinor,
-    currency: order.currency,
-    customerEmail: order.customerEmail,
-    provider: parsed.data.provider,
-    returnUrl,
-    cancelUrl,
-    metadata: {
-      ...(payosOrderCode ? { payosOrderCode } : {}),
-      ...(creemProductId ? {
-        creemProductId,
-        planCode: creemPlanConfig?.planCode ?? parsed.data.planCode ?? order.metadata?.planCode ?? null,
-        creemCurrency: "USD"
-      } : {})
-    }
-  });
+  let checkout;
+  try {
+    checkout = await createPaymentCheckout({
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      amountMinor: order.totalMinor,
+      currency: order.currency,
+      customerEmail: order.customerEmail,
+      provider: parsed.data.provider,
+      returnUrl,
+      cancelUrl,
+      metadata: {
+        ...(payosOrderCode ? { payosOrderCode } : {}),
+        ...(creemProductId ? {
+          creemProductId,
+          planCode: creemPlanConfig?.planCode ?? parsed.data.planCode ?? order.metadata?.planCode ?? null,
+          creemCurrency: "USD"
+        } : {})
+      }
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[checkout-pay] provider_failed", JSON.stringify({
+      orderNumber: order.orderNumber,
+      orderId: order.id,
+      provider: parsed.data.provider,
+      planCode: parsed.data.planCode ?? order.metadata?.planCode ?? "n/a",
+      amountMinor: order.totalMinor,
+      currency: order.currency,
+      error: message
+    }));
+    return Response.json({
+      success: false,
+      error: { code: "PROVIDER_CHECKOUT_FAILED", message: "Unable to create checkout." }
+    }, { status: 502 });
+  }
 
   await updateOrder(order.orderNumber, {
     paymentProvider: parsed.data.provider,
