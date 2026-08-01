@@ -11,6 +11,7 @@ import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
 const schema = checkoutFormSchema.extend({
   productSlug: z.string().min(1).optional(),
   orderNumber: z.string().min(1).optional(),
+  botOrderId: z.string().min(1).optional(),
   planCode: z.string().min(1).optional(),
   plan: z.string().min(1).optional(),
   amountLabel: z.string().min(1).optional(),
@@ -36,13 +37,18 @@ export async function POST(request: Request) {
   }
 
   let order;
-  const isBotCheckout = Boolean(parsed.data.orderNumber || parsed.data.checkoutId || parsed.data.customerRef);
+  const isBotCheckout = Boolean(parsed.data.botOrderId || parsed.data.orderNumber || parsed.data.checkoutId || parsed.data.customerRef);
   if (isBotCheckout) {
-    const existingOrder = parsed.data.orderNumber ? await getOrderByOrderNumber(parsed.data.orderNumber) : null;
-    const amountMinor = parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0;
-    const currency = parsed.data.currency ?? "VND";
+    const botOrderNumber = parsed.data.botOrderId ?? parsed.data.orderNumber;
+    const existingOrder = botOrderNumber ? await getOrderByOrderNumber(botOrderNumber) : null;
+    const requestedPlanCode = String(parsed.data.planCode ?? existingOrder?.metadata?.planCode ?? "").trim().toUpperCase();
+    const fixedCreemPlan = parsed.data.provider === "creem" ? await resolveCreemPlanConfig(requestedPlanCode) : null;
+    const amountMinor = parsed.data.provider === "creem"
+      ? (fixedCreemPlan?.expectedAmountMinor ?? 0)
+      : (parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0);
+    const currency = parsed.data.provider === "creem" ? "USD" : (parsed.data.currency ?? "VND");
     const planName = parsed.data.plan ?? parsed.data.planCode ?? "Bot checkout";
-    const orderNumber = parsed.data.orderNumber ?? parsed.data.checkoutId ?? `BOT-${Date.now()}`;
+    const orderNumber = botOrderNumber ?? parsed.data.checkoutId ?? `BOT-${Date.now()}`;
     if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
       return Response.json({
         success: false,
@@ -61,7 +67,7 @@ export async function POST(request: Request) {
         metadata: {
           ...existingOrder.metadata,
           ...(parsed.data.email ? { customerEmail } : {}),
-          planCode: parsed.data.planCode ?? existingOrder.metadata?.planCode ?? null,
+          planCode: requestedPlanCode || null,
           planName: parsed.data.plan ?? existingOrder.metadata?.planName ?? planName,
           amountMinor,
           currency
@@ -76,9 +82,10 @@ export async function POST(request: Request) {
       metadata: {
         source: "prive_bot",
         integrationSource: "bot_checkout",
-        orderNumber: parsed.data.orderNumber ?? null,
-        planCode: parsed.data.planCode ?? null,
-        requestedPlanCode: parsed.data.planCode ?? null,
+        orderNumber: botOrderNumber ?? null,
+        botOrderId: parsed.data.botOrderId ?? botOrderNumber ?? null,
+        planCode: requestedPlanCode || null,
+        requestedPlanCode: requestedPlanCode || null,
         planName,
         amountLabel: parsed.data.amountLabel ?? null,
         amountMinor,
@@ -91,15 +98,15 @@ export async function POST(request: Request) {
       },
       items: [
         {
-          productId: parsed.data.planCode ?? orderNumber,
-          sku: parsed.data.planCode ?? orderNumber,
+          productId: requestedPlanCode || orderNumber,
+          sku: requestedPlanCode || orderNumber,
           productName: planName,
           quantity: 1,
           unitAmountMinor: amountMinor,
           totalAmountMinor: amountMinor,
           productSnapshot: {
             name: planName,
-            slug: parsed.data.planCode ?? orderNumber,
+            slug: requestedPlanCode || orderNumber,
             shortDescription: planName,
             status: "active",
             downloadLimit: 0,
@@ -201,7 +208,7 @@ export async function POST(request: Request) {
   const metadataProviderCheckoutId = String(order.metadata?.providerCheckoutId ?? "").trim() || null;
   const metadataPayosOrderCode = String(order.metadata?.payosOrderCode ?? "").trim() || null;
   const metadataProviderPaymentId = String(order.metadata?.providerPaymentId ?? "").trim() || null;
-  if (parsed.data.provider === "creem" && !parsed.data.planCode) {
+  if (parsed.data.provider === "creem" && !(parsed.data.planCode ?? order.metadata?.planCode)) {
     return Response.json({
       success: false,
       error: {
