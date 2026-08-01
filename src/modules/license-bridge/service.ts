@@ -17,7 +17,7 @@ import {
 import { integrationErrors } from "@/modules/integration-api/errors";
 import { getIntegrationSecret, verifyIntegrationRequest } from "@/modules/integration-api/service";
 import { listLicenseKeys, updateLicenseKeyById } from "@/modules/license-keys/service";
-import { enqueuePaymentCallback, markPaymentCallback } from "@/modules/payment-callback-outbox/service";
+import { enqueuePaymentCallback, markPaymentCallback, resolvePaymentCallbackUrl } from "@/modules/payment-callback-outbox/service";
 import { licenseCheckoutSchema, licenseRevokeSchema, licenseStatusSchema, licenseVerifySchema } from "./schema";
 
 function buildBotResponseUrl(url: string | undefined, orderNumber: string, fallbackPath = "/checkout") {
@@ -163,8 +163,7 @@ function buildBotCallbackUrl() {
 }
 
 function buildBotPaymentStatusCallbackUrl() {
-  const explicit = process.env.LICENSE_BOT_PAYMENT_STATUS_URL?.trim() || process.env.BOT_PAYMENT_STATUS_URL?.trim();
-  return (explicit || buildBotCallbackUrl()).replace(/\/$/, "");
+  return resolvePaymentCallbackUrl();
 }
 
 function signBotCallbackPayload(payload: Record<string, unknown>) {
@@ -199,6 +198,13 @@ async function notifyBotPaymentStatus(input: {
 }) {
   const baseUrl = buildBotPaymentStatusCallbackUrl();
   if (!baseUrl) return null;
+  try {
+    new URL(baseUrl);
+  } catch {
+    console.error(`[payment-callback] invalid_url botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} callbackUrl=${baseUrl}`);
+    return null;
+  }
+  console.info(`[payment-callback] dispatch botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} callbackUrl=${baseUrl} secret=${botCallbackSecretFingerprint()}`);
   const timestamp = Math.floor(Date.now() / 1000);
   const nonce = generateRandomToken(16);
   const payload = {
@@ -230,7 +236,8 @@ async function notifyBotPaymentStatus(input: {
         const response = await fetch(baseUrl, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body
+          body,
+          signal: AbortSignal.timeout(15_000)
         });
         if (!response.ok) throw new Error(`Bot payment callback failed: ${response.status} ${await response.text().catch(() => "")}`);
         console.info(`[payment-callback] delivered botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt}`);
@@ -238,7 +245,8 @@ async function notifyBotPaymentStatus(input: {
         return response.json().catch(() => null);
       } catch (error) {
         lastError = error;
-        console.error(`[payment-callback] retry botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt} error=${error instanceof Error ? error.message : String(error)}`);
+        const cause = error instanceof Error && error.cause ? ` cause=${String(error.cause)}` : "";
+        console.error(`[payment-callback] retry botOrderId=${input.botOrderId} orderNumber=${input.orderNumber} attempt=${attempt} callbackUrl=${baseUrl} error=${error instanceof Error ? error.message : String(error)}${cause}`);
         if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
       }
     }
