@@ -7,6 +7,7 @@ import { createOrder, getOrderByOrderNumber, updateOrder } from "@/modules/order
 import { createPaymentCheckout } from "@/modules/payments/service";
 import { checkoutFormSchema } from "@/modules/checkout/schema";
 import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
+import { getCreemProductPricing } from "@/providers/payments/creem";
 
 const schema = checkoutFormSchema.extend({
   productSlug: z.string().min(1).optional(),
@@ -43,10 +44,11 @@ export async function POST(request: Request) {
     const existingOrder = botOrderNumber ? await getOrderByOrderNumber(botOrderNumber) : null;
     const requestedPlanCode = String(parsed.data.planCode ?? existingOrder?.metadata?.planCode ?? "").trim().toUpperCase();
     const fixedCreemPlan = parsed.data.provider === "creem" ? await resolveCreemPlanConfig(requestedPlanCode) : null;
+    const creemPricing = fixedCreemPlan ? await getCreemProductPricing(fixedCreemPlan.productId).catch(() => null) : null;
     const amountMinor = parsed.data.provider === "creem"
-      ? (fixedCreemPlan?.expectedAmountMinor ?? 0)
+      ? (creemPricing?.amountMinor ?? 0)
       : (parsed.data.amountMinor ?? existingOrder?.totalMinor ?? 0);
-    const currency = parsed.data.provider === "creem" ? "USD" : (parsed.data.currency ?? "VND");
+    const currency = parsed.data.provider === "creem" ? (creemPricing?.currency ?? "USD") : (parsed.data.currency ?? "VND");
     const planName = parsed.data.plan ?? parsed.data.planCode ?? "Bot checkout";
     const orderNumber = botOrderNumber ?? parsed.data.checkoutId ?? `BOT-${Date.now()}`;
     if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
@@ -230,9 +232,9 @@ export async function POST(request: Request) {
       }
     }, { status: 400 });
   }
-  if (parsed.data.provider === "creem" && (!creemPlanConfig?.expectedAmountMinor || order.currency !== "USD" || order.totalMinor !== creemPlanConfig.expectedAmountMinor)) {
+  if (parsed.data.provider === "creem" && (!creemPlanConfig || order.currency !== "USD")) {
     console.warn(
-      `[creem-checkout] price_mismatch orderNumber=${order.orderNumber} planCode=${parsed.data.planCode ?? order.metadata?.planCode ?? "n/a"} orderAmountMinor=${order.totalMinor} expectedAmountMinor=${creemPlanConfig?.expectedAmountMinor ?? "n/a"} currency=${order.currency}`
+      `[creem-checkout] invalid_product_mapping orderNumber=${order.orderNumber} planCode=${parsed.data.planCode ?? order.metadata?.planCode ?? "n/a"} currency=${order.currency}`
     );
     return Response.json({
       success: false,
@@ -274,7 +276,6 @@ export async function POST(request: Request) {
       ...(creemProductId ? {
         creemProductId,
         planCode: creemPlanConfig?.planCode ?? parsed.data.planCode ?? order.metadata?.planCode ?? null,
-        creemExpectedAmountMinor: creemPlanConfig?.expectedAmountMinor,
         creemCurrency: "USD"
       } : {})
     }

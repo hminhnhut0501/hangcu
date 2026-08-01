@@ -1,12 +1,9 @@
 import { getSupabaseServiceClient } from "@/lib/db/supabase-server";
-import { getLicensePlanByCode } from "@/modules/license-plans/service";
 
 export type CreemProductMapping = {
   planCode: string;
   productId: string;
   enabled: boolean;
-  /** Fixed USD amount in cents. Optional only for backwards-compatible legacy rows. */
-  expectedAmountMinor?: number;
   currency?: "USD";
 };
 export type CreemConfig = {
@@ -62,16 +59,9 @@ export async function resolveCreemPlanConfig(planCode?: string | null) {
   const mapping = config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === normalized) ||
     config.productMappings.find((item) => item.enabled && item.planCode.toUpperCase() === canonical);
   if (!mapping?.productId) return null;
-  let expectedAmountMinor = Number(mapping.expectedAmountMinor);
-  if (!Number.isSafeInteger(expectedAmountMinor) || expectedAmountMinor <= 0) {
-    const plan = await getLicensePlanByCode(canonical);
-    const usd = plan?.currencyPrices.USD;
-    expectedAmountMinor = typeof usd === "number" && usd > 0 ? Math.round(usd * 100) : 0;
-  }
   return {
     planCode: canonical,
     productId: mapping.productId.trim(),
-    expectedAmountMinor,
     currency: "USD" as const
   };
 }

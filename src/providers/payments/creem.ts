@@ -57,6 +57,12 @@ async function getCreemClient() {
   });
 }
 
+export async function getCreemProductPricing(productId: string) {
+  const creem = await getCreemClient();
+  const product = await creem.products.get(productId);
+  return { productId: product.id, amountMinor: product.price, currency: product.currency.toUpperCase() };
+}
+
 export function resolveCreemProductId(planCode?: string | null) {
   const normalized = String(planCode ?? "").trim().toUpperCase();
   if (!normalized) {

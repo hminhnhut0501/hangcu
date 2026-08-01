@@ -68,12 +68,11 @@ export async function POST(request: Request) {
     const valid = Boolean(
       expected &&
       actualProductId && actualProductId === expected.productId &&
-      actualAmountMinor === expected.expectedAmountMinor &&
-      actualCurrency === "USD" &&
-      linkedOrder.totalMinor === expected.expectedAmountMinor
+      actualAmountMinor === linkedOrder.totalMinor &&
+      actualCurrency === "USD"
     );
     console.info(
-      `[creem-webhook] payment_validation orderNumber=${linkedOrder.orderNumber} planCode=${metadataPlanCode || "n/a"} productId=${actualProductId || "n/a"} expectedProductId=${expected?.productId || "n/a"} amountMinor=${actualAmountMinor} expectedAmountMinor=${expected?.expectedAmountMinor || "n/a"} currency=${actualCurrency} valid=${valid ? "yes" : "no"}`
+      `[creem-webhook] payment_validation orderNumber=${linkedOrder.orderNumber} planCode=${metadataPlanCode || "n/a"} productId=${actualProductId || "n/a"} expectedProductId=${expected?.productId || "n/a"} amountMinor=${actualAmountMinor} orderAmountMinor=${linkedOrder.totalMinor} currency=${actualCurrency} valid=${valid ? "yes" : "no"}`
     );
     if (!valid) {
       await recordWebhookEvent({
