@@ -2,10 +2,10 @@ import { constructWebhookEventEntity } from "creem/webhooks";
 import { getWebhookEvent, recordWebhookEvent } from "@/modules/webhooks/service";
 import { getOrderByMetadataKey, getOrderByOrderNumber, updateOrder } from "@/modules/orders/service";
 import { issueLicenseFromPaidOrder } from "@/modules/license-bridge/service";
-import { resolveCreemPlanConfig } from "@/modules/creem-config/service";
+import { getCreemConfig, resolveCreemPlanConfig } from "@/modules/creem-config/service";
 
-function getWebhookSecret() {
-  const secret = process.env.CREEM_WEBHOOK_SECRET?.trim();
+async function getWebhookSecret() {
+  const secret = (await getCreemConfig()).webhookSecret.trim();
   if (!secret) {
     throw new Error("CREEM_WEBHOOK_SECRET is not configured");
   }
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   let event;
 
   try {
-    event = await constructWebhookEventEntity(rawBody, request.headers, { secret: getWebhookSecret() });
+    event = await constructWebhookEventEntity(rawBody, request.headers, { secret: await getWebhookSecret() });
   } catch (error) {
     console.error(`[creem-webhook] verify_failed error=${error instanceof Error ? error.message : String(error)}`);
     return Response.json({ success: false, error: "Webhook verification failed" }, { status: 400 });
