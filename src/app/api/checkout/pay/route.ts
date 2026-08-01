@@ -304,9 +304,12 @@ export async function POST(request: Request) {
     success: true,
     data: {
       orderNumber: order.orderNumber,
+      botOrderId: parsed.data.botOrderId ?? order.metadata?.botOrderId ?? null,
       checkoutUrl: checkout.checkoutUrl,
       provider: parsed.data.provider,
       providerCheckoutId: checkout.providerCheckoutId,
+      providerPaymentId: checkout.providerPaymentId,
+      currency: order.currency,
       orderNumberFromBot: parsed.data.orderNumber ?? null
     }
   });
