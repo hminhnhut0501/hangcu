@@ -4,13 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AdminStatusBadge } from "@/components/admin/admin-status-badge";
+import { AdminMoneyDisplay } from "@/components/admin/admin-money-display";
 
 type OrderRow = {
   orderNumber: string;
   customerEmail: string;
+  source: string;
   status: string;
   paymentStatus: string;
   fulfillmentStatus: string;
+  paymentProvider: string;
+  providerReference: string;
+  totalMinor: number;
+  currency: string;
+  createdAt: string;
   href: string;
 };
 
@@ -127,7 +134,7 @@ export function OrderBulkActions({ orders }: Props) {
           onClick={() => setSelected(orders.map((order) => order.orderNumber))}
           className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700"
         >
-          Chọn tất cả
+          Chọn trang này
         </button>
         <button
           type="button"
@@ -140,21 +147,30 @@ export function OrderBulkActions({ orders }: Props) {
         <p className="text-sm text-slate-600">{message}</p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-slate-500">
+      <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-[0_10px_35px_rgba(15,23,42,0.05)]">
+        <table className="min-w-[980px] divide-y divide-slate-200 text-sm">
+          <thead className="bg-[#f8fbff] text-left text-slate-500">
             <tr>
-              <th className="px-6 py-4 font-medium">Chọn</th>
-              <th className="px-6 py-4 font-medium">Đơn</th>
-              <th className="px-6 py-4 font-medium">Khách</th>
-              <th className="px-6 py-4 font-medium">Trạng thái</th>
-              <th className="px-6 py-4 font-medium">Hành động</th>
+              <th className="w-14 px-4 py-3 font-medium">Chọn</th>
+              <th className="px-4 py-3 font-medium">Đơn hàng</th>
+              <th className="px-4 py-3 font-medium">Khách hàng</th>
+              <th className="px-4 py-3 font-medium">Trạng thái</th>
+              <th className="px-4 py-3 font-medium">Cổng / mã</th>
+              <th className="px-4 py-3 font-medium">Tổng</th>
+              <th className="px-4 py-3 font-medium">Tạo lúc</th>
+              <th className="px-4 py-3 font-medium">Mở</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {orders.map((order) => (
+            {orders.length === 0 ? (
+              <tr>
+                <td className="px-4 py-10 text-center text-slate-500" colSpan={8}>
+                  Không có đơn phù hợp với bộ lọc hiện tại.
+                </td>
+              </tr>
+            ) : orders.map((order) => (
               <tr key={order.orderNumber}>
-                <td className="px-6 py-4">
+                <td className="px-4 py-3">
                   <input
                     type="checkbox"
                     checked={selected.includes(order.orderNumber)}
@@ -162,17 +178,39 @@ export function OrderBulkActions({ orders }: Props) {
                     className="h-4 w-4 rounded border-slate-300 text-blue-600"
                   />
                 </td>
-                <td className="px-6 py-4 font-medium">{order.orderNumber}</td>
-                <td className="px-6 py-4">{order.customerEmail}</td>
-                <td className="px-6 py-4 text-slate-600">
-                  {order.status} / {order.paymentStatus} / {order.fulfillmentStatus}
+                <td className="px-4 py-3">
+                  <Link href={order.href as any} className="font-medium text-blue-700 hover:underline">
+                    {order.orderNumber}
+                  </Link>
+                  <p className="mt-1 text-xs text-slate-500">{order.source}</p>
                 </td>
-                <td className="px-6 py-4">
+                <td className="max-w-[220px] px-4 py-3">
+                  <p className="truncate font-medium" title={order.customerEmail}>{order.customerEmail}</p>
+                  <p className="mt-1 text-xs text-slate-500">{order.currency}</p>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    <AdminStatusBadge label={order.status} tone={order.status === "failed" ? "rose" : order.status === "paid" ? "emerald" : "neutral"} />
+                    <AdminStatusBadge label={order.paymentStatus} tone={order.paymentStatus === "paid" ? "emerald" : order.paymentStatus === "pending" || order.paymentStatus === "unpaid" ? "amber" : "rose"} />
+                    <AdminStatusBadge label={order.fulfillmentStatus} tone={order.fulfillmentStatus === "fulfilled" ? "emerald" : "amber"} />
+                  </div>
+                </td>
+                <td className="px-4 py-3">
+                  <p className="font-medium">{order.paymentProvider}</p>
+                  <p className="max-w-[180px] truncate text-xs text-slate-500" title={order.providerReference}>{order.providerReference}</p>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 font-medium">
+                  <AdminMoneyDisplay amount={order.totalMinor} currency={order.currency} locale="vi" />
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-xs text-slate-500">
+                  {order.createdAt ? new Date(order.createdAt).toLocaleString("vi-VN") : "-"}
+                </td>
+                <td className="px-4 py-3">
                   <Link
                     href={order.href as any}
                     className="rounded-full border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700"
                   >
-                    Mở chi tiết
+                    Mở
                   </Link>
                 </td>
               </tr>
