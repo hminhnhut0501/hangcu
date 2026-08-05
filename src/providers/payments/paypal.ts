@@ -130,6 +130,10 @@ export class PayPalPaymentProvider implements PaymentProvider {
     return { providerPaymentId, status: status === "COMPLETED" ? "paid" : ["VOIDED", "DECLINED"].includes(status) ? "failed" : "pending" };
   }
 
+  async getOrderDetails(orderId: string) {
+    return this.api(`/v2/checkout/orders/${encodeURIComponent(orderId)}`);
+  }
+
   async captureOrder(orderId: string) {
     return this.api(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
       method: "POST",
